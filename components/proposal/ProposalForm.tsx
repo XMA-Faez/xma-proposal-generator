@@ -168,10 +168,8 @@ function ProposalForm({ initialData }) {
     }
   };
 
-  // Generate proposal
   const generateProposal = async (e) => {
     e.preventDefault();
-
     setSaveError(null);
     setIsSaving(true);
 
@@ -183,6 +181,28 @@ function ProposalForm({ initialData }) {
     }
 
     try {
+      // Important change: Create full copies of the package and services data
+      // instead of just storing IDs
+
+      // Create the proposal data object with full snapshots
+      const proposalDataWithSnapshots = {
+        clientName,
+        companyName,
+        proposalDate,
+        additionalInfo,
+        includePackage,
+        // Store the full package object as a snapshot, not just the ID
+        selectedPackage: includePackage ? selectedPackage : null,
+        // Store full copies of the selected services, not just their IDs
+        selectedServices: selectedServices.map((service) => ({
+          ...service, // Include all service properties
+          // Include features if the service has them
+          features: service.features ? [...service.features] : undefined,
+        })),
+        // Also store the discount data
+        discounts,
+      };
+
       // First try to get or create the client
       const { data: existingClient } = await supabase
         .from("clients")
@@ -213,7 +233,7 @@ function ProposalForm({ initialData }) {
         clientId = newClient.id;
       }
 
-      // Save the proposal with individual fields
+      // Save the proposal with the full data snapshots
       const { data: proposal, error: proposalError } = await supabase
         .from("proposals")
         .insert({
@@ -224,12 +244,16 @@ function ProposalForm({ initialData }) {
           proposal_date: proposalDate,
           additional_info: additionalInfo || null,
           include_package: includePackage,
+          // These are just for filtering or quick access
           package_id: includePackage ? selectedPackageId : null,
           package_discount_type: discounts.packageDiscount.type,
           package_discount_value: discounts.packageDiscount.value,
           overall_discount_type: discounts.overallDiscount.type,
           overall_discount_value: discounts.overallDiscount.value,
           status: "draft",
+          // Store the full data with snapshots here
+          proposal_data: proposalDataWithSnapshots,
+          encoded_data: JSON.stringify(proposalDataWithSnapshots),
         })
         .select()
         .single();
@@ -238,7 +262,8 @@ function ProposalForm({ initialData }) {
         throw proposalError;
       }
 
-      // Save selected services
+      // The service entries are no longer needed since we store full snapshots
+      // but we can still store them for relationship purposes if needed
       if (selectedServices.length > 0) {
         const serviceEntries = selectedServices.map((service) => {
           const discount = discounts.serviceDiscounts[service.id] || {
@@ -399,7 +424,7 @@ function ProposalForm({ initialData }) {
   // Get the selected package
   const selectedPackage =
     packagesQuery.data.find((p) => p.id === selectedPackageId) || null;
-    
+
   return (
     <div className="min-h-screen pt-40 bg-zinc-900 text-white py-8">
       <div className="container mx-auto px-4">

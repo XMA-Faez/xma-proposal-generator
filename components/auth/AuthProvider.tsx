@@ -33,10 +33,7 @@ export function AuthProvider({
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
-    console.log(user)
         try {
-          console.log("Fetching user profile for:", user.id);
-
           // Query with detailed logging
           const { data, error } = await supabase
             .from("profiles")
@@ -44,22 +41,15 @@ export function AuthProvider({
             .eq("id", user.id)
             .single();
 
-          console.log(data)
-
           if (error) {
             console.error("Error fetching profile:", error);
             setUserRole(null);
             return;
           }
 
-          console.log("Profile data received:", data);
-
           if (data) {
             setUserRole(data.role);
-            console.log("User role set to:", data.role);
           } else {
-            console.warn("No profile found for user:", user.id);
-
             // Create a profile if it doesn't exist
             try {
               const { error: insertError } = await supabase

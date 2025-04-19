@@ -1,20 +1,31 @@
-import React, { useState } from 'react';
-import { calculateDiscountedPrice, formatPrice, Discount } from '@/lib/proposalUtils';
+import React, { useState } from "react";
+import {
+  calculateDiscountedPrice,
+  formatPrice,
+  parsePrice,
+  Discount,
+} from "@/lib/proposalUtils";
 
 interface Service {
-  id: number;
+  id: string | number;
   name: string;
-  price: number;
-  currency: string;
-  description: string;
+  price: string | number;
+  currency?: string;
+  description?: string;
   monthly?: boolean;
+  is_monthly?: boolean;
   setupFee?: number;
+  setup_fee?: number;
 }
 
 interface AdditionalServicesProps {
   selectedServices: Service[];
-  discounts: Record<string, Discount>;
-  onDiscountChange: (id: number, value: number, type: 'percentage' | 'absolute') => void;
+  discounts: Record<string | number, Discount>;
+  onDiscountChange: (
+    id: string | number,
+    value: number,
+    type: "percentage" | "absolute",
+  ) => void;
 }
 
 const AdditionalServices: React.FC<AdditionalServicesProps> = ({
@@ -22,9 +33,11 @@ const AdditionalServices: React.FC<AdditionalServicesProps> = ({
   discounts,
   onDiscountChange,
 }) => {
-  const [expandedService, setExpandedService] = useState<number | null>(null);
+  const [expandedService, setExpandedService] = useState<
+    string | number | null
+  >(null);
 
-  const toggleExpand = (id: number) => {
+  const toggleExpand = (id: string | number) => {
     setExpandedService(expandedService === id ? null : id);
   };
 
@@ -40,11 +53,19 @@ const AdditionalServices: React.FC<AdditionalServicesProps> = ({
       </h2>
       <div className="space-y-4">
         {selectedServices.map((service) => {
-          if (!service || typeof service.id === 'undefined') return null;
-          
+          if (!service || typeof service.id === "undefined") return null;
+
           const isExpanded = expandedService === service.id;
-          const serviceDiscount = discounts[service.id] || { type: 'percentage', value: 0 };
-          const discountedPrice = calculateDiscountedPrice(service.price, serviceDiscount);
+          const serviceDiscount = discounts[service.id] || {
+            type: "percentage",
+            value: 0,
+          };
+          const originalPrice = parsePrice(service.price);
+          const discountedPrice = calculateDiscountedPrice(
+            originalPrice,
+            serviceDiscount,
+          );
+          const currency = service.currency || "AED";
 
           return (
             <div key={service.id} className="bg-zinc-900 p-5 rounded-lg">
@@ -78,7 +99,7 @@ const AdditionalServices: React.FC<AdditionalServicesProps> = ({
                       </svg>
                     </button>
                   </div>
-                  {!isExpanded && (
+                  {!isExpanded && service.description && (
                     <p className="text-sm text-zinc-400 mt-1 line-clamp-2">
                       {service.description}
                     </p>
@@ -87,35 +108,34 @@ const AdditionalServices: React.FC<AdditionalServicesProps> = ({
                 <div className="text-right mt-2 md:mt-0 min-w-max">
                   {serviceDiscount.value > 0 && (
                     <div className="text-base line-through text-zinc-500">
-                      {service.price} {service.currency}
+                      {formatPrice(originalPrice)} {currency}
                     </div>
                   )}
                   <div className="text-xl font-bold flex items-center justify-end">
-                    {formatPrice(discountedPrice)} {service.currency}
+                    {formatPrice(discountedPrice)} {currency}
                     {serviceDiscount.value > 0 && (
                       <span className="ml-2 text-xs font-normal bg-green-900/30 text-green-400 px-2 py-0.5 rounded">
-                        {serviceDiscount.type === 'percentage' 
-                          ? `${serviceDiscount.value}% OFF` 
-                          : `-${formatPrice(serviceDiscount.value)} ${service.currency}`}
+                        {serviceDiscount.type === "percentage"
+                          ? `${serviceDiscount.value}% OFF`
+                          : `-${formatPrice(serviceDiscount.value)} ${currency}`}
                       </span>
                     )}
                   </div>
-                  {service.monthly && (
+                  {(service.monthly || service.is_monthly) && (
                     <div className="text-sm text-zinc-400">
-                      +{service.setupFee} {service.currency}/month
+                      +{formatPrice(service.setupFee || service.setup_fee || 0)}{" "}
+                      {currency}/month
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Expanded description */}
-              {isExpanded && (
+              {isExpanded && service.description && (
                 <div className="mt-3 border-t border-zinc-800 pt-3">
                   <p className="text-zinc-300">{service.description}</p>
                 </div>
               )}
-
-              {/* Discount inputs moved to summary section */}
             </div>
           );
         })}
