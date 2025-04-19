@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { createClient } from "@/utils/supabase/server";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,17 +19,27 @@ export const metadata: Metadata = {
   description: "Create and manage client proposals",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Create supabase server client
+  const supabase = await createClient();
+  
+  // Get session from supabase
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}
       >
-        {children}
+        <AuthProvider initialSession={session}>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

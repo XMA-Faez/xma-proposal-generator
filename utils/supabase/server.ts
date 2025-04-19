@@ -1,13 +1,11 @@
-"use server";
-
+// utils/supabase/server.ts
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { Database } from "@/types/supabase";
 
 export async function createClient() {
   const cookieStore = await cookies();
-
+  
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,64 +15,35 @@ export async function createClient() {
           return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          cookieStore.set(name, value, options);
+          try {
+            cookieStore.set(name, value, options);
+          } catch (error) {
+            // Silent error in production when cookies cannot be set
+            // This happens in static site generation
+          }
         },
         remove(name: string, options: any) {
-          cookieStore.set(name, "", { ...options, maxAge: 0 });
+          try {
+            cookieStore.set(name, "", { ...options, maxAge: 0 });
+          } catch (error) {
+            // Silent error in production
+          }
         },
       },
-    },
+    }
   );
+}
+
+// These functions are kept for backward compatibility but should be replaced
+// with direct usage of the auth provider in client components
+
+export async function getUser() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  return data.user;
 }
 
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
-}
-
-export async function getUser() {
-  const supabase = await createClient();
-
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user;
-  } catch (error) {
-    console.error("Error getting user:", error);
-    return null;
-  }
-}
-
-export async function requireAuth() {
-  const user = await getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  return user;
-}
-
-export async function requireAdmin() {
-  const user = await requireAuth();
-
-  try {
-    const supabase = await createClient();
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile || profile.role !== "admin") {
-      redirect("/login");
-    }
-
-    return { user, role: profile.role };
-  } catch (error) {
-    console.error("Error checking admin role:", error);
-    redirect("/login");
-  }
 }

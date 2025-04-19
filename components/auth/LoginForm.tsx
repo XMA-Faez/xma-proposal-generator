@@ -1,42 +1,45 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
-import { signIn } from "@/app/auth/actions";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "./AuthProvider";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectedFrom = searchParams.get("redirectedFrom");
+  const redirectTo = searchParams.get("redirectTo") || "/proposal-generator";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
     if (!email || !password) {
       setError("Email and password are required");
+      setIsLoading(false);
       return;
     }
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
-    if (redirectedFrom) {
-      formData.append("redirectedFrom", redirectedFrom);
-    }
+    try {
+      const { error } = await signIn(email, password);
 
-    startTransition(async () => {
-      // Call the server action
-      const result = await signIn(formData);
-
-      if (result?.error) {
-        setError(result.error);
+      if (error) {
+        setError(error.message);
+      } else {
+        // Successful login - redirect
+        router.push(redirectTo);
       }
-    });
+    } catch (err) {
+      setError("An unexpected error occurred");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,6 +62,7 @@ export default function LoginForm() {
             className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
             placeholder="admin@xmaagency.com"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -72,15 +76,16 @@ export default function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
             required
+            disabled={isLoading}
           />
         </div>
 
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isLoading}
           className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? (
+          {isLoading ? (
             <div className="flex items-center justify-center">
               <svg
                 className="animate-spin h-5 w-5 mr-2"

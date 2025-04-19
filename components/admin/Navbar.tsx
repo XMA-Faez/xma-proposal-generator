@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { User } from "@supabase/supabase-js";
-import { signOut } from "@/utils/supabase/server";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface NavbarProps {
   user: User;
@@ -15,6 +15,7 @@ export default function Navbar({ user }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
+  const { signOut } = useAuth();
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`);
@@ -26,6 +27,10 @@ export default function Navbar({ user }: NavbarProps) {
 
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -85,14 +90,12 @@ export default function Navbar({ user }: NavbarProps) {
                     aria-orientation="vertical"
                     aria-labelledby="user-menu"
                   >
-                    <form action={signOut}>
-                      <button
-                        type="submit"
-                        className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-zinc-600"
-                      >
-                        Sign out
-                      </button>
-                    </form>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-zinc-600"
+                    >
+                      Sign out
+                    </button>
                   </div>
                 </div>
               )}
@@ -148,15 +151,12 @@ export default function Navbar({ user }: NavbarProps) {
               <div className="block px-3 py-2 rounded-md text-base font-medium text-gray-300">
                 {user.email}
               </div>
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-zinc-600 hover:text-white"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Sign out
-                </button>
-              </form>
+              <button
+                onClick={handleSignOut}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-zinc-600 hover:text-white"
+              >
+                Sign out
+              </button>
             </div>
           </div>
         </div>

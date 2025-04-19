@@ -1,20 +1,31 @@
+// app/login/page.tsx
 import { Metadata } from "next";
-import LoginForm from "@/components/auth/LoginForm";
 import { redirect } from "next/navigation";
-import { getUser } from "@/utils/supabase/server";
+import LoginForm from "@/components/auth/LoginForm";
+import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "Admin Login - XMA Agency",
   description: "Login to access the XMA Agency admin tools",
 };
 
-export default async function LoginPage() {
+// Properly type the searchParams prop
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: { redirectTo?: string };
+}) {
   // Check if user is already logged in
-  const user = await getUser();
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // If already authenticated, redirect to dashboard
-  if (user) {
-    redirect("/proposal-generator");
+  if (session) {
+    // Use the string value from searchParams safely
+    const redirectTo = searchParams.redirectTo || "/proposal-generator";
+    redirect(redirectTo);
   }
 
   return (
