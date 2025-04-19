@@ -1,12 +1,14 @@
-import Image from "next/image";
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
-export default function Home() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center">
-      <Link href="/proposal-generator">
-        <button>Go To Proposal Generator</button>
-      </Link>
-    </div>
-  );
+export default async function Home() {
+  const session = await auth();
+
+  if (session && session.user) {
+    // If user is authenticated, redirect to proposal generator
+    redirect("/proposal-generator");
+  } else {
+    // Otherwise, redirect to login page
+    redirect("/login");
+  }
 }
