@@ -88,10 +88,15 @@ export async function saveProposal(proposalData: any, encodedData: string) {
 
   // Create shareable link with the base URL
   // Use window.location.origin on client-side or env var on server-side
+  // Get base URL with more robust priority handling
   const baseUrl =
     typeof window !== "undefined"
       ? window.location.origin
-      : process.env.NEXT_PUBLIC_BASE_URL || "https://yoursite.com";
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NEXT_PUBLIC_SITE_URL ||
+          process.env.NEXT_PUBLIC_BASE_URL ||
+          "";
 
   return {
     ...proposal,

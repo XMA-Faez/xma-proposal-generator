@@ -38,9 +38,14 @@ export async function saveProposal(proposalData, encodedData) {
     
   if (linkError) throw linkError
   
+  // Get base URL with priority order
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || "";
+  
   return {
     ...proposal,
-    link: `${process.env.NEXT_PUBLIC_BASE_URL}/proposal?token=${token}`
+    link: `${baseUrl}/proposal?token=${token}`
   }
 }
 

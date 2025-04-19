@@ -79,8 +79,17 @@ export async function POST(request: Request) {
       throw linkError;
     }
 
+    // Determine base URL with priority
     const baseUrl =
-      request.headers.get("origin") || process.env.NEXT_PUBLIC_BASE_URL || "";
+      // First check request headers (best for serverless functions)
+      request.headers.get("origin") ||
+      // Then check Vercel deployment URL
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : // Finally fall back to custom environment variables
+          process.env.NEXT_PUBLIC_SITE_URL ||
+          process.env.NEXT_PUBLIC_BASE_URL ||
+          "");
 
     return Response.json({
       proposal: {
