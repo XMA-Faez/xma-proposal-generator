@@ -1,27 +1,19 @@
-import { auth } from "@/auth";
+import { NextRequest } from 'next/server'
+import { updateSession } from '@/utils/supabase/middleware'
 
-export default auth((req) => {
-  // If user is trying to access admin routes without admin privileges, redirect to login
-  const isAdminRoute =
-    req.nextUrl.pathname.startsWith("/proposal-generator") ||
-    req.nextUrl.pathname.startsWith("/proposals");
+export async function middleware(request: NextRequest) {
+  return await updateSession(request)
+}
 
-  const isAdminUser = req.auth?.user && req.auth.user.role === "admin";
-
-  // Protect admin routes
-  if (isAdminRoute && !isAdminUser) {
-    return Response.redirect(new URL("/login", req.nextUrl.origin));
-  }
-
-  // Redirect authenticated users from login page to admin dashboard
-  if (req.nextUrl.pathname === "/login" && req.auth) {
-    return Response.redirect(
-      new URL("/proposal-generator", req.nextUrl.origin),
-    );
-  }
-});
-
-// Specify which paths the middleware should run on
 export const config = {
-  matcher: ["/proposal-generator/:path*", "/proposals/:path*", "/login"],
-};
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+}

@@ -1,4 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "@/types/supabase";
 
 // Environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -6,6 +8,11 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 // Create a single supabase client for the entire application
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Client-side supabase client with auth helpers (for handling auth state)
+export function createBrowserClient() {
+  return createClientComponentClient<Database>();
+}
 
 // Helper functions for proposal management
 export async function getProposalByToken(token: string) {
@@ -96,7 +103,7 @@ export async function saveProposal(proposalData: any, encodedData: string) {
 async function getOrCreateClient(clientData: {
   clientName: string;
   companyName: string;
-  email?: string;
+  email?: string | null;
 }) {
   // Check if client exists by company name
   const { data: existingClient } = await supabase

@@ -1,5 +1,4 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { requireAdmin } from "@/utils/supabase/server";
 import Navbar from "@/components/admin/Navbar";
 
 export default async function AdminLayout({
@@ -7,19 +6,13 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
-  // If user is not authenticated, redirect to login
-  if (!session || !session.user) {
-    redirect("/login");
-  }
+  // This function will redirect to login if user is not an admin
+  const { user } = await requireAdmin();
 
   return (
     <div className="min-h-screen bg-zinc-900">
-      <Navbar user={session.user} />
-      <main className="pt-16">
-        {children}
-      </main>
+      <Navbar user={user} />
+      <main className="pt-16">{children}</main>
     </div>
   );
 }

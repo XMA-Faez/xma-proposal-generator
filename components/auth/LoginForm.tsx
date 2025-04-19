@@ -1,48 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { signIn } from "@/app/auth/actions";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const searchParams = useSearchParams();
+  const redirectedFrom = searchParams.get("redirectedFrom");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!email || !password) {
-      setError("Please enter both email and password");
+      setError("Email and password are required");
       return;
     }
 
-    try {
-      setIsLoading(true);
-      setError("");
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    if (redirectedFrom) {
+      formData.append("redirectedFrom", redirectedFrom);
+    }
 
-      const result = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+    startTransition(async () => {
+      // Call the server action
+      const result = await signIn(formData);
 
       if (result?.error) {
-        setError("Invalid email or password");
-        return;
+        setError(result.error);
       }
-
-      // If successful, redirect to the proposal generator
-      router.push("/proposal-generator");
-      router.refresh();
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("An error occurred during sign in");
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   return (
@@ -83,10 +77,10 @@ export default function LoginForm() {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isPending}
           className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? (
+          {isPending ? (
             <div className="flex items-center justify-center">
               <svg
                 className="animate-spin h-5 w-5 mr-2"

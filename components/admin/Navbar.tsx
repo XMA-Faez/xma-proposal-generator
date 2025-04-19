@@ -3,15 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { Menu, X, ChevronDown } from "lucide-react";
+import { User } from "@supabase/supabase-js";
+import { signOut } from "@/utils/supabase/server";
 
 interface NavbarProps {
-  user: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
+  user: User;
 }
 
 export default function Navbar({ user }: NavbarProps) {
@@ -75,7 +72,7 @@ export default function Navbar({ user }: NavbarProps) {
                 onClick={toggleProfile}
               >
                 <span className="px-3 py-2 rounded-md text-sm font-medium flex items-center">
-                  {user.name || user.email}
+                  {user.email}
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </span>
               </button>
@@ -88,14 +85,14 @@ export default function Navbar({ user }: NavbarProps) {
                     aria-orientation="vertical"
                     aria-labelledby="user-menu"
                   >
-                    <button
-                      className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-zinc-600"
-                      onClick={() =>
-                        signOut({ redirect: true, callbackUrl: "/login" })
-                      }
-                    >
-                      Sign out
-                    </button>
+                    <form action={signOut}>
+                      <button
+                        type="submit"
+                        className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-zinc-600"
+                      >
+                        Sign out
+                      </button>
+                    </form>
                   </div>
                 </div>
               )}
@@ -149,17 +146,17 @@ export default function Navbar({ user }: NavbarProps) {
           <div className="pt-4 pb-3 border-t border-zinc-600">
             <div className="px-2 space-y-1">
               <div className="block px-3 py-2 rounded-md text-base font-medium text-gray-300">
-                {user.name || user.email}
+                {user.email}
               </div>
-              <button
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-zinc-600 hover:text-white"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  signOut({ redirect: true, callbackUrl: "/login" });
-                }}
-              >
-                Sign out
-              </button>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-zinc-600 hover:text-white"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign out
+                </button>
+              </form>
             </div>
           </div>
         </div>
