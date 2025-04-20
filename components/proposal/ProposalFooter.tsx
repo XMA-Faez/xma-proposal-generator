@@ -8,7 +8,7 @@ const ProposalFooter: React.FC = () => {
     <div className="text-center mb-12">
       <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8 mb-8">
         <a
-          href="mailto:admin@xmaagency.com"
+          href="mailto:admin@xma.ae"
           className="flex items-center text-zinc-400 hover:text-white transition-colors group"
         >
           <div className="bg-zinc-800 p-2 rounded-full mr-3 group-hover:bg-red-600 transition-colors">
@@ -27,7 +27,7 @@ const ProposalFooter: React.FC = () => {
               />
             </svg>
           </div>
-          admin@xmaagency.com
+          admin@xma.ae
         </a>
         <a
           href="tel:+971503636856"

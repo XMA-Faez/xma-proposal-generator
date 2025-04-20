@@ -60,7 +60,7 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
-            placeholder="admin@xmaagency.com"
+            placeholder="admin@xma.ae"
             required
             disabled={isLoading}
           />

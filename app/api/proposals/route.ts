@@ -1,5 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import { randomUUID } from "crypto";
+import {
+  generateOrderId,
+  getNextSequentialNumber,
+} from "@/lib/orderIdGenerator";
 
 export async function POST(request: Request) {
   try {
@@ -43,7 +47,12 @@ export async function POST(request: Request) {
       clientId = newClient.id;
     }
 
-    // Save the proposal
+    // Generate a unique order ID
+    const nextSequence = await getNextSequentialNumber(supabase);
+    const orderId = generateOrderId(nextSequence);
+    console.log(orderId)
+
+    // Save the proposal with the order ID
     const { data: proposal, error: proposalError } = await supabase
       .from("proposals")
       .insert({
@@ -54,6 +63,9 @@ export async function POST(request: Request) {
         proposal_data: proposalData,
         encoded_data: encodedData,
         status: "draft",
+        order_id: orderId, // Add the order ID to the proposal
+        client_name: proposalData.clientName,
+        company_name: proposalData.companyName,
       })
       .select()
       .single();
@@ -79,17 +91,8 @@ export async function POST(request: Request) {
       throw linkError;
     }
 
-    // Determine base URL with priority
     const baseUrl =
-      // First check request headers (best for serverless functions)
-      request.headers.get("origin") ||
-      // Then check Vercel deployment URL
-      (process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : // Finally fall back to custom environment variables
-          process.env.NEXT_PUBLIC_SITE_URL ||
-          process.env.NEXT_PUBLIC_BASE_URL ||
-          "");
+      request.headers.get("origin") || process.env.NEXT_PUBLIC_BASE_URL || "";
 
     return Response.json({
       proposal: {

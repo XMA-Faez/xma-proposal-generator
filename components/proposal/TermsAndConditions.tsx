@@ -68,8 +68,8 @@ const TermsAndConditions: React.FC = () => {
       ) : (
         <div className="bg-zinc-900 p-5 rounded-lg">
           <p className="text-zinc-400 text-sm">
-            This proposal is subject to our standard terms and conditions, including 50% payment upfront, 
-            2 rounds of revisions, a 4-6 week timeline, and client-provided content requirements. 
+            This proposal is subject to our standard terms and conditions, including 100% payment upfront, 
+            1 rounds of revisions, a 4-6 week timeline, and client-provided content requirements. 
             <span 
               onClick={() => setIsExpanded(true)} 
               className="text-red-400 hover:text-red-300 cursor-pointer ml-1"

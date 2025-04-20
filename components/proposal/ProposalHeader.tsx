@@ -1,15 +1,17 @@
-import React from 'react';
+import React from "react";
 
 interface ProposalHeaderProps {
   clientName: string;
   companyName: string;
   proposalDate: string;
+  orderId?: string; // Add optional order ID field
 }
 
 const ProposalHeader: React.FC<ProposalHeaderProps> = ({
   clientName,
   companyName,
   proposalDate,
+  orderId, // Add order ID to props
 }) => {
   return (
     <div className="mb-8">
@@ -28,10 +30,17 @@ const ProposalHeader: React.FC<ProposalHeaderProps> = ({
             Prepared exclusively for{" "}
             <span className="text-white font-medium">{companyName}</span>
           </p>
+
+          {/* Display Order ID if available */}
+          {orderId && (
+            <div className="mt-3 inline-block bg-red-600/20 text-red-400 text-sm font-medium px-3 py-1 rounded">
+              Order ID: {orderId}
+            </div>
+          )}
         </div>
 
         {/* Client Information */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-zinc-900/50 p-4 rounded-lg hover:bg-zinc-900 transition-colors">
             <p className="text-sm text-zinc-400">Client Name:</p>
             <p className="font-medium text-lg">{clientName}</p>
@@ -44,6 +53,12 @@ const ProposalHeader: React.FC<ProposalHeaderProps> = ({
             <p className="text-sm text-zinc-400">Proposal Date:</p>
             <p className="font-medium text-lg">{proposalDate}</p>
           </div>
+          {orderId && (
+            <div className="bg-zinc-900/50 p-4 rounded-lg hover:bg-zinc-900 transition-colors">
+              <p className="text-sm text-zinc-400">Order ID:</p>
+              <p className="font-medium text-lg">{orderId}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

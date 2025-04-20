@@ -8,6 +8,10 @@ import PackageSelection from "./PackageSelection";
 import ServiceSelection from "./ServiceSelection";
 import GeneratorSummary from "./GeneratorSummary";
 import ProposalSuccess from "./ProposalSuccess";
+import {
+  generateOrderId,
+  getNextSequentialNumber,
+} from "@/lib/orderIdGenerator";
 
 // Main Component
 function ProposalForm({ initialData }) {
@@ -181,8 +185,15 @@ function ProposalForm({ initialData }) {
     }
 
     try {
-      // Important change: Create full copies of the package and services data
-      // instead of just storing IDs
+      // Get the selected package
+      const selectedPackage = packagesQuery.data.find(
+        (p) => p.id === selectedPackageId,
+      );
+
+      // Find the index of the selected package in the array (for backward compatibility)
+      const selectedPackageIndex = packagesQuery.data.findIndex(
+        (p) => p.id === selectedPackageId,
+      );
 
       // Create the proposal data object with full snapshots
       const proposalDataWithSnapshots = {
@@ -191,8 +202,9 @@ function ProposalForm({ initialData }) {
         proposalDate,
         additionalInfo,
         includePackage,
-        // Store the full package object as a snapshot, not just the ID
+        // Store both the full package object and the index
         selectedPackage: includePackage ? selectedPackage : null,
+        selectedPackageIndex: includePackage ? selectedPackageIndex : null,
         // Store full copies of the selected services, not just their IDs
         selectedServices: selectedServices.map((service) => ({
           ...service, // Include all service properties
@@ -233,7 +245,13 @@ function ProposalForm({ initialData }) {
         clientId = newClient.id;
       }
 
-      // Save the proposal with the full data snapshots
+      // Generate a unique order ID for this proposal
+      const nextSequence = await getNextSequentialNumber(supabase);
+      const orderId = generateOrderId(nextSequence);
+
+      console.log("Generated Order ID:", orderId); // Add logging for debugging
+
+      // Save the proposal with the full data snapshots and order ID
       const { data: proposal, error: proposalError } = await supabase
         .from("proposals")
         .insert({
@@ -253,7 +271,9 @@ function ProposalForm({ initialData }) {
           status: "draft",
           // Store the full data with snapshots here
           proposal_data: proposalDataWithSnapshots,
-          encoded_data: JSON.stringify(proposalDataWithSnapshots),
+          encoded_data: btoa(JSON.stringify(proposalDataWithSnapshots)),
+          // Add the order ID
+          order_id: orderId,
         })
         .select()
         .single();

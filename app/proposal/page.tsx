@@ -12,6 +12,7 @@ import TermsAndConditions from "@/components/proposal/TermsAndConditions";
 import ProposalFooter from "@/components/proposal/ProposalFooter";
 import LoadingState from "@/components/proposal/LoadingState";
 import ErrorState from "@/components/proposal/ErrorState";
+import ProposalCTA from "@/components/proposal/ProposalCTA";
 
 const ProposalPage = () => {
   const searchParams = useSearchParams();
@@ -19,6 +20,7 @@ const ProposalPage = () => {
   const tokenParam = searchParams.get("token");
 
   const [proposalData, setProposalData] = useState(null);
+  const [orderId, setOrderId] = useState<string | null>(null); // Add state for order ID
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [discounts, setDiscounts] = useState({
@@ -69,75 +71,14 @@ const ProposalPage = () => {
             .update({ views_count: (link.views_count || 0) + 1 })
             .eq("token", tokenParam);
 
-          // If the proposal has proposal_data field with data, use that directly
-          if (proposal.proposal_data) {
-            setProposalData(proposal.proposal_data);
+          // Set the proposal data from the stored JSON
+          setProposalData(proposal.proposal_data);
 
-            // Extract discounts from proposal_data if available
-            if (proposal.proposal_data.discounts) {
-              setDiscounts(
-                normalizeDiscounts(proposal.proposal_data.discounts),
-              );
-            } else {
-              // Otherwise build discounts from DB fields
-              setDiscounts({
-                packageDiscount: {
-                  type: proposal.package_discount_type || "percentage",
-                  value: proposal.package_discount_value || 0,
-                },
-                serviceDiscounts: {}, // Would need to fetch from proposal_services
-                overallDiscount: {
-                  type: proposal.overall_discount_type || "percentage",
-                  value: proposal.overall_discount_value || 0,
-                },
-              });
-            }
-          }
-          // If there's encoded_data, try decoding that
-          else if (proposal.encoded_data) {
-            const decodedData = decodeProposalData(proposal.encoded_data);
-            if (decodedData) {
-              setProposalData(decodedData);
+          // Set the order ID from the database
+          setOrderId(proposal.order_id);
 
-              if (decodedData.discounts) {
-                setDiscounts(normalizeDiscounts(decodedData.discounts));
-              }
-            } else {
-              setError("Invalid proposal data format");
-            }
-          }
-          // Legacy format - build data structure from db fields
-          else {
-            // Create data structure for legacy proposal
-            setProposalData({
-              clientName: proposal.client_name || proposal.client?.name,
-              companyName:
-                proposal.company_name || proposal.client?.company_name,
-              proposalDate: proposal.proposal_date,
-              additionalInfo: proposal.additional_info,
-              includePackage: proposal.include_package !== false,
-              selectedPackageId: proposal.package_id,
-              // For legacy proposals, we need to load the package and services
-              // These will be done by the component directly
-            });
-
-            setDiscounts({
-              packageDiscount: {
-                type: proposal.package_discount_type || "percentage",
-                value: proposal.package_discount_value || 0,
-              },
-              serviceDiscounts: {}, // Would need to fetch from proposal_services
-              overallDiscount: {
-                type: proposal.overall_discount_type || "percentage",
-                value: proposal.overall_discount_value || 0,
-              },
-            });
-
-            // NOTE: For legacy proposals, we will need to fetch the related package and services
-            // This approach is not ideal and should be migrated to the snapshot approach
-            console.warn(
-              "Legacy proposal format detected. Consider migrating to snapshot format.",
-            );
+          if (proposal.proposal_data.discounts) {
+            setDiscounts(normalizeDiscounts(proposal.proposal_data.discounts));
           }
         }
         // If we have encoded proposal data directly in the URL
@@ -148,10 +89,34 @@ const ProposalPage = () => {
             const normalizedData = {
               ...decodedData,
               includePackage: decodedData.includePackage !== false,
-              selectedPackage: decodedData.selectedPackage || null,
+              selectedPackageIndex:
+                decodedData.selectedPackageIndex === null
+                  ? 1
+                  : decodedData.selectedPackageIndex,
             };
 
             setProposalData(normalizedData);
+
+            // URL-based proposals won't have an order ID
+            setOrderId(null);
+
+            // Initialize service discounts
+            if (
+              normalizedData.selectedServices &&
+              normalizedData.selectedServices.length > 0
+            ) {
+              const initialServiceDiscounts = {};
+              normalizedData.selectedServices.forEach((service) => {
+                initialServiceDiscounts[service.id] = {
+                  type: "percentage",
+                  value: 0,
+                };
+              });
+              setDiscounts((prev) => ({
+                ...prev,
+                serviceDiscounts: initialServiceDiscounts,
+              }));
+            }
 
             // If the proposal already contains discount data, use it
             if (normalizedData.discounts) {
@@ -226,6 +191,7 @@ const ProposalPage = () => {
           clientName={proposalData.clientName}
           companyName={proposalData.companyName}
           proposalDate={proposalData.proposalDate}
+          orderId={orderId} // Pass the order ID to the header
         />
 
         {proposalData.additionalInfo && (
@@ -241,16 +207,13 @@ const ProposalPage = () => {
           </div>
         )}
 
-        {/* Use the updated PackageDisplay component */}
         <PackageDisplay
-          selectedPackage={proposalData.selectedPackage}
           selectedPackageIndex={proposalData.selectedPackageIndex}
           discount={discounts.packageDiscount}
           onDiscountChange={() => {}} // Dummy function since clients can't modify
           includePackage={proposalData.includePackage !== false}
         />
 
-        {/* Use the updated AdditionalServices component */}
         {proposalData.selectedServices &&
           proposalData.selectedServices.length > 0 && (
             <AdditionalServices
@@ -260,10 +223,15 @@ const ProposalPage = () => {
             />
           )}
 
-        {/* Use the updated SummarySection component */}
-        <SummarySection proposalData={proposalData} discounts={discounts} />
+        <SummarySection
+          proposalData={proposalData}
+          discounts={discounts}
+          orderId={orderId} // Pass the order ID to the summary section
+        />
 
         <TermsAndConditions />
+
+        <ProposalCTA />
 
         <ProposalFooter />
       </div>

@@ -1,13 +1,15 @@
+// lib/supabase.ts with Order ID support
 import { createClient } from "@supabase/supabase-js";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/types/supabase";
+import { generateOrderId, getNextSequentialNumber } from "./orderIdGenerator";
 
 // Environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 // Create a single supabase client for the entire application
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Client-side supabase client with auth helpers (for handling auth state)
 export function createBrowserClient() {
@@ -49,59 +51,66 @@ export async function getProposalByToken(token: string) {
 }
 
 export async function saveProposal(proposalData: any, encodedData: string) {
-  // First get or create the client
-  const client = await getOrCreateClient({
-    clientName: proposalData.clientName,
-    companyName: proposalData.companyName,
-    email: proposalData.email || null,
-  });
+  try {
+    // First get or create the client
+    const client = await getOrCreateClient({
+      clientName: proposalData.clientName,
+      companyName: proposalData.companyName,
+      email: proposalData.email || null,
+    });
 
-  // Save the proposal
-  const { data: proposal, error } = await supabase
-    .from("proposals")
-    .insert({
-      client_id: client.id,
-      title: `Proposal for ${client.company_name}`,
-      proposal_date: proposalData.proposalDate,
-      additional_info: proposalData.additionalInfo || null,
-      proposal_data: proposalData,
-      encoded_data: encodedData,
-      status: "draft",
-    })
-    .select()
-    .single();
+    // Generate a unique order ID for this proposal
+    const nextSequence = await getNextSequentialNumber(supabase);
+    const orderId = generateOrderId(nextSequence);
 
-  if (error) throw error;
+    // Save the proposal with the order ID
+    const { data: proposal, error } = await supabase
+      .from("proposals")
+      .insert({
+        client_id: client.id,
+        title: `Proposal for ${client.company_name}`,
+        proposal_date: proposalData.proposalDate,
+        additional_info: proposalData.additionalInfo || null,
+        proposal_data: proposalData,
+        encoded_data: encodedData,
+        status: "draft",
+        order_id: orderId, // Add the order ID to the proposal
+        client_name: proposalData.clientName,
+        company_name: proposalData.companyName,
+      })
+      .select()
+      .single();
 
-  // Create a link token
-  const { data: link, error: linkError } = await supabase
-    .from("proposal_links")
-    .insert({
-      proposal_id: proposal.id,
-      token: crypto.randomUUID(),
-      views_count: 0,
-    })
-    .select()
-    .single();
+    if (error) throw error;
 
-  if (linkError) throw linkError;
+    // Create a link token
+    const { data: link, error: linkError } = await supabase
+      .from("proposal_links")
+      .insert({
+        proposal_id: proposal.id,
+        token: crypto.randomUUID(),
+        views_count: 0,
+      })
+      .select()
+      .single();
 
-  // Create shareable link with the base URL
-  // Use window.location.origin on client-side or env var on server-side
-  // Get base URL with more robust priority handling
-  const baseUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.NEXT_PUBLIC_SITE_URL ||
-          process.env.NEXT_PUBLIC_BASE_URL ||
-          "";
+    if (linkError) throw linkError;
 
-  return {
-    ...proposal,
-    link: `${baseUrl}/proposal?token=${link.token}`,
-  };
+    // Create shareable link with the base URL
+    // Use window.location.origin on client-side or env var on server-side
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_BASE_URL || "https://yoursite.com";
+
+    return {
+      ...proposal,
+      link: `${baseUrl}/proposal?token=${link.token}`,
+    };
+  } catch (error) {
+    console.error("Error in saveProposal:", error);
+    throw error;
+  }
 }
 
 // Helper function to get or create a client

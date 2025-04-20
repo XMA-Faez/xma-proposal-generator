@@ -93,10 +93,10 @@ export const standaloneServices = [
 
 // Terms and Conditions
 export const termsAndConditions = [
-  "1. Payment Terms: 50% deposit required to initiate the project, with the remaining 50% due upon completion.",
-  "2. Revisions: Package includes up to 2 rounds of revisions for each deliverable. Additional revisions will be billed at our standard hourly rate.",
+  "1. Payment Terms: 100% payment required upfront to initiate the project.",
+  "2. Revisions: Package includes up to 1 rounds of revisions for each deliverable.",
   "3. Timeline: Estimated completion time is 4-6 weeks from project start date, dependent on client feedback turnaround times.",
-  "4. Content: Client is responsible for providing necessary content (text, product information, etc.) within 7 days of project start.",
+  "4. Content: Client is responsible for providing necessary content (brand asset, product information, account credentials etc.) within 3 days of project start.",
   "5. Intellectual Property: Upon full payment, client receives full rights to all deliverables created specifically for this project.",
   "6. Cancellation: In case of cancellation, client is responsible for payment of all work completed up to the cancellation date.",
   "7. Confidentiality: XMA Agency agrees to maintain confidentiality of all client information.",
