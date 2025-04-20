@@ -52,7 +52,7 @@ const ProposalFooter: React.FC = () => {
           +971 50 363 6856
         </a>
         <a
-          href="https://xmaagency.com"
+          href="https://xma.ae"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center text-zinc-400 hover:text-white transition-colors group"
@@ -73,7 +73,7 @@ const ProposalFooter: React.FC = () => {
               />
             </svg>
           </div>
-          xmaagency.com
+          xma.ae
         </a>
       </div>
       
