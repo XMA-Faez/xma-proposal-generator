@@ -4,6 +4,9 @@
 
 import { packages, standaloneServices } from "@/data/proposalData";
 
+// Tax rate (5%)
+export const TAX_RATE = 0.05;
+
 // Utility function for decoding proposal data
 export const decodeProposalData = (encodedData: string) => {
   try {
@@ -33,6 +36,8 @@ export const decodeProposalData = (encodedData: string) => {
         serviceDiscounts: {},
         overallDiscount: { type: "percentage", value: 0 },
       },
+      // Set includeTax to true by default for existing proposals
+      includeTax: data.includeTax !== false,
     };
 
     return validatedData;
@@ -68,6 +73,7 @@ export const prepareProposalData = (
     selectedPackageId,
     selectedServiceIds = [],
     discounts,
+    includeTax = true, // Default to true for tax inclusion
   } = formData;
 
   // Get full package data from packages array
@@ -98,6 +104,8 @@ export const prepareProposalData = (
     selectedServiceIds,
     // Include discounts
     discounts,
+    // Include tax flag
+    includeTax,
   };
 };
 
@@ -144,7 +152,7 @@ export const formatPrice = (price: number): string => {
   return new Intl.NumberFormat("en-US").format(price);
 };
 
-// Calculate total price with all discounts
+// Calculate total price with all discounts and tax
 export const calculateTotalPrice = (
   proposalData: any,
   discounts: {
@@ -155,6 +163,9 @@ export const calculateTotalPrice = (
 ) => {
   let packagePrice = 0;
   let discountedPackagePrice = 0;
+
+  // Check if tax should be included
+  const includeTax = proposalData.includeTax !== false;
 
   // Calculate package price with discount if a package is included
   if (proposalData.includePackage !== false) {
@@ -219,11 +230,17 @@ export const calculateTotalPrice = (
   const subtotal = discountedPackagePrice + servicesPrice;
 
   // Apply overall discount
-  const finalPrice = calculateDiscountedPrice(
+  const finalPriceBeforeTax = calculateDiscountedPrice(
     subtotal,
     discounts.overallDiscount || { type: "percentage", value: 0 },
   );
-  const overallDiscountAmount = subtotal - finalPrice;
+  const overallDiscountAmount = subtotal - finalPriceBeforeTax;
+
+  // Calculate tax if applicable
+  const taxAmount = includeTax ? Math.round(finalPriceBeforeTax * TAX_RATE) : 0;
+
+  // Calculate final price with tax
+  const finalPrice = finalPriceBeforeTax + taxAmount;
 
   // Calculate package discount amount
   const packageDiscountAmount = packagePrice - discountedPackagePrice;
@@ -237,6 +254,10 @@ export const calculateTotalPrice = (
     totalServiceDiscount,
     subtotal,
     overallDiscountAmount,
+    finalPriceBeforeTax,
+    taxAmount,
+    taxRate: TAX_RATE,
+    includeTax,
     finalPrice,
     formattedFinalPrice: formatPrice(finalPrice),
   };

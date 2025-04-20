@@ -15,6 +15,7 @@ import {
 
 // Main Component
 function ProposalForm({ initialData }) {
+  const [includeTax, setIncludeTax] = useState(true);
   // Use React Query with initialData
   const packagesQuery = useQuery({
     queryKey: ["packages"],
@@ -213,6 +214,7 @@ function ProposalForm({ initialData }) {
         })),
         // Also store the discount data
         discounts,
+        includeTax,
       };
 
       // First try to get or create the client
@@ -274,6 +276,7 @@ function ProposalForm({ initialData }) {
           encoded_data: btoa(JSON.stringify(proposalDataWithSnapshots)),
           // Add the order ID
           order_id: orderId,
+          include_tax: includeTax,
         })
         .select()
         .single();
@@ -497,7 +500,9 @@ function ProposalForm({ initialData }) {
                   selectedPackage={selectedPackage}
                   selectedServices={selectedServices}
                   discounts={discounts}
+                  includeTax={includeTax}
                   onDiscountChange={handleDiscountChange}
+                  onTaxToggle={setIncludeTax}
                 />
               )}
 
