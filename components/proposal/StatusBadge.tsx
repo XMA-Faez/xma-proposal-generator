@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface StatusBadgeProps {
@@ -31,6 +31,25 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   
   // Find the current status object
   const statusObj = statusOptions.find(opt => opt.value === currentStatus) || statusOptions[0];
+
+  // Close dropdown when clicking outside
+  const closeDropdown = (e: MouseEvent) => {
+    setIsOpen(false);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      // Add a small delay to prevent immediate closing when opening
+      const timer = setTimeout(() => {
+        document.addEventListener('click', closeDropdown);
+      }, 10);
+      
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('click', closeDropdown);
+      };
+    }
+  }, [isOpen]);
 
   const handleStatusChange = async (newStatus: string) => {
     if (newStatus === currentStatus) {
@@ -91,7 +110,10 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   return (
     <div className={`relative ${className}`}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent event bubbling
+          setIsOpen(!isOpen);
+        }}
         className={`${statusObj.color} ${isUpdating ? "opacity-50" : ""} text-xs px-2 py-1 rounded flex items-center justify-between min-w-20`}
         disabled={isUpdating}
       >
@@ -107,11 +129,14 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 right-0 bg-zinc-800 border border-zinc-700 rounded shadow-lg min-w-32">
+        <div className="absolute z-40 mt-1 right-0 bg-zinc-800 border border-zinc-700 rounded shadow-lg min-w-32">
           {statusOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => handleStatusChange(option.value)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                handleStatusChange(option.value);
+              }}
               className={`block w-full text-left px-3 py-2 text-xs hover:bg-zinc-700 transition-colors
                 ${option.value === currentStatus ? "bg-zinc-700" : ""}`}
             >
@@ -123,7 +148,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       )}
       
       {error && (
-        <div className="absolute top-full mt-1 right-0 bg-red-900/80 text-red-200 text-xs p-2 rounded shadow-lg z-20">
+        <div className="absolute top-full mt-1 right-0 bg-red-900/80 text-red-200 text-xs p-2 rounded shadow-lg z-50">
           {error}
         </div>
       )}

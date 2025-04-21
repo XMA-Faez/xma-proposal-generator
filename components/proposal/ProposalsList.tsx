@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProposalCard from "./ProposalCard";
+import Toast from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
+import { RefreshCw, Plus } from "lucide-react";
 
 interface ProposalsListProps {
   initialProposals: any[];
@@ -16,6 +18,11 @@ export default function ProposalsList({
   const [proposals, setProposals] = useState(initialProposals);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState("all"); // Filter state
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    type: "success" as "success" | "error" | "info"
+  });
   const router = useRouter();
 
   // Function to refresh proposals data
@@ -43,6 +50,26 @@ export default function ProposalsList({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle proposal deletion
+  const handleDelete = (deletedId: string) => {
+    // Update the local state to remove the deleted proposal
+    setProposals((currentProposals) => 
+      currentProposals.filter((proposal) => proposal.id !== deletedId)
+    );
+    
+    // Show toast notification
+    setToast({
+      visible: true,
+      message: "Proposal deleted successfully",
+      type: "success"
+    });
+  };
+  
+  // Close toast notification
+  const handleCloseToast = () => {
+    setToast({...toast, visible: false});
   };
 
   // Filter proposals based on status
@@ -81,6 +108,14 @@ export default function ProposalsList({
 
   return (
     <div>
+      {/* Toast notification */}
+      <Toast
+        isVisible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onClose={handleCloseToast}
+      />
+      
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div className="flex items-center">
           <p className="text-zinc-400 mr-4">
@@ -130,52 +165,21 @@ export default function ProposalsList({
           >
             {isLoading ? (
               <>
-                <svg
-                  className="animate-spin h-4 w-4 mr-2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
+                <RefreshCw className="animate-spin h-4 w-4 mr-2" />
                 Refreshing...
               </>
             ) : (
               <>
-                <svg
-                  className="h-4 w-4 mr-2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </>
             )}
           </button>
           <Link
             href="/proposal-generator"
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
           >
+            <Plus className="h-4 w-4 mr-2" />
             Create New Proposal
           </Link>
         </div>
@@ -183,7 +187,11 @@ export default function ProposalsList({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredProposals.map((proposal) => (
-          <ProposalCard key={proposal.id} proposal={proposal} />
+          <ProposalCard 
+            key={proposal.id} 
+            proposal={proposal} 
+            onDelete={handleDelete}
+          />
         ))}
       </div>
     </div>
