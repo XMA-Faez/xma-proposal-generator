@@ -97,10 +97,11 @@ const ProposalPage = () => {
             .update({ views_count: (link.views_count || 0) + 1 })
             .eq("token", tokenParam);
 
-          // Return the proposal data and order ID
+          // Return the proposal data, order ID, and status
           return {
             proposalData: proposal.proposal_data,
             orderId: proposal.order_id,
+            status: proposal.status || "draft",
             discounts: normalizeDiscounts(proposal.proposal_data.discounts),
           };
         }
@@ -139,6 +140,7 @@ const ProposalPage = () => {
           return {
             proposalData: normalizedData,
             orderId: null, // URL-based proposals won't have an order ID
+            status: "draft", // Default status for URL-based proposals
             discounts: initialDiscounts,
           };
         } else {
@@ -159,7 +161,10 @@ const ProposalPage = () => {
     return <ErrorState error={error?.message || "Failed to load proposal data"} />;
   }
 
-  const { proposalData, orderId, discounts } = data;
+  const { proposalData, orderId, status, discounts } = data;
+
+  // Check if this is an accepted or paid proposal
+  const isAcceptedOrPaid = ["accepted", "paid"].includes(status?.toLowerCase());
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white py-6 px-4">
@@ -170,6 +175,21 @@ const ProposalPage = () => {
           proposalDate={proposalData.proposalDate}
           orderId={orderId} // Pass the order ID to the header
         />
+
+        {/* Status Badge */}
+        {status && (
+          <div className="mb-8 text-center">
+            <div className={`inline-block px-4 py-2 rounded-full 
+              ${status === "accepted" ? "bg-green-900 text-green-300" : 
+                status === "paid" ? "bg-purple-900 text-purple-300" : 
+                status === "sent" ? "bg-blue-900 text-blue-300" : 
+                status === "rejected" ? "bg-red-900 text-red-300" :
+                "bg-zinc-800 text-zinc-300"}`}
+            >
+              {status.toUpperCase()} PROPOSAL
+            </div>
+          </div>
+        )}
 
         {proposalData.additionalInfo && (
           <div className="mb-8 bg-zinc-800 rounded-lg p-6 shadow-lg">
@@ -205,11 +225,13 @@ const ProposalPage = () => {
           proposalData={proposalData}
           discounts={discounts}
           orderId={orderId} // Pass the order ID to the summary section
+          status={status} // Pass the status to control expiration display
         />
 
         <TermsAndConditions />
 
-        <ProposalCTA />
+        {/* Only show CTA section if proposal is not already paid */}
+        {status !== "paid" && <ProposalCTA />}
 
         <ProposalFooter />
       </div>

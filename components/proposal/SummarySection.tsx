@@ -2,7 +2,6 @@ import React from "react";
 import {
   calculateTotalPrice,
   formatPrice,
-  parsePrice,
   Discount,
   TAX_RATE,
 } from "@/lib/proposalUtils";
@@ -16,6 +15,7 @@ interface SummarySectionProps {
     overallDiscount: Discount;
   };
   orderId?: string | null;
+  status?: string;
   onDiscountChange?: (
     type: string,
     id: number | null,
@@ -29,6 +29,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({
   proposalData,
   discounts,
   orderId,
+  status = "draft",
   includeTax = true,
 }) => {
   // Override includeTax from props if explicitly set
@@ -90,6 +91,9 @@ const SummarySection: React.FC<SummarySectionProps> = ({
     // Default fallback
     return "Selected Package";
   };
+
+  // Check if this is an accepted or paid proposal
+  const isAcceptedOrPaid = ["accepted", "paid"].includes(status.toLowerCase());
 
   return (
     <div className="mb-8 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-lg p-6 shadow-lg border border-zinc-700">
@@ -239,14 +243,35 @@ const SummarySection: React.FC<SummarySectionProps> = ({
         )}
 
         <div className="mt-4 text-center">
-          <p className="text-sm text-zinc-400">
-            This proposal is valid for 30 days from the date issued.
-            {effectiveIncludeTax && (
-              <span className="ml-1">
-                All prices include {(TAX_RATE * 100).toFixed(0)}% VAT.
-              </span>
-            )}
-          </p>
+          {!isAcceptedOrPaid && (
+            <p className="text-sm text-zinc-400">
+              This proposal is valid for 30 days from the date issued.
+              {effectiveIncludeTax && (
+                <span className="ml-1">
+                  All prices include {(TAX_RATE * 100).toFixed(0)}% VAT.
+                </span>
+              )}
+            </p>
+          )}
+          {isAcceptedOrPaid && (
+            <p className="text-sm text-zinc-400">
+              {status === "paid" ? (
+                <span className="text-green-400 font-medium">
+                  This proposal has been accepted and paid. All terms are
+                  finalized.
+                </span>
+              ) : (
+                <span className="text-green-400 font-medium">
+                  This proposal has been accepted. All terms are finalized.
+                </span>
+              )}
+              {effectiveIncludeTax && (
+                <span className="ml-1 text-zinc-400">
+                  All prices include {(TAX_RATE * 100).toFixed(0)}% VAT.
+                </span>
+              )}
+            </p>
+          )}
         </div>
 
         {/* Legal Contract Section with Order ID */}

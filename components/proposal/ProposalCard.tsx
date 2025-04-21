@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import StatusBadge from "./StatusBadge";
 
 interface ProposalCardProps {
   proposal: any;
@@ -9,16 +10,28 @@ interface ProposalCardProps {
 
 const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
   const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState(proposal.status || "draft");
 
   const token = proposal.links && proposal.links[0]?.token;
   const viewCount = (proposal.links && proposal.links[0]?.views_count) || 0;
-  const orderId = proposal.order_id; // Get the order ID
+  const orderId = proposal.order_id;
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const shareableLink = token ? `${baseUrl}/proposal?token=${token}` : null;
 
   const proposalDate = new Date(proposal.proposal_date).toLocaleDateString();
   const createDate = new Date(proposal.created_at).toLocaleDateString();
+
+  // Calculate expiration date (30 days from proposal date)
+  const expDate = new Date(proposal.proposal_date);
+  expDate.setDate(expDate.getDate() + 30);
+  const expirationDate = expDate.toLocaleDateString();
+
+  // Check if proposal is expired
+  const isExpired = new Date() > expDate;
+
+  // Determine if we should show expiration date (hide for accepted/paid proposals)
+  const showExpiration = !["accepted", "paid"].includes(status.toLowerCase());
 
   const copyToClipboard = async () => {
     if (!shareableLink) return;
@@ -32,18 +45,9 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
     }
   };
 
-  // Status badge color mapping
-  const getStatusBadgeClass = (status) => {
-    switch (status?.toLowerCase()) {
-      case "accepted":
-        return "bg-green-900 text-green-300";
-      case "sent":
-        return "bg-blue-900 text-blue-300";
-      case "rejected":
-        return "bg-red-900 text-red-300";
-      default:
-        return "bg-zinc-700 text-zinc-300";
-    }
+  // Handler for status changes
+  const handleStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
   };
 
   return (
@@ -51,11 +55,11 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
       <div className="mb-3">
         <div className="flex justify-between items-start">
           <h2 className="text-xl font-bold">{proposal.client?.company_name}</h2>
-          <span
-            className={`text-xs px-2 py-1 rounded ${getStatusBadgeClass(proposal.status)}`}
-          >
-            {proposal.status?.toUpperCase() || "DRAFT"}
-          </span>
+          <StatusBadge
+            status={status}
+            proposalId={proposal.id}
+            onStatusChange={handleStatusChange}
+          />
         </div>
         <p className="text-zinc-400">{proposal.client?.name}</p>
 
@@ -76,7 +80,12 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal }) => {
         </div>
         <div className="text-right">
           <p>Views: {viewCount}</p>
-          {orderId && <p>Contract ID: {orderId}</p>}
+          {showExpiration && (
+            <p className={isExpired ? "text-red-400" : ""}>
+              {isExpired ? "Expired: " : "Expires: "}
+              {expirationDate}
+            </p>
+          )}
         </div>
       </div>
 
