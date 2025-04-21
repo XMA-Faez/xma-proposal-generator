@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { decodeProposalData } from "@/lib/proposalUtils";
 import ProposalHeader from "@/components/proposal/ProposalHeader";
@@ -19,18 +20,47 @@ const ProposalPage = () => {
   const proposalParam = searchParams.get("proposal");
   const tokenParam = searchParams.get("token");
 
-  const [proposalData, setProposalData] = useState(null);
-  const [orderId, setOrderId] = useState<string | null>(null); // Add state for order ID
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [discounts, setDiscounts] = useState({
-    packageDiscount: { type: "percentage", value: 0 },
-    serviceDiscounts: {},
-    overallDiscount: { type: "percentage", value: 0 },
-  });
+  // Helper function to normalize discount structure
+  const normalizeDiscounts = (discounts) => {
+    const normalized = {
+      packageDiscount: { type: "percentage", value: 0 },
+      serviceDiscounts: {},
+      overallDiscount: { type: "percentage", value: 0 },
+    };
 
-  useEffect(() => {
-    async function fetchProposalData() {
+    // Normalize package discount
+    if (discounts?.packageDiscount) {
+      normalized.packageDiscount =
+        typeof discounts.packageDiscount === "number"
+          ? { type: "percentage", value: discounts.packageDiscount }
+          : discounts.packageDiscount;
+    }
+
+    // Normalize overall discount
+    if (discounts?.overallDiscount) {
+      normalized.overallDiscount =
+        typeof discounts.overallDiscount === "number"
+          ? { type: "percentage", value: discounts.overallDiscount }
+          : discounts.overallDiscount;
+    }
+
+    // Normalize service discounts
+    if (discounts?.serviceDiscounts) {
+      Object.entries(discounts.serviceDiscounts).forEach(([id, discount]) => {
+        normalized.serviceDiscounts[id] =
+          typeof discount === "number"
+            ? { type: "percentage", value: discount }
+            : discount;
+      });
+    }
+
+    return normalized;
+  };
+
+  // Use React Query to fetch proposal data
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["proposal", tokenParam, proposalParam],
+    queryFn: async () => {
       try {
         // If we have a token, fetch from Supabase
         if (tokenParam) {
@@ -42,9 +72,7 @@ const ProposalPage = () => {
             .single();
 
           if (linkError) {
-            setError("Invalid proposal link");
-            setIsLoading(false);
-            return;
+            throw new Error("Invalid proposal link");
           }
 
           // Get the proposal
@@ -60,9 +88,7 @@ const ProposalPage = () => {
             .single();
 
           if (proposalError) {
-            setError("Failed to load proposal");
-            setIsLoading(false);
-            return;
+            throw new Error("Failed to load proposal");
           }
 
           // Update the view count
@@ -71,118 +97,69 @@ const ProposalPage = () => {
             .update({ views_count: (link.views_count || 0) + 1 })
             .eq("token", tokenParam);
 
-          // Set the proposal data from the stored JSON
-          setProposalData(proposal.proposal_data);
-
-          // Set the order ID from the database
-          setOrderId(proposal.order_id);
-
-          if (proposal.proposal_data.discounts) {
-            setDiscounts(normalizeDiscounts(proposal.proposal_data.discounts));
-          }
+          // Return the proposal data and order ID
+          return {
+            proposalData: proposal.proposal_data,
+            orderId: proposal.order_id,
+            discounts: normalizeDiscounts(proposal.proposal_data.discounts),
+          };
         }
         // If we have encoded proposal data directly in the URL
         else if (proposalParam) {
           const decodedData = decodeProposalData(proposalParam);
-          if (decodedData) {
-            // Initialize data with defaults to handle older proposal formats
-            const normalizedData = {
-              ...decodedData,
-              includePackage: decodedData.includePackage !== false,
-              selectedPackageIndex:
-                decodedData.selectedPackageIndex === null
-                  ? 1
-                  : decodedData.selectedPackageIndex,
-            };
-
-            setProposalData(normalizedData);
-
-            // URL-based proposals won't have an order ID
-            setOrderId(null);
-
-            // Initialize service discounts
-            if (
-              normalizedData.selectedServices &&
-              normalizedData.selectedServices.length > 0
-            ) {
-              const initialServiceDiscounts = {};
-              normalizedData.selectedServices.forEach((service) => {
-                initialServiceDiscounts[service.id] = {
-                  type: "percentage",
-                  value: 0,
-                };
-              });
-              setDiscounts((prev) => ({
-                ...prev,
-                serviceDiscounts: initialServiceDiscounts,
-              }));
-            }
-
-            // If the proposal already contains discount data, use it
-            if (normalizedData.discounts) {
-              setDiscounts(normalizeDiscounts(normalizedData.discounts));
-            }
-          } else {
-            setError("Invalid proposal data");
+          if (!decodedData) {
+            throw new Error("Invalid proposal data");
           }
+
+          // Initialize data with defaults to handle older proposal formats
+          const normalizedData = {
+            ...decodedData,
+            includePackage: decodedData.includePackage !== false,
+            selectedPackageIndex:
+              decodedData.selectedPackageIndex === null
+                ? 1
+                : decodedData.selectedPackageIndex,
+          };
+
+          // Initialize service discounts
+          let initialDiscounts = normalizeDiscounts(normalizedData.discounts);
+          
+          if (
+            !normalizedData.discounts && 
+            normalizedData.selectedServices && 
+            normalizedData.selectedServices.length > 0
+          ) {
+            const serviceDiscounts = {};
+            normalizedData.selectedServices.forEach((service) => {
+              serviceDiscounts[service.id] = { type: "percentage", value: 0 };
+            });
+            initialDiscounts.serviceDiscounts = serviceDiscounts;
+          }
+
+          return {
+            proposalData: normalizedData,
+            orderId: null, // URL-based proposals won't have an order ID
+            discounts: initialDiscounts,
+          };
         } else {
-          setError("No proposal data found");
+          throw new Error("No proposal data found");
         }
       } catch (error) {
         console.error("Error loading proposal:", error);
-        setError("Failed to load proposal data");
-      } finally {
-        setIsLoading(false);
+        throw error;
       }
-    }
-
-    // Helper function to normalize discount structure
-    const normalizeDiscounts = (discounts) => {
-      const normalized = {
-        packageDiscount: { type: "percentage", value: 0 },
-        serviceDiscounts: {},
-        overallDiscount: { type: "percentage", value: 0 },
-      };
-
-      // Normalize package discount
-      if (discounts.packageDiscount) {
-        normalized.packageDiscount =
-          typeof discounts.packageDiscount === "number"
-            ? { type: "percentage", value: discounts.packageDiscount }
-            : discounts.packageDiscount;
-      }
-
-      // Normalize overall discount
-      if (discounts.overallDiscount) {
-        normalized.overallDiscount =
-          typeof discounts.overallDiscount === "number"
-            ? { type: "percentage", value: discounts.overallDiscount }
-            : discounts.overallDiscount;
-      }
-
-      // Normalize service discounts
-      if (discounts.serviceDiscounts) {
-        Object.entries(discounts.serviceDiscounts).forEach(([id, discount]) => {
-          normalized.serviceDiscounts[id] =
-            typeof discount === "number"
-              ? { type: "percentage", value: discount }
-              : discount;
-        });
-      }
-
-      return normalized;
-    };
-
-    fetchProposalData();
-  }, [proposalParam, tokenParam]);
+    },
+  });
 
   if (isLoading) {
     return <LoadingState />;
   }
 
-  if (error || !proposalData) {
-    return <ErrorState error={error} />;
+  if (error || !data?.proposalData) {
+    return <ErrorState error={error?.message || "Failed to load proposal data"} />;
   }
+
+  const { proposalData, orderId, discounts } = data;
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white py-6 px-4">
@@ -209,6 +186,7 @@ const ProposalPage = () => {
 
         <PackageDisplay
           selectedPackageIndex={proposalData.selectedPackageIndex}
+          selectedPackage={proposalData.selectedPackage}  // Add this for direct reference
           discount={discounts.packageDiscount}
           onDiscountChange={() => {}} // Dummy function since clients can't modify
           includePackage={proposalData.includePackage !== false}

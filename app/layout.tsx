@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { createClient } from "@/utils/supabase/server";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import QueryProvider from "./QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,7 @@ export default async function RootLayout({
 }) {
   // Create supabase server client
   const supabase = await createClient();
-  
+
   // Get session from supabase
   const {
     data: { session },
@@ -37,9 +38,9 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}
       >
-        <AuthProvider initialSession={session}>
-          {children}
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider initialSession={session}>{children}</AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
