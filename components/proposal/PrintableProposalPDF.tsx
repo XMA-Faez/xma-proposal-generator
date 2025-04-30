@@ -295,35 +295,35 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
               Prepared exclusively for {proposalData.companyName}
             </Text>
 
-            {/* {status && ( */}
-            {/*   <View */}
-            {/*     style={{ */}
-            {/*       ...contractStyle.statusBadge, */}
-            {/*       backgroundColor: */}
-            {/*         status === "accepted" */}
-            {/*           ? "#ECFDF5" */}
-            {/*           : status === "paid" */}
-            {/*             ? "#F5F3FF" */}
-            {/*             : status === "sent" */}
-            {/*               ? "#EFF6FF" */}
-            {/*               : status === "rejected" */}
-            {/*                 ? "#FEF2F2" */}
-            {/*                 : "#F3F4F6", */}
-            {/*       color: */}
-            {/*         status === "accepted" */}
-            {/*           ? "#047857" */}
-            {/*           : status === "paid" */}
-            {/*             ? "#7C3AED" */}
-            {/*             : status === "sent" */}
-            {/*               ? "#1D4ED8" */}
-            {/*               : status === "rejected" */}
-            {/*                 ? "#DC2626" */}
-            {/*                 : "#4B5563", */}
-            {/*     }} */}
-            {/*   > */}
-            {/*     <Text>{status.toUpperCase()} PROPOSAL</Text> */}
-            {/*   </View> */}
-            {/* )} */}
+            {status && (
+              <View
+                style={{
+                  ...contractStyle.statusBadge,
+                  backgroundColor:
+                    status === "accepted"
+                      ? "#ECFDF5"
+                      : status === "paid"
+                        ? "#F5F3FF"
+                        : status === "sent"
+                          ? "#EFF6FF"
+                          : status === "rejected"
+                            ? "#FEF2F2"
+                            : "#F3F4F6",
+                  color:
+                    status === "accepted"
+                      ? "#047857"
+                      : status === "paid"
+                        ? "#7C3AED"
+                        : status === "sent"
+                          ? "#1D4ED8"
+                          : status === "rejected"
+                            ? "#DC2626"
+                            : "#4B5563",
+                }}
+              >
+                <Text>{(status || "DRAFT").toUpperCase()} PROPOSAL</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -361,12 +361,14 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           </View>
         )}
 
-        {/* Project Details */}
+        {/* Project Details (Additional Information) */}
         {proposalData.additionalInfo && (
           <View style={contractStyle.section}>
             <Text style={contractStyle.sectionTitle}>Project Details</Text>
             <View style={contractStyle.packageBox}>
-              <Text style={{ fontSize: 9 }}>{proposalData.additionalInfo}</Text>
+              <Text style={{ fontSize: 9, lineHeight: 1.5 }}>
+                {proposalData.additionalInfo}
+              </Text>
             </View>
           </View>
         )}
@@ -396,13 +398,17 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
                     ? proposalData.discounts.packageDiscount.type ===
                       "percentage"
                       ? formatPrice(
-                          parseFloat(proposalData.selectedPackage.price) *
+                          parseFloat(
+                            proposalData.selectedPackage.price.toString().replace(/,/g, "")
+                          ) *
                             (1 -
                               proposalData.discounts.packageDiscount.value /
                                 100),
                         )
                       : formatPrice(
-                          parseFloat(proposalData.selectedPackage.price) -
+                          parseFloat(
+                            proposalData.selectedPackage.price.toString().replace(/,/g, "")
+                          ) -
                             proposalData.discounts.packageDiscount.value,
                         )
                     : proposalData.selectedPackage.price}{" "}
@@ -606,6 +612,7 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           <Text style={contractStyle.termsTitle}>Terms and Conditions</Text>
           {renderTermsCompact()}
         </View>
+        
         {/* Bank Information Section - Added before signatures */}
         <View style={contractStyle.bankInfoContainer}>
           <Text style={contractStyle.bankInfoTitle}>Payment Information</Text>
@@ -638,6 +645,7 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
             making payment
           </Text>
         </View>
+        
         {/* Accepted or Signatures */}
         {isAcceptedOrPaid ? (
           <Text style={contractStyle.acceptedBadge}>
