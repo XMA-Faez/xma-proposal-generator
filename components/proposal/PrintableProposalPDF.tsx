@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  StyleSheet,
   Document,
   Page,
   Text,
@@ -9,29 +10,6 @@ import {
 } from "@react-pdf/renderer";
 import { formatPrice } from "@/lib/proposalUtils";
 import contractStyle from "@/data/contractStyle";
-
-// Register fonts for PDF
-Font.register({
-  family: "Roboto",
-  fonts: [
-    {
-      src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf",
-      fontWeight: 300,
-    },
-    {
-      src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-medium-webfont.ttf",
-      fontWeight: 500,
-    },
-    {
-      src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf",
-      fontWeight: 700,
-    },
-  ],
-});
 
 // Create PDF Document Component
 const ProposalPDF = ({ proposalData, orderId, status }) => {
@@ -295,7 +273,7 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
   // Define company information for XMA Agency
   const xmaInfo = {
     name: "Amir Mahdi Banki",
-    title: "CEO, xluxive digital marketing LLC",
+    title: "CEO, XLUXIVE DIGITAL MARKETING LLC",
     email: "admin@xma.ae",
     phone: "+971 50 810 7712",
   };
@@ -476,10 +454,14 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
 
             {/* Subtotal */}
             <View style={contractStyle.summaryRow}>
-              <Text style={{ ...contractStyle.summaryCol1, fontWeight: "bold" }}>
+              <Text
+                style={{ ...contractStyle.summaryCol1, fontWeight: "bold" }}
+              >
                 Subtotal
               </Text>
-              <Text style={{ ...contractStyle.summaryCol2, fontWeight: "bold" }}>
+              <Text
+                style={{ ...contractStyle.summaryCol2, fontWeight: "bold" }}
+              >
                 {formatPrice(subtotal)} AED
               </Text>
             </View>
@@ -496,7 +478,9 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
                       ) + " AED"}
                   )
                 </Text>
-                <Text style={{ ...contractStyle.summaryCol2, color: "#10B981" }}>
+                <Text
+                  style={{ ...contractStyle.summaryCol2, color: "#10B981" }}
+                >
                   -{formatPrice(discountAmount)} AED
                 </Text>
               </View>
@@ -574,7 +558,9 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
         {proposalData.selectedServices &&
           proposalData.selectedServices.length > 0 && (
             <View style={contractStyle.section}>
-              <Text style={contractStyle.sectionTitle}>Additional Services</Text>
+              <Text style={contractStyle.sectionTitle}>
+                Additional Services
+              </Text>
               <View
                 style={{
                   flexDirection:
@@ -595,7 +581,9 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
                     ]}
                     key={index}
                   >
-                    <Text style={contractStyle.serviceName}>{service.name}</Text>
+                    <Text style={contractStyle.serviceName}>
+                      {service.name}
+                    </Text>
                     <Text style={contractStyle.serviceDescription}>
                       {service.description && service.description.length > 100
                         ? service.description.substring(0, 100) + "..."
@@ -618,7 +606,38 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           <Text style={contractStyle.termsTitle}>Terms and Conditions</Text>
           {renderTermsCompact()}
         </View>
-
+        {/* Bank Information Section - Added before signatures */}
+        <View style={contractStyle.bankInfoContainer}>
+          <Text style={contractStyle.bankInfoTitle}>Payment Information</Text>
+          <View style={contractStyle.bankInfoGrid}>
+            <View style={contractStyle.bankInfoItem}>
+              <Text style={contractStyle.bankInfoLabel}>Account Holder:</Text>
+              <Text style={contractStyle.bankInfoValue}>
+                XLUXIVE DIGITAL MARKETING L.L.C
+              </Text>
+            </View>
+            <View style={contractStyle.bankInfoItem}>
+              <Text style={contractStyle.bankInfoLabel}>IBAN:</Text>
+              <Text style={contractStyle.bankInfoValue}>
+                AE590860000009339072484
+              </Text>
+            </View>
+            <View style={contractStyle.bankInfoItem}>
+              <Text style={contractStyle.bankInfoLabel}>BIC/SWIFT:</Text>
+              <Text style={contractStyle.bankInfoValue}>WIOBAEADXXX</Text>
+            </View>
+            <View style={contractStyle.bankInfoItem}>
+              <Text style={contractStyle.bankInfoLabel}>Business Address:</Text>
+              <Text style={contractStyle.bankInfoValue}>
+                The Curve Building M44, Dubai, UAE
+              </Text>
+            </View>
+          </View>
+          <Text style={contractStyle.bankInfoNote}>
+            Please reference your Order ID ({orderId || "as provided"}) when
+            making payment
+          </Text>
+        </View>
         {/* Accepted or Signatures */}
         {isAcceptedOrPaid ? (
           <Text style={contractStyle.acceptedBadge}>

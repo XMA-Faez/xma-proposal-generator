@@ -51,24 +51,32 @@ const PrintButton: React.FC<PrintButtonProps> = ({
       fileName={fileName}
       className="no-underline"
     >
-      {({ blob, url, loading, error }) => (
-        <button
-          disabled={loading}
-          className="bg-white text-zinc-900 hover:bg-gray-100 px-4 py-2 rounded-md font-medium flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-70"
-        >
-          {loading ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              <span>Generating PDF...</span>
-            </>
-          ) : (
-            <>
-              <FileDown size={18} />
-              <span>Download Contract (PDF)</span>
-            </>
-          )}
-        </button>
-      )}
+      {({ blob, url, loading, error }) => {
+        // Log any error to console for debugging
+        if (error) {
+          console.error("PDF Generation Error:", error);
+        }
+
+        return (
+          <button
+            type="button"
+            disabled={loading}
+            className="bg-white text-zinc-900 hover:bg-gray-100 px-4 py-2 rounded-md font-medium flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-70 cursor-pointer"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                <span>Generating PDF...</span>
+              </>
+            ) : (
+              <>
+                <FileDown size={18} />
+                <span>Download Contract (PDF)</span>
+              </>
+            )}
+          </button>
+        );
+      }}
     </PDFDownloadLink>
   );
 };

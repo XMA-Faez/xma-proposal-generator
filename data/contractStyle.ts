@@ -1,10 +1,11 @@
+import { StyleSheet } from "@react-pdf/renderer";
+
 // Create optimized styles for PDF - making elements more compact
 const contractStyle = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "#FFFFFF",
     padding: 30,
-    fontFamily: "Roboto",
   },
   watermark: {
     position: "absolute",
@@ -307,6 +308,47 @@ const contractStyle = StyleSheet.create({
     right: -10,
     transform: "rotate(10deg)",
   },
+  
+  // Bank information styles
+  bankInfoContainer: {
+    backgroundColor: "#FEF9C3",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    marginTop: 50,
+    borderLeftWidth: 3,
+    borderLeftColor: "#CA8A04",
+    borderLeftStyle: "solid",
+  },
+  bankInfoTitle: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#78350F",
+    marginBottom: 4,
+  },
+  bankInfoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  bankInfoItem: {
+    width: "50%",
+    marginBottom: 4,
+  },
+  bankInfoLabel: {
+    fontSize: 8,
+    color: "#78350F",
+  },
+  bankInfoValue: {
+    fontSize: 9,
+    fontWeight: "medium",
+    color: "#78350F",
+  },
+  bankInfoNote: {
+    fontSize: 8,
+    color: "#78350F",
+    fontStyle: "italic",
+    marginTop: 4,
+  }
 });
 
 export default contractStyle;
