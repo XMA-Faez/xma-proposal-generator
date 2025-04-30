@@ -10,6 +10,7 @@
     "seed:admin": "node scripts/seed-admin.js"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.0",
     "@supabase/ssr": "^0.1.0",
     "@supabase/supabase-js": "^2.39.6",
     "@tanstack/react-query": "^5.74.4",

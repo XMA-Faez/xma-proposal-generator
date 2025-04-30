@@ -1,5 +1,3 @@
-// Modified ProposalContent.tsx to use the snapshot data
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -12,6 +10,7 @@ import TermsAndConditions from "@/components/proposal/TermsAndConditions";
 import ProposalFooter from "@/components/proposal/ProposalFooter";
 import LoadingState from "@/components/proposal/LoadingState";
 import ErrorState from "@/components/proposal/ErrorState";
+import ContractActions from "@/components/proposal/ContractActions";
 
 interface ProposalContentProps {
   proposalData?: any;
@@ -27,7 +26,43 @@ const ProposalContent: React.FC<ProposalContentProps> = ({
   const [proposalData, setProposalData] = useState(initialProposalData || null);
   const [isLoading, setIsLoading] = useState(!serverFetched && !proposalData);
   const [error, setError] = useState<string | null>(null);
-  
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Generate a shareable link if one isn't provided
+  const getShareableLink = () => {
+    if (typeof window === "undefined") return null;
+
+    // For token-based proposals
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    if (token) {
+      return `${window.location.origin}/proposal?token=${token}`;
+    }
+
+    // For encoded proposals
+    if (encodedProposal) {
+      return `${window.location.origin}/proposal?proposal=${encodedProposal}`;
+    }
+
+    return null;
+  };
+
+  const shareableLink = getShareableLink();
+
+  const copyLinkToClipboard = () => {
+    if (!shareableLink) return;
+
+    navigator.clipboard
+      .writeText(shareableLink)
+      .then(() => {
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 3000);
+      })
+      .catch((err) => {
+        console.error("Could not copy text: ", err);
+      });
+  };
+
   useEffect(() => {
     // If we already have proposal data from the server, use that
     if (initialProposalData) {
@@ -74,23 +109,38 @@ const ProposalContent: React.FC<ProposalContentProps> = ({
     includePackage = true,
     // Important change: Use the stored package snapshot instead of fetching by ID
     selectedPackage,
-    // Important change: Use the stored services snapshot 
+    // Important change: Use the stored services snapshot
     selectedServices = [],
     // Get discounts from the snapshot
     discounts = {
       packageDiscount: { type: "percentage", value: 0 },
       serviceDiscounts: {},
-      overallDiscount: { type: "percentage", value: 0 }
-    }
+      overallDiscount: { type: "percentage", value: 0 },
+    },
   } = proposalData;
+
+  // Try to get order ID from parent component or props
+  const orderId = initialProposalData?.order_id || null;
+  const status = initialProposalData?.status || "draft";
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white py-6 px-4">
       <div className="max-w-5xl mx-auto">
+        {/* Contract Actions - Adding this right at the top for visibility */}
+        <ContractActions
+          proposalData={proposalData}
+          orderId={orderId}
+          status={status}
+          shareableLink={shareableLink}
+          onCopyLink={copyLinkToClipboard}
+          copied={linkCopied}
+        />
+
         <ProposalHeader
           clientName={clientName}
           companyName={companyName}
           proposalDate={proposalDate}
+          orderId={orderId}
         />
 
         {additionalInfo && (
@@ -108,66 +158,13 @@ const ProposalContent: React.FC<ProposalContentProps> = ({
 
         {/* If include package and we have a package snapshot */}
         {includePackage && selectedPackage && (
-          <div className="mb-8 bg-zinc-800 rounded-lg p-6 shadow-lg">
-            <h2 className="text-xl font-bold mb-4 text-red-500">Selected Package</h2>
-            <div className="bg-zinc-900 p-6 rounded-lg mb-6">
-              <div className="flex flex-wrap justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-bold">
-                    {selectedPackage.name} Package
-                  </h3>
-                  {selectedPackage.is_popular && (
-                    <div className="inline-block bg-red-600/20 text-red-400 text-xs font-medium px-2 py-1 rounded mt-1">
-                      Most Popular
-                    </div>
-                  )}
-                  <p className="text-zinc-400 mt-2 max-w-xl">
-                    {selectedPackage.description}
-                  </p>
-                </div>
-                <div className="text-right mt-2 md:mt-0">
-                  {discounts.packageDiscount.value > 0 && (
-                    <div className="text-lg line-through text-zinc-500">
-                      {selectedPackage.price} {selectedPackage.currency}
-                    </div>
-                  )}
-                  <div className="text-2xl font-bold flex items-center justify-end">
-                    {/* Calculate discounted price here or use a utility function */}
-                    {selectedPackage.price} {selectedPackage.currency}
-                    {discounts.packageDiscount.value > 0 && (
-                      <span className="ml-2 text-sm font-normal bg-green-900/30 text-green-400 px-2 py-1 rounded">
-                        {discounts.packageDiscount.type === 'percentage' 
-                          ? `${discounts.packageDiscount.value}% OFF` 
-                          : `-${discounts.packageDiscount.value} ${selectedPackage.currency}`}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                {selectedPackage.features && selectedPackage.features.map((feature, index) => (
-                  <div key={index} className="flex items-start">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className={feature.is_bold ? "font-medium" : ""}>
-                      {feature.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <PackageDisplay
+            selectedPackageIndex={null}
+            selectedPackage={selectedPackage}
+            discount={discounts.packageDiscount}
+            onDiscountChange={() => {}} // Dummy function
+            includePackage={includePackage}
+          />
         )}
 
         {selectedServices && selectedServices.length > 0 && (
@@ -178,7 +175,12 @@ const ProposalContent: React.FC<ProposalContentProps> = ({
           />
         )}
 
-        <SummarySection proposalData={proposalData} discounts={discounts} />
+        <SummarySection
+          proposalData={proposalData}
+          discounts={discounts}
+          orderId={orderId}
+          status={status}
+        />
 
         <TermsAndConditions />
 

@@ -24,7 +24,7 @@ const ProposalCTA = () => {
           <div>
             <p className="text-sm text-zinc-400 mb-1">Business Address</p>
             <p className="font-medium">
-              Etihad Airways Centre 5th Floor, Abu Dhabi, UAE
+              The Curve Bulding M44, Dubai, UAE
             </p>
           </div>
         </div>

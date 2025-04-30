@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -14,11 +14,13 @@ import ProposalFooter from "@/components/proposal/ProposalFooter";
 import LoadingState from "@/components/proposal/LoadingState";
 import ErrorState from "@/components/proposal/ErrorState";
 import ProposalCTA from "@/components/proposal/ProposalCTA";
+import PrintButton from "@/components/proposal/PrintButton";
 
 const ProposalPage = () => {
   const searchParams = useSearchParams();
   const proposalParam = searchParams.get("proposal");
   const tokenParam = searchParams.get("token");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Helper function to normalize discount structure
   const normalizeDiscounts = (discounts) => {
@@ -55,6 +57,27 @@ const ProposalPage = () => {
     }
 
     return normalized;
+  };
+
+  // Generate a shareable link based on the current URL
+  const getShareableLink = () => {
+    if (typeof window === 'undefined') return null;
+    return window.location.href;
+  };
+
+  const shareableLink = getShareableLink();
+
+  const copyLinkToClipboard = () => {
+    if (!shareableLink) return;
+    
+    navigator.clipboard.writeText(shareableLink)
+      .then(() => {
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 3000);
+      })
+      .catch(err => {
+        console.error('Could not copy text: ', err);
+      });
   };
 
   // Use React Query to fetch proposal data
@@ -169,6 +192,15 @@ const ProposalPage = () => {
   return (
     <div className="min-h-screen bg-zinc-900 text-white py-6 px-4">
       <div className="max-w-5xl mx-auto">
+        {/* Add the simple Print Button at the top */}
+        <div className="flex justify-end mb-4">
+          <PrintButton
+            proposalData={proposalData}
+            orderId={orderId}
+            status={status}
+          />
+        </div>
+
         <ProposalHeader
           clientName={proposalData.clientName}
           companyName={proposalData.companyName}
@@ -176,20 +208,6 @@ const ProposalPage = () => {
           orderId={orderId} // Pass the order ID to the header
         />
 
-        {/* Status Badge */}
-        {status && (
-          <div className="mb-8 text-center">
-            <div className={`inline-block px-4 py-2 rounded-full 
-              ${status === "accepted" ? "bg-green-900 text-green-300" : 
-                status === "paid" ? "bg-purple-900 text-purple-300" : 
-                status === "sent" ? "bg-blue-900 text-blue-300" : 
-                status === "rejected" ? "bg-red-900 text-red-300" :
-                "bg-zinc-800 text-zinc-300"}`}
-            >
-              {status.toUpperCase()} PROPOSAL
-            </div>
-          </div>
-        )}
 
         {proposalData.additionalInfo && (
           <div className="mb-8 bg-zinc-800 rounded-lg p-6 shadow-lg">

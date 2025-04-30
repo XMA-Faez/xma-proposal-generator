@@ -1,0 +1,76 @@
+"use client";
+
+import React, { useState } from "react";
+import { FileDown, Loader2 } from "lucide-react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import ProposalPDF from "./PrintableProposalPDF";
+
+interface PrintButtonProps {
+  proposalData: any;
+  orderId?: string | null;
+  status?: string;
+}
+
+const PrintButton: React.FC<PrintButtonProps> = ({
+  proposalData,
+  orderId,
+  status,
+}) => {
+  const [isClient, setIsClient] = useState(false);
+
+  // Check if we're in the browser environment
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    // Server-side rendering fallback
+    return (
+      <button
+        className="bg-white text-zinc-900 hover:bg-gray-100 px-4 py-2 rounded-md font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
+        disabled
+      >
+        <FileDown size={18} />
+        <span>Download Contract</span>
+      </button>
+    );
+  }
+
+  // Format file name based on company name
+  const fileName = `XMA_Proposal_${proposalData.companyName.replace(/\s+/g, "_")}.pdf`;
+
+  return (
+    <PDFDownloadLink
+      document={
+        <ProposalPDF
+          proposalData={proposalData}
+          orderId={orderId}
+          status={status}
+        />
+      }
+      fileName={fileName}
+      className="no-underline"
+    >
+      {({ blob, url, loading, error }) => (
+        <button
+          disabled={loading}
+          className="bg-white text-zinc-900 hover:bg-gray-100 px-4 py-2 rounded-md font-medium flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-70"
+        >
+          {loading ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              <span>Generating PDF...</span>
+            </>
+          ) : (
+            <>
+              <FileDown size={18} />
+              <span>Download Contract (PDF)</span>
+            </>
+          )}
+        </button>
+      )}
+    </PDFDownloadLink>
+  );
+};
+
+export default PrintButton;

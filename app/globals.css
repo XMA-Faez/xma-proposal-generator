@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "./animations.css"
+@import "./animations.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -123,5 +123,106 @@
 }
 
 body {
-  
+}
+
+/* Print-specific styles */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  nav,
+  button:not(.print-only),
+  .no-print,
+  .bg-gradient-to-br {
+    display: none !important;
+  }
+
+  /* Reset background colors for printing */
+  .bg-zinc-800,
+  .bg-zinc-900,
+  .bg-zinc-900\/50,
+  [class*="bg-zinc-"] {
+    background-color: white !important;
+    color: black !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Make text visible on white background */
+  .text-white,
+  .text-zinc-300,
+  .text-zinc-400,
+  [class*="text-zinc-"] {
+    color: black !important;
+  }
+
+  /* Preserve heading colors */
+  .text-red-500,
+  [class*="text-red-"] {
+    color: #e53e3e !important;
+  }
+
+  /* Add page breaks where needed */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  /* Ensure sections don't break across pages */
+  .no-break {
+    page-break-inside: avoid;
+  }
+
+  /* Print-specific layout adjustments */
+  .max-w-5xl {
+    max-width: none !important;
+  }
+
+  /* Override text sizes for better print readability */
+  .text-sm {
+    font-size: 11pt !important;
+  }
+
+  .text-xs {
+    font-size: 9pt !important;
+  }
+
+  .text-lg {
+    font-size: 14pt !important;
+  }
+
+  .text-xl {
+    font-size: 16pt !important;
+  }
+
+  /* Ensure good margin for printing */
+  .print-container {
+    margin: 0.5in;
+  }
+
+  /* Add light borders for visual separation in print */
+  .print-border-bottom {
+    border-bottom: 1px solid #eee !important;
+    padding-bottom: 0.5cm;
+    margin-bottom: 0.5cm;
+  }
+
+  /* Watermark */
+  .print-watermark {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) rotate(-30deg) !important;
+    opacity: 0.05 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    display: block !important;
+    width: 400px !important;
+    height: 400px !important;
+  }
 }
