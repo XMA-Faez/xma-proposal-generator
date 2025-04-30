@@ -98,7 +98,7 @@ export const termsAndConditions = [
   "3. Timeline: Estimated completion time is 4-6 weeks from project start date, dependent on client feedback turnaround times.",
   "4. Content: Client is responsible for providing necessary content (brand asset, product information, account credentials etc.) within 3 days of project start.",
   "5. Intellectual Property: Upon full payment, client receives full rights to all deliverables created specifically for this project.",
-  "6. Cancellation: In case of cancellation, client is responsible for payment of all work completed up to the cancellation date.",
+  "6. Cancellation and Satisfaction Guarantee: We offer a satisfaction guarantee for up to one month after campaign launch. If dissatisfied, client may request a refund, but will forfeit content ownership rights and may no longer use the content for advertising or posting. For retainer cancellations, clients may keep the CRM system for a reduced fee of 300 AED per month.",
   "7. Confidentiality: XMA Agency agrees to maintain confidentiality of all client information.",
   "8. Additional Services: Any services not specified in this proposal will require a separate agreement.",
   "9. Validity: This proposal is valid for 30 days from the date issued.",

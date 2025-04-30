@@ -4,14 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
-import {
-  MoreVertical,
-  Trash2,
-  Share2,
-  Eye,
-  Copy,
-  ExternalLink,
-} from "lucide-react";
+import { Trash2, Share2, Copy } from "lucide-react";
 
 interface ProposalCardProps {
   proposal: any;
@@ -21,7 +14,6 @@ interface ProposalCardProps {
 const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
   const [copied, setCopied] = useState(false);
   const [status, setStatus] = useState(proposal.status || "draft");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -103,21 +95,6 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
     }
   };
 
-  // Close menu when clicking outside
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
-
-  // Close menu when clicking outside
-  React.useEffect(() => {
-    if (menuOpen) {
-      document.addEventListener("click", closeMenu);
-    }
-    return () => {
-      document.removeEventListener("click", closeMenu);
-    };
-  }, [menuOpen]);
-
   return (
     <div className="bg-zinc-800 rounded-lg shadow-lg">
       {/* Header with Status Badge */}
@@ -186,60 +163,14 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
 
         {/* Action Buttons */}
         <div className="flex gap-3">
-          {/* Actions Menu */}
-          <div className="relative">
-            <button
-              className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 py-2 rounded flex items-center"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent event bubbling
-                setMenuOpen(!menuOpen);
-              }}
-            >
-              <MoreVertical size={16} className="mr-1" />
-              Actions
-            </button>
-
-            {menuOpen && (
-              <div className="absolute left-0 top-full mt-1 w-48 bg-zinc-700 rounded-md shadow-lg z-20">
-                <div className="py-1" role="menu">
-                  <button
-                    className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-zinc-600 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent event bubbling
-                      copyToClipboard();
-                      setMenuOpen(false);
-                    }}
-                  >
-                    <Copy size={16} className="mr-2" />
-                    Copy Link
-                  </button>
-
-                  {proposal.encoded_data && (
-                    <Link
-                      href={`/proposal?proposal=${proposal.encoded_data}`}
-                      target="_blank"
-                      className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-zinc-600 transition-colors"
-                    >
-                      <ExternalLink size={16} className="mr-2" />
-                      Original Version
-                    </Link>
-                  )}
-
-                  <button
-                    className="flex items-center w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent event bubbling
-                      setMenuOpen(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                  >
-                    <Trash2 size={16} className="mr-2" />
-                    Delete Proposal
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Delete Button */}
+          <button
+            className="bg-zinc-700 hover:bg-red-700 text-white px-3 py-2 rounded flex items-center transition-colors"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <Trash2 size={16} className="mr-1" />
+            Delete
+          </button>
 
           {token && (
             <Link
