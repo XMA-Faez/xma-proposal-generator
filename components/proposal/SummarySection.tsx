@@ -6,6 +6,7 @@ import {
   TAX_RATE,
 } from "@/lib/proposalUtils";
 import { packages } from "@/data/proposalData";
+import CompanyStamp from "./CompanyStamp";
 
 interface SummarySectionProps {
   proposalData: any;
@@ -274,34 +275,8 @@ const SummarySection: React.FC<SummarySectionProps> = ({
           )}
         </div>
 
-        {/* Legal Contract Section with Order ID */}
-        {orderId && (
-          <div className="mt-6 pt-4 border-t border-zinc-700">
-            <h3 className="text-md font-bold text-center mb-3">
-              Legal Agreement
-            </h3>
-            <div className="text-sm text-zinc-300">
-              <p>
-                By accepting this proposal, the client agrees to enter into a
-                legally binding contract with XMA Agency under Order ID:{" "}
-                <span className="font-semibold text-red-400">{orderId}</span>.
-                This document serves as the official agreement between both
-                parties and is subject to the terms and conditions outlined
-                herein.
-              </p>
-              <p className="mt-2">
-                All payments, deliverables, and service terms are governed by
-                this agreement. Please reference the Order ID in all
-                communications regarding this contract.
-              </p>
-            </div>
-            <p className="mt-4 text-xs text-center text-zinc-400">
-              This document is electronically generated and valid without
-              signature. The Order ID serves as the unique identifier for this
-              contract.
-            </p>
-          </div>
-        )}
+        {/* Legal Contract Section with Company Stamp */}
+        {orderId && <CompanyStamp orderId={orderId} />}
       </div>
     </div>
   );
