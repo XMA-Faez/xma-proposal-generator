@@ -240,7 +240,7 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
     // First 5 terms in first column, remaining in second column
     const terms = [
       "Payment Terms: 100% payment required upfront to initiate the project.",
-      "Revisions: Package includes up to 1 rounds of revisions for each deliverable.",
+      "Revisions: Package includes up to 3 rounds of revisions for each deliverable.",
       "Timeline: Estimated completion time is 4-6 weeks from project start date, dependent on client feedback turnaround times.",
       "Content: Client is responsible for providing necessary content (brand asset, product information, account credentials etc.) within 3 days of project start.",
       "Intellectual Property: Upon full payment, client receives full rights to all deliverables created specifically for this project.",
@@ -399,7 +399,9 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
                       "percentage"
                       ? formatPrice(
                           parseFloat(
-                            proposalData.selectedPackage.price.toString().replace(/,/g, "")
+                            proposalData.selectedPackage.price
+                              .toString()
+                              .replace(/,/g, ""),
                           ) *
                             (1 -
                               proposalData.discounts.packageDiscount.value /
@@ -407,9 +409,10 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
                         )
                       : formatPrice(
                           parseFloat(
-                            proposalData.selectedPackage.price.toString().replace(/,/g, "")
-                          ) -
-                            proposalData.discounts.packageDiscount.value,
+                            proposalData.selectedPackage.price
+                              .toString()
+                              .replace(/,/g, ""),
+                          ) - proposalData.discounts.packageDiscount.value,
                         )
                     : proposalData.selectedPackage.price}{" "}
                   AED
@@ -612,7 +615,7 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           <Text style={contractStyle.termsTitle}>Terms and Conditions</Text>
           {renderTermsCompact()}
         </View>
-        
+
         {/* Bank Information Section - Added before signatures */}
         <View style={contractStyle.bankInfoContainer}>
           <Text style={contractStyle.bankInfoTitle}>Payment Information</Text>
@@ -645,13 +648,28 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
             making payment
           </Text>
         </View>
-        
+
         {/* Accepted or Signatures */}
         {isAcceptedOrPaid ? (
-          <Text style={contractStyle.acceptedBadge}>
-            This proposal has been {status?.toLowerCase()} and all terms are
-            finalized.
-          </Text>
+          <View>
+            <Text style={contractStyle.acceptedBadge}>
+              This proposal has been {status?.toLowerCase()} and all terms are
+              finalized.
+            </Text>
+
+            {/* Add stamp here too for accepted proposals */}
+            <View
+              style={[
+                contractStyle.stamp,
+                { position: "relative", alignSelf: "center", marginTop: 20 },
+              ]}
+            >
+              <Image
+                src="/NSGT Global Limited XMA Lead Flow Proposal.png"
+                style={{ width: 120, height: 120 }}
+              />
+            </View>
+          </View>
         ) : (
           <View style={contractStyle.signatures}>
             <View style={contractStyle.signatureBlock}>

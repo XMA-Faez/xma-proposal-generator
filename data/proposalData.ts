@@ -94,7 +94,7 @@ export const standaloneServices = [
 // Terms and Conditions
 export const termsAndConditions = [
   "1. Payment Terms: 100% payment required upfront to initiate the project.",
-  "2. Revisions: Package includes up to 1 rounds of revisions for each deliverable.",
+  "2. Revisions: Package includes up to 3 rounds of revisions for each deliverable.",
   "3. Timeline: Estimated completion time is 4-6 weeks from project start date, dependent on client feedback turnaround times.",
   "4. Content: Client is responsible for providing necessary content (brand asset, product information, account credentials etc.) within 3 days of project start.",
   "5. Intellectual Property: Upon full payment, client receives full rights to all deliverables created specifically for this project.",
