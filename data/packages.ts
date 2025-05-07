@@ -10,7 +10,7 @@ export const packages = [
         { text: '8 Total Ads', bold: true, included: true },
         { text: '5 Static Ads', included: true },
         { text: '3 Video Ads', included: true },
-        { text: 'Ad Campaign(s) Set-up', included: true },
+        { text: 'Ad Campaigns Setup + 1 Month Free Management', included: true },
         { text: 'CRM', included: true },
         { text: 'WhatsApp Integration', included: true }
     ],
@@ -26,7 +26,7 @@ export const packages = [
         { text: '18 Total Ads', bold: true, included: true },
         { text: '10 Static Ads', included: true },
         { text: '8 Video Ads', included: true },
-        { text: 'Ad Campaign(s) Set-up', included: true },
+        { text: 'Ad Campaigns Setup + 1 Month Free Management', included: true },
         { text: 'CRM', included: true },
         { text: 'WhatsApp Integration', included: true }
     ],
@@ -42,7 +42,7 @@ export const packages = [
         { text: '34 Total Ads', bold: true, included: true },
         { text: '20 Static Ads', included: true },
         { text: '14 Video Ads', included: true },
-        { text: 'Ad Campaign(s) Set-up', included: true },
+        { text: 'Ad Campaigns Setup + 1 Month Free Management', included: true },
         { text: 'CRM', included: true },
         { text: 'WhatsApp Integration', included: true }
     ],
