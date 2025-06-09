@@ -248,6 +248,18 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
       "Confidentiality: XMA Agency agrees to maintain confidentiality of all client information.",
       "Additional Services: Any services not specified in this proposal will require a separate agreement.",
       `Validity: This proposal is valid for 30 days from the date issued${isExpired ? " (EXPIRED)" : ` (Valid until ${expirationDate})`}`,
+      "Commencement of Ad Management: The initial ad management period (1 month) will begin once all essential assets—including CRM access, video creatives, and static visuals—have been delivered and approved. Ongoing management beyond this period will require enrollment in one of XMA Agency's subscription packages.",
+      "Advertising Platforms: XMA Agency can manage advertising across any major platform. Platform selection is based on the client's budget and marketing strategy, with common starting points being Google Ads and Meta platforms.",
+      "Ad Spend Handling: Ad budgets will be actively managed by XMA Agency. However, all payments for ad spend will be made directly by the client through their own advertising account(s).",
+      "CRM Usage Terms: If a client chooses not to continue with a subscription plan after the initial engagement but wishes to retain CRM access, a fee of AED 300 per month will apply. This fee is included at no extra cost for clients on a subscription plan.",
+      "Ownership of Data and Assets: All CRM data, leads, and creative assets produced for the client remain the exclusive property of the client. Upon request, a Non-Disclosure Agreement (NDA) may be signed. In the case of a full refund under our satisfaction guarantee, ownership of all deliverables reverts to XMA Agency and use of such content is no longer permitted.",
+      "Optimization Commitment: Campaigns managed during the initial period will be actively optimized for performance, with the goal of delivering meaningful results and building a strong foundation for long-term collaboration.",
+      "Delivery of Assets and Reports: All final assets and reports will be shared with the client upon completion and internal approval, ensuring transparency and full access.",
+      "Support Response Time: XMA Agency provides customer support within 12–24 hours on business days, with most queries addressed much sooner.",
+      "Reporting & Review Rights: Clients under ongoing management plans are entitled to request weekly performance reports or biweekly review meetings with their assigned account manager.",
+      "Ad Account Access and Control: Advertising accounts will be created and owned by the client. XMA Agency will be granted access as an employee or partner for campaign management purposes only.",
+      "Creative Revisions: All ad creatives will be uniquely tailored to the client's brand and may undergo revisions until satisfactory, within reasonable limits as defined in the package.",
+      "Project Handover and Exit Support: If a client chooses not to continue with XMA's services post-project, a full handover will be provided, along with two weeks of standby support to assist with the transition.",
     ];
 
     return (
