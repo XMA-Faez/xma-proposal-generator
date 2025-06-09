@@ -1,18 +1,6 @@
 import React, { useState } from "react";
 import { termsAndConditions } from "@/data/proposalData";
 
-// Updated terms and conditions with satisfaction guarantee and cancellation policy
-const updatedTermsAndConditions = [
-  "1. Payment Terms: 100% payment required upfront to initiate the project.",
-  "2. Revisions: Package includes up to 3 rounds of revisions for each deliverable.",
-  "3. Timeline: Estimated completion time is 4-6 weeks from project start date, dependent on client feedback turnaround times.",
-  "4. Content: Client is responsible for providing necessary content (brand asset, product information, account credentials etc.) within 3 days of project start.",
-  "5. Intellectual Property: Upon full payment, client receives full rights to all deliverables created specifically for this project.",
-  "6. Cancellation and Satisfaction Guarantee: We offer a satisfaction guarantee for up to one month after campaign launch. If dissatisfied, client may request a refund, but will forfeit content ownership rights and may no longer use the content for advertising or posting. For retainer cancellations, clients may keep the CRM system for a reduced fee of 300 AED per month.",
-  "7. Confidentiality: XMA Agency agrees to maintain confidentiality of all client information.",
-  "8. Additional Services: Any services not specified in this proposal will require a separate agreement.",
-  "9. Validity: This proposal is valid for 30 days from the date issued.",
-];
 
 const TermsAndConditions: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -68,7 +56,7 @@ const TermsAndConditions: React.FC = () => {
       {isExpanded ? (
         <div className="bg-zinc-900 p-5 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {updatedTermsAndConditions.map((term, index) => (
+            {termsAndConditions.map((term, index) => (
               <div key={index} className="flex">
                 <div className="mr-3 text-red-500 font-bold">{index + 1}.</div>
                 <div className="text-zinc-300">
@@ -82,7 +70,7 @@ const TermsAndConditions: React.FC = () => {
         <div className="bg-zinc-900 p-5 rounded-lg">
           <p className="text-zinc-400 text-sm">
             This proposal is subject to our standard terms and conditions,
-            including 100% payment upfront, 1 rounds of revisions, a 4-6 week
+            including 100% payment upfront, 3 rounds of revisions, a 4-6 week
             timeline, and client-provided content requirements. We offer a
             satisfaction guarantee for up to one month after campaign launch.
             <span
