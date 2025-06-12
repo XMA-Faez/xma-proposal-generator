@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ClientInformationForm from "./ClientInformationForm";
+import CustomClientInformationForm from "./CustomClientInformationForm";
 import CustomServiceForm from "./CustomServiceForm";
 import CustomProposalSummary from "./CustomProposalSummary";
+import CustomTermsForm from "./CustomTermsForm";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -25,13 +26,14 @@ export interface CustomProposalData {
     clientName: string;
     companyName: string;
     proposalDate: string;
+    additionalInfo?: string;
   };
   services: CustomService[];
   discount: number;
   discountType: "percentage" | "absolute";
   taxIncluded: boolean;
   terms: "standard" | "custom";
-  customTerms?: string;
+  customTerms: string[];
 }
 
 export default function CustomProposalClient() {
@@ -42,12 +44,14 @@ export default function CustomProposalClient() {
       clientName: "",
       companyName: "",
       proposalDate: new Date().toISOString().split("T")[0],
+      additionalInfo: "",
     },
     services: [],
     discount: 0,
     discountType: "percentage",
     taxIncluded: true,
     terms: "standard",
+    customTerms: [],
   });
 
   const handleClientInfoChange = (clientInfo: CustomProposalData["clientInfo"]) => {
@@ -83,11 +87,17 @@ export default function CustomProposalClient() {
     setProposalData((prev) => ({ ...prev, taxIncluded }));
   };
 
-  const handleTermsChange = (terms: "standard" | "custom", customTerms?: string) => {
+  const handleTermsChange = (terms: "standard" | "custom", customTerms: string[] = []) => {
     setProposalData((prev) => ({ ...prev, terms, customTerms }));
   };
 
   const handleSubmit = async () => {
+    console.log("Validation check:", {
+      clientName: proposalData.clientInfo.clientName,
+      companyName: proposalData.clientInfo.companyName,
+      proposalData: proposalData
+    });
+    
     if (!proposalData.clientInfo.clientName || !proposalData.clientInfo.companyName) {
       alert("Please fill in all client information");
       return;
@@ -98,8 +108,8 @@ export default function CustomProposalClient() {
       return;
     }
 
-    if (proposalData.terms === "custom" && !proposalData.customTerms) {
-      alert("Please provide custom terms and conditions");
+    if (proposalData.terms === "custom" && proposalData.customTerms.length === 0) {
+      alert("Please add at least one custom term or condition");
       return;
     }
 
@@ -133,7 +143,7 @@ export default function CustomProposalClient() {
       <div className="lg:col-span-2 space-y-8">
         <Card className="p-6 bg-zinc-800 border-zinc-700">
           <h2 className="text-xl font-semibold text-white mb-4">Client Information</h2>
-          <ClientInformationForm
+          <CustomClientInformationForm
             clientInfo={proposalData.clientInfo}
             onChange={handleClientInfoChange}
           />
@@ -151,30 +161,11 @@ export default function CustomProposalClient() {
 
         <Card className="p-6 bg-zinc-800 border-zinc-700">
           <h2 className="text-xl font-semibold text-white mb-4">Terms & Conditions</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-300">Terms Type</label>
-              <select
-                value={proposalData.terms}
-                onChange={(e) => handleTermsChange(e.target.value as "standard" | "custom")}
-                className="mt-1 w-full rounded-md bg-zinc-700 border-zinc-600 text-white px-3 py-2"
-              >
-                <option value="standard">Standard Terms</option>
-                <option value="custom">Custom Terms</option>
-              </select>
-            </div>
-            {proposalData.terms === "custom" && (
-              <div>
-                <label className="text-sm font-medium text-gray-300">Custom Terms</label>
-                <textarea
-                  value={proposalData.customTerms || ""}
-                  onChange={(e) => handleTermsChange("custom", e.target.value)}
-                  className="mt-1 w-full rounded-md bg-zinc-700 border-zinc-600 text-white px-3 py-2 h-32"
-                  placeholder="Enter custom terms and conditions..."
-                />
-              </div>
-            )}
-          </div>
+          <CustomTermsForm
+            terms={proposalData.terms}
+            customTerms={proposalData.customTerms}
+            onTermsChange={handleTermsChange}
+          />
         </Card>
       </div>
 

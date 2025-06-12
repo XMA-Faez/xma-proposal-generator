@@ -16,7 +16,13 @@ export function generateOrderId(sequentialNumber: number): string {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
-  const sequence = String(sequentialNumber).padStart(5, "0");
+  
+  // Ensure sequentialNumber is a valid number
+  const validSequence = typeof sequentialNumber === 'number' && !isNaN(sequentialNumber) 
+    ? sequentialNumber 
+    : 1;
+  
+  const sequence = String(validSequence).padStart(5, "0");
 
   return `XMA-${year}-${month}-${sequence}`;
 }

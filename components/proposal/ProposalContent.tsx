@@ -218,13 +218,18 @@ const ProposalContent: React.FC<ProposalContentProps> = ({
           </div>
 
           {/* Terms and Conditions */}
-          {terms === "custom" && customTerms ? (
+          {terms === "custom" && customTerms && customTerms.length > 0 ? (
             <div className="mb-8 bg-zinc-800 rounded-lg p-6 shadow-lg">
               <h2 className="text-xl font-bold mb-4 text-red-500">Terms & Conditions</h2>
               <div className="bg-zinc-900/50 p-5 rounded-lg">
-                <div className="whitespace-pre-wrap text-zinc-300 text-sm">
-                  {customTerms}
-                </div>
+                <ol className="space-y-3 text-zinc-300 text-sm">
+                  {customTerms.map((term, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-red-500 mr-3 font-semibold">{index + 1}.</span>
+                      <span className="leading-relaxed">{term}</span>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </div>
           ) : (

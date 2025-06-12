@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,10 +23,12 @@ export default function CustomServiceForm({
 }: CustomServiceFormProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [currentFeature, setCurrentFeature] = useState("");
+  const featureInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<Omit<CustomService, "id">>({
     name: "",
     description: "",
-    features: [""],
+    features: [],
     price: 0,
     paymentType: "monthly",
     isMainService: false,
@@ -36,20 +38,38 @@ export default function CustomServiceForm({
     setFormData({
       name: "",
       description: "",
-      features: [""],
+      features: [],
       price: 0,
       paymentType: "monthly",
       isMainService: false,
     });
+    setCurrentFeature("");
     setIsAdding(false);
     setEditingId(null);
   };
 
   const handleAddFeature = () => {
+    if (!currentFeature.trim()) return;
+    
     setFormData((prev) => ({
       ...prev,
-      features: [...prev.features, ""],
+      features: [...prev.features, currentFeature.trim()],
     }));
+    setCurrentFeature("");
+    
+    // Focus back to input for next feature
+    setTimeout(() => {
+      if (featureInputRef.current) {
+        featureInputRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const handleFeatureKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddFeature();
+    }
   };
 
   const handleRemoveFeature = (index: number) => {
@@ -67,15 +87,19 @@ export default function CustomServiceForm({
   };
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.price || formData.features.some((f) => !f.trim())) {
-      alert("Please fill in all required fields");
+    if (!formData.name || !formData.price) {
+      alert("Please fill in service name and price");
+      return;
+    }
+
+    if (formData.features.length === 0) {
+      alert("Please add at least one feature");
       return;
     }
 
     const service: CustomService = {
       id: editingId || Date.now().toString(),
       ...formData,
-      features: formData.features.filter((f) => f.trim()),
     };
 
     if (editingId) {
@@ -192,35 +216,45 @@ export default function CustomServiceForm({
 
             <div>
               <label className="text-sm font-medium text-gray-300 mb-2 block">Features</label>
+              
+              {/* Always-ready input for new features */}
+              <div className="mb-3">
+                <Input
+                  ref={featureInputRef}
+                  value={currentFeature}
+                  onChange={(e) => setCurrentFeature(e.target.value)}
+                  onKeyPress={handleFeatureKeyPress}
+                  className="bg-zinc-600 border-zinc-500 text-white"
+                  placeholder={`Feature ${formData.features.length + 1} (Press Enter to add)`}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Press Enter to add the feature and move to the next one
+                </p>
+              </div>
+
+              {/* Existing Features */}
               {formData.features.map((feature, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <Input
-                    placeholder="Feature"
-                    value={feature}
-                    onChange={(e) => handleFeatureChange(index, e.target.value)}
-                    className="bg-zinc-600 border-zinc-500 text-white"
-                  />
-                  {formData.features.length > 1 && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleRemoveFeature(index)}
-                      className="text-gray-400 hover:text-red-400"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
+                <div key={index} className="flex gap-2 mb-2 items-center">
+                  <span className="text-sm text-gray-400 w-6">{index + 1}.</span>
+                  <span className="flex-1 text-sm text-gray-300 bg-zinc-700 px-3 py-2 rounded border border-zinc-600">
+                    {feature}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleRemoveFeature(index)}
+                    className="text-gray-400 hover:text-red-400"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleAddFeature}
-                className="text-gray-400 hover:text-white"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Feature
-              </Button>
+
+              {formData.features.length === 0 && (
+                <p className="text-sm text-gray-500 italic">
+                  No features added yet. Start typing above to add your first feature.
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

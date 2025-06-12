@@ -37,7 +37,10 @@ const PrintButton: React.FC<PrintButtonProps> = ({
   }
 
   // Format file name based on company name
-  const fileName = `XMA_Proposal_${proposalData.companyName.replace(/\s+/g, "_")}.pdf`;
+  const companyName = proposalData.isCustomProposal 
+    ? proposalData.clientInfo?.companyName 
+    : proposalData.companyName;
+  const fileName = `XMA_Proposal_${companyName?.replace(/\s+/g, "_") || "Unknown"}.pdf`;
 
   return (
     <PDFDownloadLink

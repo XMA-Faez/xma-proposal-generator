@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { generateOrderId } from "@/lib/orderIdGenerator";
+import { generateOrderId, getNextSequentialNumber } from "@/lib/orderIdGenerator";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,19 +42,22 @@ export async function POST(request: NextRequest) {
         .insert({
           name: clientInfo.clientName,
           company_name: clientInfo.companyName,
-          created_by: user.id,
         })
         .select("id")
         .single();
 
       if (clientError || !newClient) {
-        throw new Error("Failed to create client");
+        console.error("Client creation error:", clientError);
+        throw new Error(`Failed to create client: ${clientError?.message || "Unknown error"}`);
       }
       clientId = newClient.id;
     }
 
     // Generate order ID
-    const orderId = await generateOrderId(supabase);
+    const nextSequence = await getNextSequentialNumber(supabase);
+    console.log("Next sequence:", nextSequence, typeof nextSequence);
+    const orderId = generateOrderId(nextSequence);
+    console.log("Generated order ID:", orderId);
 
     // Calculate totals
     const subtotal = services.reduce((sum: number, service: any) => sum + service.price, 0);
@@ -66,12 +69,13 @@ export async function POST(request: NextRequest) {
     const totalAmount = afterDiscount + taxAmount;
 
     // Prepare proposal data
+    console.log("Storing order_id:", orderId, typeof orderId);
     const proposalPayload = {
       order_id: orderId,
       client_id: clientId,
-      total_amount: totalAmount,
+      client_name: clientInfo.clientName,
+      company_name: clientInfo.companyName,
       status: "pending",
-      created_by: user.id,
       proposal_date: clientInfo.proposalDate,
       proposal_data: {
         clientInfo,
@@ -99,7 +103,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (proposalError || !proposal) {
-      throw new Error("Failed to create proposal");
+      console.error("Proposal creation error:", proposalError);
+      throw new Error(`Failed to create proposal: ${proposalError?.message || "Unknown error"}`);
     }
 
     // Generate shareable link
@@ -109,11 +114,11 @@ export async function POST(request: NextRequest) {
       .insert({
         proposal_id: proposal.id,
         token,
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
       });
 
     if (linkError) {
-      throw new Error("Failed to create proposal link");
+      console.error("Proposal link creation error:", linkError);
+      throw new Error(`Failed to create proposal link: ${linkError?.message || "Unknown error"}`);
     }
 
     const proposalUrl = `/proposal?token=${token}`;

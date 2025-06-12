@@ -698,8 +698,19 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
         {/* Terms & Conditions */}
         <View style={contractStyle.terms}>
           <Text style={contractStyle.termsTitle}>Terms and Conditions</Text>
-          {isCustomProposal && proposalData.terms === "custom" && proposalData.customTerms ? (
-            <Text style={{ fontSize: 9, lineHeight: 1.4 }}>{proposalData.customTerms}</Text>
+          {isCustomProposal && proposalData.terms === "custom" && proposalData.customTerms && proposalData.customTerms.length > 0 ? (
+            <View style={{ paddingTop: 5 }}>
+              {proposalData.customTerms.map((term, index) => (
+                <View key={index} style={{ flexDirection: "row", marginBottom: 5, alignItems: "flex-start" }}>
+                  <Text style={{ fontSize: 9, fontWeight: "bold", marginRight: 5, color: "#DC2626" }}>
+                    {index + 1}.
+                  </Text>
+                  <Text style={{ fontSize: 9, lineHeight: 1.4, flex: 1 }}>
+                    {term}
+                  </Text>
+                </View>
+              ))}
+            </View>
           ) : (
             renderTermsCompact()
           )}
