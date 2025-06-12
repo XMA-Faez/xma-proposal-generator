@@ -1,0 +1,286 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Plus, Trash2, Edit2, Check, X } from "lucide-react";
+import { CustomService, PaymentType } from "./CustomProposalClient";
+
+interface CustomServiceFormProps {
+  services: CustomService[];
+  onAddService: (service: CustomService) => void;
+  onUpdateService: (id: string, service: CustomService) => void;
+  onRemoveService: (id: string) => void;
+}
+
+export default function CustomServiceForm({
+  services,
+  onAddService,
+  onUpdateService,
+  onRemoveService,
+}: CustomServiceFormProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Omit<CustomService, "id">>({
+    name: "",
+    description: "",
+    features: [""],
+    price: 0,
+    paymentType: "monthly",
+    isMainService: false,
+  });
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      features: [""],
+      price: 0,
+      paymentType: "monthly",
+      isMainService: false,
+    });
+    setIsAdding(false);
+    setEditingId(null);
+  };
+
+  const handleAddFeature = () => {
+    setFormData((prev) => ({
+      ...prev,
+      features: [...prev.features, ""],
+    }));
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleFeatureChange = (index: number, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      features: prev.features.map((f, i) => (i === index ? value : f)),
+    }));
+  };
+
+  const handleSubmit = () => {
+    if (!formData.name || !formData.price || formData.features.some((f) => !f.trim())) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    const service: CustomService = {
+      id: editingId || Date.now().toString(),
+      ...formData,
+      features: formData.features.filter((f) => f.trim()),
+    };
+
+    if (editingId) {
+      onUpdateService(editingId, service);
+    } else {
+      onAddService(service);
+    }
+
+    resetForm();
+  };
+
+  const startEdit = (service: CustomService) => {
+    setEditingId(service.id);
+    setFormData({
+      name: service.name,
+      description: service.description,
+      features: service.features,
+      price: service.price,
+      paymentType: service.paymentType,
+      isMainService: service.isMainService,
+    });
+    setIsAdding(true);
+  };
+
+  const hasMainService = services.some((s) => s.isMainService);
+
+  return (
+    <div className="space-y-4">
+      {/* Existing Services */}
+      {services.map((service) => (
+        <Card key={service.id} className="p-4 bg-zinc-700 border-zinc-600">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-white">{service.name}</h3>
+                {service.isMainService && (
+                  <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">
+                    Main Service
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-300 mt-1">{service.description}</p>
+              <ul className="mt-2 space-y-1">
+                {service.features.map((feature, idx) => (
+                  <li key={idx} className="text-sm text-gray-400">
+                    • {feature}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 flex items-center gap-4 text-sm">
+                <span className="text-white font-medium">
+                  {service.price.toLocaleString()} AED
+                </span>
+                <span className="text-gray-400">
+                  {service.paymentType === "monthly" ? "per month" : "one-time"}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => startEdit(service)}
+                className="text-gray-400 hover:text-white"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onRemoveService(service.id)}
+                className="text-gray-400 hover:text-red-400"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ))}
+
+      {/* Add/Edit Form */}
+      {isAdding ? (
+        <Card className="p-4 bg-zinc-700 border-zinc-600">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Service Name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="bg-zinc-600 border-zinc-500 text-white"
+              />
+              {!hasMainService && !editingId && (
+                <label className="flex items-center gap-2 text-sm text-gray-300 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={formData.isMainService}
+                    onChange={(e) =>
+                      setFormData({ ...formData, isMainService: e.target.checked })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  Main Service
+                </label>
+              )}
+            </div>
+
+            <Textarea
+              placeholder="Service Description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="bg-zinc-600 border-zinc-500 text-white"
+              rows={3}
+            />
+
+            <div>
+              <label className="text-sm font-medium text-gray-300 mb-2 block">Features</label>
+              {formData.features.map((feature, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <Input
+                    placeholder="Feature"
+                    value={feature}
+                    onChange={(e) => handleFeatureChange(index, e.target.value)}
+                    className="bg-zinc-600 border-zinc-500 text-white"
+                  />
+                  {formData.features.length > 1 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleRemoveFeature(index)}
+                      className="text-gray-400 hover:text-red-400"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleAddFeature}
+                className="text-gray-400 hover:text-white"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Feature
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-1 block">Price (AED)</label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={formData.price || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
+                  }
+                  className="bg-zinc-600 border-zinc-500 text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-1 block">Payment Type</label>
+                <select
+                  value={formData.paymentType}
+                  onChange={(e) =>
+                    setFormData({ ...formData, paymentType: e.target.value as PaymentType })
+                  }
+                  className="w-full rounded-md bg-zinc-600 border-zinc-500 text-white px-3 py-2"
+                >
+                  <option value="monthly">Monthly</option>
+                  <option value="fixed">One-time</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={resetForm}
+                className="text-gray-400 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSubmit}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                <Check className="h-4 w-4 mr-1" />
+                {editingId ? "Update" : "Add"} Service
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        <Button
+          onClick={() => setIsAdding(true)}
+          variant="outline"
+          className="w-full border-zinc-600 text-gray-300 hover:text-white hover:bg-zinc-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Service
+        </Button>
+      )}
+    </div>
+  );
+}

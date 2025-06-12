@@ -13,16 +13,20 @@ import contractStyle from "@/data/contractStyle";
 
 // Create PDF Document Component
 const ProposalPDF = ({ proposalData, orderId, status }) => {
+  // Check if this is a custom proposal
+  const isCustomProposal = proposalData.isCustomProposal || false;
+  
   // Current date for signature
   const currentDate = new Date().toLocaleDateString();
 
   // Format dates
-  const formattedDate = new Date(
-    proposalData.proposalDate,
-  ).toLocaleDateString();
+  const proposalDate = isCustomProposal 
+    ? proposalData.clientInfo?.proposalDate 
+    : proposalData.proposalDate;
+  const formattedDate = new Date(proposalDate).toLocaleDateString();
 
   // Calculate expiration date (30 days from proposal date)
-  const expDate = new Date(proposalData.proposalDate);
+  const expDate = new Date(proposalDate);
   expDate.setDate(expDate.getDate() + 30);
   const expirationDate = expDate.toLocaleDateString();
 
@@ -36,6 +40,11 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
 
   // Calculate subtotal
   const calculateSubtotal = () => {
+    // For custom proposals, use the pre-calculated values
+    if (isCustomProposal && proposalData.calculations) {
+      return proposalData.calculations.subtotal;
+    }
+    
     let subtotal = 0;
 
     // Add package price if included
@@ -92,6 +101,11 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
 
   // Calculate discount
   const calculateDiscountAmount = () => {
+    // For custom proposals, use the pre-calculated values
+    if (isCustomProposal && proposalData.calculations) {
+      return proposalData.calculations.discountAmount;
+    }
+    
     if (!proposalData.discounts?.overallDiscount?.value) return 0;
 
     if (proposalData.discounts.overallDiscount.type === "percentage") {
@@ -106,13 +120,20 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
 
   // Calculate tax
   const calculateTaxAmount = () => {
+    // For custom proposals, use the pre-calculated values
+    if (isCustomProposal && proposalData.calculations) {
+      return proposalData.calculations.taxAmount;
+    }
+    
     return proposalData.includeTax !== false ? subtotalAfterDiscount * 0.05 : 0;
   };
 
   const taxAmount = calculateTaxAmount();
 
   // Calculate total
-  const totalAmount = subtotalAfterDiscount + taxAmount;
+  const totalAmount = isCustomProposal && proposalData.calculations 
+    ? proposalData.calculations.totalAmount 
+    : subtotalAfterDiscount + taxAmount;
 
   // Check if there are monthly fees
   const hasMonthlyFees = () => {
@@ -304,7 +325,7 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
             <Image src="/XMA-black.png" style={contractStyle.logo} />
             <Text style={contractStyle.title}>Marketing Contract</Text>
             <Text style={contractStyle.subtitle}>
-              Prepared exclusively for {proposalData.companyName}
+              Prepared exclusively for {isCustomProposal ? proposalData.clientInfo?.companyName : proposalData.companyName}
             </Text>
 
             {status && (
@@ -344,14 +365,14 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           <View style={contractStyle.clientInfoBlock}>
             <Text style={contractStyle.clientInfoLabel}>Client Name:</Text>
             <Text style={contractStyle.clientInfoValue}>
-              {proposalData.clientName}
+              {isCustomProposal ? proposalData.clientInfo?.clientName : proposalData.clientName}
             </Text>
           </View>
 
           <View style={contractStyle.clientInfoBlock}>
             <Text style={contractStyle.clientInfoLabel}>Company:</Text>
             <Text style={contractStyle.clientInfoValue}>
-              {proposalData.companyName}
+              {isCustomProposal ? proposalData.clientInfo?.companyName : proposalData.companyName}
             </Text>
           </View>
 
@@ -390,8 +411,23 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           <Text style={contractStyle.sectionTitle}>Investment Summary</Text>
 
           <View style={contractStyle.summaryTable}>
-            {/* Package row */}
-            {proposalData.includePackage && proposalData.selectedPackage && (
+            {/* Custom Services for Custom Proposals */}
+            {isCustomProposal && proposalData.services && proposalData.services.map((service) => (
+              <View style={contractStyle.summaryRow} key={service.id}>
+                <Text style={contractStyle.summaryCol1}>
+                  {service.name}
+                  {service.isMainService && " (Main Service)"}
+                  {service.paymentType === "monthly" ? " - Monthly" : " - One-time"}
+                </Text>
+                <Text style={contractStyle.summaryCol2}>
+                  {formatPrice(service.price)} AED
+                  {service.paymentType === "monthly" && "/mo"}
+                </Text>
+              </View>
+            ))}
+            
+            {/* Package row - for standard proposals */}
+            {!isCustomProposal && proposalData.includePackage && proposalData.selectedPackage && (
               <View style={contractStyle.summaryRow}>
                 <Text style={contractStyle.summaryCol1}>
                   {proposalData.selectedPackage.name} Package
@@ -432,8 +468,8 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
               </View>
             )}
 
-            {/* Service rows */}
-            {proposalData.selectedServices &&
+            {/* Service rows - for standard proposals */}
+            {!isCustomProposal && proposalData.selectedServices &&
               proposalData.selectedServices.map((service, idx) => {
                 const serviceDiscount =
                   proposalData.discounts?.serviceDiscounts?.[service.id];
@@ -575,8 +611,45 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           </View>
         )}
 
-        {/* Services */}
-        {proposalData.selectedServices &&
+        {/* Services - Custom Proposals */}
+        {isCustomProposal && proposalData.services && proposalData.services.length > 0 && (
+          <View style={contractStyle.section}>
+            <Text style={contractStyle.sectionTitle}>Services</Text>
+            {proposalData.services.map((service, index) => (
+              <View style={contractStyle.packageBox} key={service.id}>
+                <Text style={contractStyle.packageName}>
+                  {service.name}
+                  {service.isMainService && " - Main Service"}
+                </Text>
+                {service.description && (
+                  <Text style={contractStyle.packageDescription}>
+                    {service.description}
+                  </Text>
+                )}
+                <Text style={contractStyle.packagePrice}>
+                  Price: {formatPrice(service.price)} AED
+                  {service.paymentType === "monthly" ? " per month" : " (one-time)"}
+                </Text>
+                {service.features && service.features.length > 0 && (
+                  <View style={contractStyle.featuresList}>
+                    <Text style={{ fontSize: 10, fontWeight: "bold", marginBottom: 3 }}>
+                      Features:
+                    </Text>
+                    {service.features.map((feature, idx) => (
+                      <View style={contractStyle.featureItem} key={idx}>
+                        <Text style={contractStyle.featureBullet}>•</Text>
+                        <Text style={contractStyle.featureText}>{feature}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Services - Standard Proposals */}
+        {!isCustomProposal && proposalData.selectedServices &&
           proposalData.selectedServices.length > 0 && (
             <View style={contractStyle.section}>
               <Text style={contractStyle.sectionTitle}>
@@ -622,10 +695,14 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
             </View>
           )}
 
-        {/* Terms & Conditions - using compact layout */}
+        {/* Terms & Conditions */}
         <View style={contractStyle.terms}>
           <Text style={contractStyle.termsTitle}>Terms and Conditions</Text>
-          {renderTermsCompact()}
+          {isCustomProposal && proposalData.terms === "custom" && proposalData.customTerms ? (
+            <Text style={{ fontSize: 9, lineHeight: 1.4 }}>{proposalData.customTerms}</Text>
+          ) : (
+            renderTermsCompact()
+          )}
         </View>
 
         {/* Bank Information Section - Added before signatures */}

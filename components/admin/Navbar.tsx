@@ -60,6 +60,16 @@ export default function Navbar({ user }: NavbarProps) {
               Proposal Generator
             </Link>
             <Link
+              href="/custom-proposal"
+              className={`px-3 py-2 rounded-md text-sm font-medium ${
+                isActive("/custom-proposal")
+                  ? "bg-red-600 text-white"
+                  : "text-gray-300 hover:bg-zinc-700 hover:text-white"
+              }`}
+            >
+              Custom Proposal
+            </Link>
+            <Link
               href="/proposals"
               className={`px-3 py-2 rounded-md text-sm font-medium ${
                 isActive("/proposals")
@@ -133,6 +143,17 @@ export default function Navbar({ user }: NavbarProps) {
               onClick={() => setIsMenuOpen(false)}
             >
               Proposal Generator
+            </Link>
+            <Link
+              href="/custom-proposal"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActive("/custom-proposal")
+                  ? "bg-red-600 text-white"
+                  : "text-gray-300 hover:bg-zinc-600 hover:text-white"
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Custom Proposal
             </Link>
             <Link
               href="/proposals"

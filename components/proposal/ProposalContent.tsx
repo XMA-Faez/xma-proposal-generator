@@ -10,7 +10,7 @@ import TermsAndConditions from "@/components/proposal/TermsAndConditions";
 import ProposalFooter from "@/components/proposal/ProposalFooter";
 import LoadingState from "@/components/proposal/LoadingState";
 import ErrorState from "@/components/proposal/ErrorState";
-import ContractActions from "@/components/proposal/ContractActions";
+import CompanyStamp from "@/components/proposal/CompanyStamp";
 
 interface ProposalContentProps {
   proposalData?: any;
@@ -100,7 +100,144 @@ const ProposalContent: React.FC<ProposalContentProps> = ({
   }
 
   // Extract data from the proposal
-  // Use the snapshots from proposal_data instead of fetching current package/service data
+  // Check if this is a custom proposal
+  const isCustomProposal = proposalData.isCustomProposal || false;
+  
+  // For custom proposals, extract data differently
+  if (isCustomProposal) {
+    const {
+      clientInfo,
+      services,
+      discount,
+      discountType,
+      taxIncluded,
+      terms,
+      customTerms,
+    } = proposalData;
+
+    return (
+      <div className="min-h-screen bg-zinc-900 text-white py-6 px-4">
+        <div className="max-w-5xl mx-auto">
+          <ProposalHeader
+            clientName={clientInfo.clientName}
+            companyName={clientInfo.companyName}
+            proposalDate={clientInfo.proposalDate}
+            orderId={orderId}
+          />
+
+          {/* Custom Services Display */}
+          <div className="mb-8 bg-zinc-800 rounded-lg p-6 shadow-lg">
+            <h2 className="text-2xl font-bold mb-6 text-red-500">Services</h2>
+            
+            {services.map((service, index) => (
+              <div key={service.id} className={`${index > 0 ? 'mt-6 pt-6 border-t border-zinc-700' : ''}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xl font-semibold text-white">
+                    {service.name}
+                    {service.isMainService && (
+                      <span className="ml-2 text-sm bg-red-600 text-white px-2 py-1 rounded">
+                        Main Service
+                      </span>
+                    )}
+                  </h3>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-white">
+                      {service.price.toLocaleString()} AED
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      {service.paymentType === "monthly" ? "per month" : "one-time payment"}
+                    </p>
+                  </div>
+                </div>
+                
+                {service.description && (
+                  <p className="text-gray-300 mb-4">{service.description}</p>
+                )}
+                
+                {service.features && service.features.length > 0 && (
+                  <div className="bg-zinc-900/50 p-4 rounded-lg">
+                    <h4 className="text-sm font-semibold text-gray-400 mb-2">Features:</h4>
+                    <ul className="space-y-1">
+                      {service.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start text-sm text-gray-300">
+                          <span className="text-red-500 mr-2">•</span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Custom Summary Section */}
+          <div className="mb-8 bg-zinc-800 rounded-lg p-6 shadow-lg">
+            <h2 className="text-xl font-bold mb-4 text-red-500">Summary</h2>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Subtotal</span>
+                <span className="text-white font-medium">
+                  {proposalData.calculations.subtotal.toLocaleString()} AED
+                </span>
+              </div>
+              
+              {discount > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">
+                    Discount ({discountType === "percentage" ? `${discount}%` : `${discount} AED`})
+                  </span>
+                  <span className="text-red-400 font-medium">
+                    -{proposalData.calculations.discountAmount.toLocaleString()} AED
+                  </span>
+                </div>
+              )}
+              
+              {taxIncluded && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">VAT (5%)</span>
+                  <span className="text-white font-medium">
+                    {proposalData.calculations.taxAmount.toLocaleString()} AED
+                  </span>
+                </div>
+              )}
+              
+              <div className="pt-3 border-t border-zinc-700">
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-bold text-white">Total</span>
+                  <span className="text-2xl font-bold text-white">
+                    {proposalData.calculations.totalAmount.toLocaleString()} AED
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <CompanyStamp />
+            </div>
+          </div>
+
+          {/* Terms and Conditions */}
+          {terms === "custom" && customTerms ? (
+            <div className="mb-8 bg-zinc-800 rounded-lg p-6 shadow-lg">
+              <h2 className="text-xl font-bold mb-4 text-red-500">Terms & Conditions</h2>
+              <div className="bg-zinc-900/50 p-5 rounded-lg">
+                <div className="whitespace-pre-wrap text-zinc-300 text-sm">
+                  {customTerms}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <TermsAndConditions />
+          )}
+
+          <ProposalFooter />
+        </div>
+      </div>
+    );
+  }
+
+  // Standard proposal data extraction
   const {
     clientName,
     companyName,
@@ -126,16 +263,6 @@ const ProposalContent: React.FC<ProposalContentProps> = ({
   return (
     <div className="min-h-screen bg-zinc-900 text-white py-6 px-4">
       <div className="max-w-5xl mx-auto">
-        {/* Contract Actions - Adding this right at the top for visibility */}
-        <ContractActions
-          proposalData={proposalData}
-          orderId={orderId}
-          status={status}
-          shareableLink={shareableLink}
-          onCopyLink={copyLinkToClipboard}
-          copied={linkCopied}
-        />
-
         <ProposalHeader
           clientName={clientName}
           companyName={companyName}
