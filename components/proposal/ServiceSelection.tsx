@@ -28,7 +28,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
   includePackage,
 }) => {
   return (
-    <div className="bg-zinc-800 rounded-lg p-6 mb-8">
+    <div className="bg-zinc-900 rounded-lg p-6 mb-8">
       <h2 className="text-xl font-bold mb-4 text-red-500">
         {includePackage ? "Additional Services (Optional)" : "Services"}
       </h2>
@@ -41,7 +41,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
           return (
             <div
               key={service.id}
-              className={`flex flex-col p-4 rounded-lg ${isSelected ? "bg-zinc-900 border border-red-500/50" : "bg-zinc-900"}`}
+              className={`flex flex-col p-4 rounded-lg ${isSelected ? "bg-zinc-800 border border-red-500/50" : "bg-zinc-800"}`}
             >
               <div className="flex items-start">
                 <input
@@ -57,14 +57,16 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <span className="block font-medium">
-                        {service.name}
-                      </span>
+                      <div className="flex items-center">
+                        <span className="block font-medium">
+                          {service.name}
+                        </span>
+                        <ServiceInfo service={service} />
+                      </div>
                       <span className="block text-sm text-zinc-400 mt-1">
                         {service.description &&
                           service.description.substring(0, 80)}
                         ...
-                        <ServiceInfo service={service} />
                       </span>
                     </div>
                     <div className="text-right">

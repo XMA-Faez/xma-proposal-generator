@@ -33,7 +33,11 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) 
       isSelected ? "border-red-500 shadow-lg" : "border-zinc-700"
     } ${
       pkg.is_popular && !isSelected ? "border-zinc-600" : ""
-    } bg-zinc-900 backdrop-blur-sm transition-all hover:shadow-xl cursor-pointer`}
+    } ${
+      isSelected ? "bg-zinc-800" : "bg-zinc-800/50 opacity-70"
+    } backdrop-blur-sm transition-all hover:shadow-xl cursor-pointer ${
+      !isSelected ? "hover:opacity-90" : ""
+    }`}
     onClick={() => onSelect(pkg.id)}
   >
     {pkg.is_popular && (
@@ -104,7 +108,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) 
         </ul>
       </div>
       <div className="mt-6 text-sm text-zinc-400">{pkg.description}</div>
-      <div
+      <button
         className={`mt-4 w-full py-2 text-center rounded-md ${
           isSelected
             ? "bg-red-600 text-white font-medium"
@@ -112,7 +116,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) 
         }`}
       >
         {isSelected ? "Selected" : "Select Package"}
-      </div>
+      </button>
     </div>
   </div>
 );
