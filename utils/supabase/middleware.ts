@@ -49,7 +49,8 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // This will refresh the session if needed
+  // This will refresh the session if needed (safe for middleware cookie management)
+  // Note: getSession() is used here only for session refresh, not for authentication verification
   await supabase.auth.getSession();
 
   return response;

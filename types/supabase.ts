@@ -241,6 +241,8 @@ export interface Database {
           updated_at: string | null;
           client_name: string;
           order_id: string | null; // Added the order_id field
+          validity_days: number | null;
+          expires_at: string | null;
         };
         Insert: {
           additional_info?: string | null;
@@ -262,6 +264,8 @@ export interface Database {
           updated_at?: string | null;
           client_name: string;
           order_id?: string | null; // Added the order_id field
+          validity_days?: number | null;
+          expires_at?: string | null;
         };
         Update: {
           additional_info?: string | null;
@@ -283,6 +287,8 @@ export interface Database {
           updated_at?: string | null;
           client_name?: string;
           order_id?: string | null; // Added the order_id field
+          validity_days?: number | null;
+          expires_at?: string | null;
         };
         Relationships: [
           {

@@ -360,6 +360,27 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
           </View>
         </View>
 
+        {/* From and For Section */}
+        <View style={{ marginBottom: 20, paddingHorizontal: 30 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>From:</Text>
+              <Text style={{ fontSize: 11, marginBottom: 2 }}>XMA Agency</Text>
+              <Text style={{ fontSize: 10, color: "#666" }}>The Curve Building M44</Text>
+              <Text style={{ fontSize: 10, color: "#666" }}>Dubai, UAE</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: "flex-end" }}>
+              <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>For:</Text>
+              <Text style={{ fontSize: 11, marginBottom: 2 }}>
+                {isCustomProposal ? proposalData.clientInfo?.companyName : proposalData.companyName}
+              </Text>
+              <Text style={{ fontSize: 10, color: "#666" }}>
+                {isCustomProposal ? proposalData.clientInfo?.clientName : proposalData.clientName}
+              </Text>
+            </View>
+          </View>
+        </View>
+
         {/* Client Information */}
         <View style={contractStyle.clientInfo}>
           <View style={contractStyle.clientInfoBlock}>
@@ -790,7 +811,7 @@ const ProposalPDF = ({ proposalData, orderId, status }) => {
 
             <View style={contractStyle.signatureBlock}>
               <Text style={contractStyle.signatureTitle}>
-                For {proposalData.companyName}:
+                For {isCustomProposal ? proposalData.clientInfo?.companyName : proposalData.companyName}:
               </Text>
               <View style={contractStyle.signatureLine} />
               <Text style={contractStyle.signatureLabel}>

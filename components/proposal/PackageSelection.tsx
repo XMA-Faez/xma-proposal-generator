@@ -30,7 +30,7 @@ const PackageSelection: React.FC<PackageSelectionProps> = ({
   setIncludePackage,
 }) => {
   return (
-    <div className="bg-zinc-800 rounded-lg p-6 mb-8">
+    <div className="bg-zinc-900 rounded-lg p-6 mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-red-500">
           Select Package

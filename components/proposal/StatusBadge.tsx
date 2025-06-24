@@ -15,7 +15,8 @@ const statusOptions = [
   { value: "sent", label: "SENT", color: "bg-blue-900 text-blue-300" },
   { value: "accepted", label: "ACCEPTED", color: "bg-green-900 text-green-300" },
   { value: "paid", label: "PAID", color: "bg-purple-900 text-purple-300" },
-  { value: "rejected", label: "REJECTED", color: "bg-red-900 text-red-300" }
+  { value: "rejected", label: "REJECTED", color: "bg-red-900 text-red-300" },
+  { value: "expired", label: "EXPIRED", color: "bg-orange-900 text-orange-300" }
 ];
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ 

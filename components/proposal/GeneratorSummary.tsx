@@ -114,7 +114,7 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
     );
 
   return (
-    <div className="bg-zinc-800 rounded-lg p-6 mb-8">
+    <div className="bg-zinc-900 rounded-lg p-6 mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-red-500">Summary & Discounts</h2>
         <button
@@ -126,7 +126,7 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
       </div>
 
       {showDiscounts && (
-        <div className="bg-zinc-900 p-4 rounded-lg mb-6">
+        <div className="bg-zinc-800 p-4 rounded-lg mb-6">
           <h3 className="font-medium mb-4">Discount Settings</h3>
 
           <div className="space-y-4">
@@ -208,13 +208,13 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
             </div>
 
             {/* Tax toggle */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 pt-3">
-              <div className="md:col-span-4">
+            <div className="flex items-center gap-2 pt-3">
+              <div className="">
                 <span className="text-sm text-zinc-400">
                   Include {(TAX_RATE * 100).toFixed(0)}% VAT:
                 </span>
               </div>
-              <div className="md:col-span-8">
+              <div className="">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -240,7 +240,7 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
       )}
 
       {/* Price Summary */}
-      <div className="bg-zinc-900 p-4 rounded-lg">
+      <div className="bg-zinc-800 p-4 rounded-lg">
         <div className="space-y-2 mb-4">
           {includePackage && selectedPackage && (
             <div className="flex justify-between items-center text-sm">

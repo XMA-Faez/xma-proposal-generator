@@ -9,13 +9,11 @@ export const metadata: Metadata = {
   description: "Login to access the XMA Agency admin tools",
 };
 
-// Properly type the searchParams prop
 export default async function LoginPage({
   searchParams,
 }: {
   searchParams: { redirectTo?: string };
 }) {
-  // Check if user is already logged in
   const supabase = await createClient();
   const {
     data: { session },
@@ -23,9 +21,7 @@ export default async function LoginPage({
 
   // If already authenticated, redirect to dashboard
   if (session) {
-    // Use the string value from searchParams safely
-    const redirectTo = searchParams.redirectTo || "/proposal-generator";
-    redirect(redirectTo);
+    redirect(searchParams.redirectTo || "/proposal-generator");
   }
 
   return (

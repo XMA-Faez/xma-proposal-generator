@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
-import { Trash2, Share2, Copy } from "lucide-react";
+import CountdownTimer from "./CountdownTimer";
+import { Trash2, Share2, Copy, RefreshCw, Edit } from "lucide-react";
 
 interface ProposalCardProps {
   proposal: any;
@@ -17,6 +18,8 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isRenewing, setIsRenewing] = useState(false);
+  const [renewError, setRenewError] = useState<string | null>(null);
 
   const token = proposal.links && proposal.links[0]?.token;
   const viewCount = (proposal.links && proposal.links[0]?.views_count) || 0;
@@ -28,16 +31,23 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
   const proposalDate = new Date(proposal.proposal_date).toLocaleDateString();
   const createDate = new Date(proposal.created_at).toLocaleDateString();
 
-  // Calculate expiration date (30 days from proposal date)
-  const expDate = new Date(proposal.proposal_date);
-  expDate.setDate(expDate.getDate() + 30);
-  const expirationDate = expDate.toLocaleDateString();
+  // Use expires_at from database - don't calculate for old proposals
+  let expiresAt: Date | null = null;
+  let hasValidExpiration = false;
+  
+  if (proposal.expires_at) {
+    expiresAt = new Date(proposal.expires_at);
+    hasValidExpiration = true;
+  }
+  // Don't auto-calculate for old proposals - let them exist without countdown
+  
+  const expirationDate = expiresAt ? expiresAt.toLocaleDateString() : null;
 
-  // Check if proposal is expired
-  const isExpired = new Date() > expDate;
+  // Check if proposal is expired (only if it has a valid expiration date)
+  const isExpired = expiresAt ? new Date() > expiresAt : false;
 
-  // Determine if we should show expiration date (hide for accepted/paid proposals)
-  const showExpiration = !["accepted", "paid"].includes(status.toLowerCase());
+  // Determine if we should show expiration info (hide for accepted/paid proposals and proposals without expiration)
+  const showExpiration = hasValidExpiration && !["accepted", "paid"].includes(status.toLowerCase());
 
   const copyToClipboard = async () => {
     if (!shareableLink) return;
@@ -54,6 +64,66 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
   // Handler for status changes
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
+  };
+
+  // Handler for when countdown expires
+  const handleCountdownExpire = async () => {
+    if (status !== "expired" && !["accepted", "paid"].includes(status.toLowerCase())) {
+      // Update status to expired
+      try {
+        const response = await fetch(`/api/update-proposal-status`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            id: proposal.id,
+            status: 'expired' 
+          }),
+        });
+        
+        if (response.ok) {
+          setStatus('expired');
+        }
+      } catch (error) {
+        console.error('Failed to update proposal status to expired:', error);
+      }
+    }
+  };
+
+  // Handler for renewing expired proposals
+  const handleRenew = async () => {
+    if (!proposal.id) return;
+
+    setIsRenewing(true);
+    setRenewError(null);
+
+    try {
+      const response = await fetch("/api/proposals/renew", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: proposal.id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to renew proposal");
+      }
+
+      // Update status and refresh the component
+      setStatus('draft');
+      // Optionally trigger a page refresh or callback to parent
+      window.location.reload();
+    } catch (error) {
+      console.error("Error renewing proposal:", error);
+      setRenewError(
+        error instanceof Error ? error.message : "Failed to renew proposal",
+      );
+    } finally {
+      setIsRenewing(false);
+    }
   };
 
   // Delete the proposal
@@ -127,11 +197,18 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
           </div>
           <div className="text-right">
             <p>Views: {viewCount}</p>
-            {showExpiration && (
-              <p className={isExpired ? "text-red-400" : ""}>
-                {isExpired ? "Expired: " : "Expires: "}
-                {expirationDate}
-              </p>
+            {showExpiration && expiresAt && (
+              <div>
+                {!isExpired && status !== "expired" ? (
+                  <div className="text-xs text-zinc-400 mb-1">Expires in:</div>
+                ) : null}
+                <CountdownTimer 
+                  expiresAt={expiresAt.toISOString()} 
+                  onExpire={handleCountdownExpire}
+                  className="text-xs justify-end"
+                  status={status}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -163,6 +240,27 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
 
         {/* Action Buttons */}
         <div className="flex gap-3">
+          {/* Renew Button - only show for expired proposals that have expiration dates */}
+          {hasValidExpiration && (isExpired || status === "expired") && (
+            <button
+              className="bg-green-700 hover:bg-green-600 text-white px-3 py-2 rounded flex items-center transition-colors disabled:opacity-50"
+              onClick={handleRenew}
+              disabled={isRenewing}
+            >
+              <RefreshCw size={16} className={`mr-1 ${isRenewing ? 'animate-spin' : ''}`} />
+              {isRenewing ? 'Renewing...' : 'Renew'}
+            </button>
+          )}
+
+          {/* Edit Button */}
+          <Link
+            href={`/proposals/edit/${proposal.id}`}
+            className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 py-2 rounded flex items-center transition-colors"
+          >
+            <Edit size={16} className="mr-1" />
+            Edit
+          </Link>
+
           {/* Delete Button */}
           <button
             className="bg-zinc-700 hover:bg-red-700 text-white px-3 py-2 rounded flex items-center transition-colors"
@@ -183,6 +281,13 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
             </Link>
           )}
         </div>
+
+        {/* Renewal Error */}
+        {renewError && (
+          <div className="mt-2 text-red-500 text-sm">
+            Error: {renewError}
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}

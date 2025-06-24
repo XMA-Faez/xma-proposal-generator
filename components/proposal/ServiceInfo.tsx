@@ -14,8 +14,9 @@ const ServiceInfo: React.FC<ServiceInfoProps> = ({ service }) => {
   return (
     <div className="relative">
       <div
-        className="text-blue-400 cursor-pointer hover:text-blue-300 ml-2"
-        onClick={() => setShowInfo(!showInfo)}
+        className="text-blue-400 cursor-pointer hover:text-blue-300 ml-1"
+        onMouseEnter={() => setShowInfo(true)}
+        onMouseLeave={() => setShowInfo(false)}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

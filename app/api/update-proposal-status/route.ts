@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     }
     
     // Validate status
-    const validStatuses = ['draft', 'sent', 'accepted', 'rejected', 'paid'];
+    const validStatuses = ['draft', 'sent', 'accepted', 'rejected', 'paid', 'expired'];
     if (!validStatuses.includes(status.toLowerCase())) {
       return Response.json(
         { error: 'Invalid status value' }, 

@@ -27,17 +27,17 @@ export function AuthProvider({
   const supabase = createClient();
   const [session, setSession] = useState<Session | null>(initialSession);
   const [user, setUser] = useState<User | null>(initialSession?.user || null);
-  const [isLoading, setIsLoading] = useState<boolean>(!initialSession);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
+        setIsLoading(true);
         try {
-          // Query with detailed logging
           const { data, error } = await supabase
             .from("profiles")
-            .select("*") // Select all fields for debugging
+            .select("*")
             .eq("id", user.id)
             .single();
 
@@ -57,13 +57,12 @@ export function AuthProvider({
                 .insert({
                   id: user.id,
                   email: user.email,
-                  role: "admin", // Set role for new user
+                  role: "admin",
                 });
 
               if (insertError) {
                 console.error("Error creating profile:", insertError);
               } else {
-                console.log("Created new profile with admin role");
                 setUserRole("admin");
               }
             } catch (e) {
@@ -73,10 +72,8 @@ export function AuthProvider({
         } catch (error) {
           console.error("Error in profile fetch:", error);
         }
-
         setIsLoading(false);
       } else {
-        console.log("No user found");
         setUserRole(null);
         setIsLoading(false);
       }
@@ -89,11 +86,16 @@ export function AuthProvider({
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      setUser(session?.user || null);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        setSession(session);
+        setUser(session.user);
+      } else if (event === "SIGNED_OUT") {
+        setSession(null);
+        setUser(null);
+      }
 
-      // Refresh the page on sign in or sign out to update server-side session
+      // Refresh the page on sign in or sign out
       if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         router.refresh();
       }

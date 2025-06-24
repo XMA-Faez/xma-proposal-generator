@@ -28,7 +28,9 @@ export default async function RootLayout({
   // Create supabase server client
   const supabase = await createClient();
 
-  // Get session from supabase
+  // Get session from supabase for initial hydration
+  // Note: This is only used for client-side hydration, NOT for authentication decisions
+  // The AuthProvider will securely verify the user with getUser() before trusting it
   const {
     data: { session },
   } = await supabase.auth.getSession();

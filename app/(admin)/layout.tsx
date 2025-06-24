@@ -14,14 +14,12 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // Only redirect if authentication check is complete and we definitely know
-    // the user is either not logged in or not an admin
     if (!isLoading && (!user || (userRole !== null && userRole !== "admin"))) {
       router.push(`/login?redirectTo=${encodeURIComponent(window.location.pathname)}`);
     }
   }, [isLoading, user, userRole, router]);
 
-  // Show loading state while checking authentication or waiting for profile data
+  // Show loading state while checking authentication
   if (isLoading || (user && userRole === null)) {
     return (
       <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
@@ -35,7 +33,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-900">
+    <div className="min-h-screen bg-zinc-950">
       <Navbar user={user} />
       <main className="pt-16">{children}</main>
     </div>

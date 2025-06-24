@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, Edit2, Check, X } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, X, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { CustomService, PaymentType } from "./CustomProposalClient";
 
 interface CustomServiceFormProps {
@@ -86,9 +86,27 @@ export default function CustomServiceForm({
     }));
   };
 
+  const moveFeatureUp = (index: number) => {
+    if (index === 0) return;
+    setFormData((prev) => {
+      const newFeatures = [...prev.features];
+      [newFeatures[index - 1], newFeatures[index]] = [newFeatures[index], newFeatures[index - 1]];
+      return { ...prev, features: newFeatures };
+    });
+  };
+
+  const moveFeatureDown = (index: number) => {
+    if (index === formData.features.length - 1) return;
+    setFormData((prev) => {
+      const newFeatures = [...prev.features];
+      [newFeatures[index], newFeatures[index + 1]] = [newFeatures[index + 1], newFeatures[index]];
+      return { ...prev, features: newFeatures };
+    });
+  };
+
   const handleSubmit = () => {
-    if (!formData.name || !formData.price) {
-      alert("Please fill in service name and price");
+    if (!formData.name || formData.price < 0) {
+      alert("Please fill in service name and enter a valid price (0 or higher)");
       return;
     }
 
@@ -239,6 +257,29 @@ export default function CustomServiceForm({
                   <span className="flex-1 text-sm text-gray-300 bg-zinc-700 px-3 py-2 rounded border border-zinc-600">
                     {feature}
                   </span>
+                  
+                  {/* Move buttons */}
+                  <div className="flex flex-col">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => moveFeatureUp(index)}
+                      disabled={index === 0}
+                      className="text-gray-400 hover:text-white p-1 h-auto"
+                    >
+                      <ChevronUp className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => moveFeatureDown(index)}
+                      disabled={index === formData.features.length - 1}
+                      className="text-gray-400 hover:text-white p-1 h-auto"
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  
                   <Button
                     size="sm"
                     variant="ghost"
@@ -263,10 +304,14 @@ export default function CustomServiceForm({
                 <Input
                   type="number"
                   placeholder="0"
-                  value={formData.price || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
-                  }
+                  min="0"
+                  step="0.01"
+                  value={formData.price.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseFloat(value);
+                    setFormData({ ...formData, price: isNaN(numValue) ? 0 : numValue });
+                  }}
                   className="bg-zinc-600 border-zinc-500 text-white"
                 />
               </div>
@@ -309,7 +354,7 @@ export default function CustomServiceForm({
         <Button
           onClick={() => setIsAdding(true)}
           variant="outline"
-          className="w-full border-zinc-600 text-gray-300 hover:text-white hover:bg-zinc-700"
+          className="w-full bg-zinc-700 border-zinc-600 text-gray-300 hover:text-white hover:bg-zinc-700"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Service

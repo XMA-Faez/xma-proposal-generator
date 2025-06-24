@@ -69,16 +69,42 @@ export function createMiddlewareSupabaseClient(request: NextRequest) {
   return { supabase, response };
 }
 
-// Get the authenticated user's session
+// Get the authenticated user's session (DEPRECATED - use getUser() instead)
+// This function is kept for backward compatibility but should not be used for security-critical operations
 export async function getSession() {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();
     return session;
   } catch (error) {
     console.error("Error getting session:", error);
+    return null;
+  }
+}
+
+// Get authenticated session using secure getUser() method
+export async function getAuthenticatedSession() {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user },
+      error
+    } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      return null;
+    }
+
+    // Get session after user is verified
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    
+    return session;
+  } catch (error) {
+    console.error("Error getting authenticated session:", error);
     return null;
   }
 }
@@ -97,15 +123,18 @@ export async function getUser() {
   }
 }
 
-// Check if user is authenticated and has admin role
+// Check if user is authenticated and has admin role (SECURE VERSION)
 export async function requireAdmin() {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
+    
+    // Use getUser() for secure authentication verification
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+      error: userError
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (userError || !user) {
       redirect("/login");
     }
 
@@ -113,7 +142,7 @@ export async function requireAdmin() {
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     if (error || !profile || profile.role !== "admin") {
@@ -121,7 +150,7 @@ export async function requireAdmin() {
     }
 
     return {
-      user: session.user,
+      user,
       role: profile.role,
     };
   } catch (error) {

@@ -15,7 +15,8 @@ async function getProposalsData() {
         `
         *,
         client:clients(*),
-        links:proposal_links(*)
+        links:proposal_links(*),
+        package:packages(*)
       `,
       )
       .order("created_at", { ascending: false });

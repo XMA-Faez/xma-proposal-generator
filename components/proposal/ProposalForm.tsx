@@ -14,8 +14,8 @@ import {
 } from "@/lib/orderIdGenerator";
 
 // Main Component
-function ProposalForm({ initialData }) {
-  const [includeTax, setIncludeTax] = useState(true);
+function ProposalForm({ initialData, editMode = false, existingProposal = null, onSubmit = null }) {
+  const [includeTax, setIncludeTax] = useState(existingProposal?.includeTax ?? true);
   // Use React Query with initialData
   const packagesQuery = useQuery({
     queryKey: ["packages"],
@@ -52,25 +52,28 @@ function ProposalForm({ initialData }) {
   });
 
   // State for form inputs
-  const [clientName, setClientName] = useState("");
-  const [companyName, setCompanyName] = useState("");
+  const [clientName, setClientName] = useState(existingProposal?.clientName || "");
+  const [companyName, setCompanyName] = useState(existingProposal?.companyName || "");
   const [proposalDate, setProposalDate] = useState(
-    new Date().toISOString().split("T")[0],
+    existingProposal?.proposalDate || new Date().toISOString().split("T")[0],
   );
-  const [additionalInfo, setAdditionalInfo] = useState("");
-  const [selectedPackageId, setSelectedPackageId] = useState(null);
-  const [selectedServices, setSelectedServices] = useState([]);
+  const [additionalInfo, setAdditionalInfo] = useState(existingProposal?.additionalInfo || "");
+  const [selectedPackageId, setSelectedPackageId] = useState(existingProposal?.selectedPackage?.id || null);
+  const [selectedServices, setSelectedServices] = useState(existingProposal?.selectedServices || []);
   const [showProposal, setShowProposal] = useState(false);
   const [proposalLink, setProposalLink] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
-  const [includePackage, setIncludePackage] = useState(true);
-  const [discounts, setDiscounts] = useState({
-    packageDiscount: { type: "percentage", value: 0 },
-    serviceDiscounts: {},
-    overallDiscount: { type: "percentage", value: 0 },
-  });
+  const [includePackage, setIncludePackage] = useState(existingProposal?.includePackage ?? true);
+  const [discounts, setDiscounts] = useState(
+    existingProposal?.discounts || {
+      packageDiscount: { type: "percentage", value: 0 },
+      serviceDiscounts: {},
+      overallDiscount: { type: "percentage", value: 0 },
+    }
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [validityDays, setValidityDays] = useState(existingProposal?.validityDays || 30);
 
   // Set default selected package when packages are loaded
   useEffect(() => {
@@ -185,6 +188,31 @@ function ProposalForm({ initialData }) {
       return;
     }
 
+    // If in edit mode and custom onSubmit provided, use it
+    if (editMode && onSubmit) {
+      const formData = {
+        clientName,
+        companyName,
+        proposalDate,
+        additionalInfo,
+        includePackage,
+        selectedPackageId,
+        selectedServices,
+        discounts,
+        includeTax,
+        validityDays,
+      };
+      
+      try {
+        await onSubmit(formData);
+      } catch (error) {
+        setSaveError(error.message || "Failed to update proposal");
+      } finally {
+        setIsSaving(false);
+      }
+      return;
+    }
+
     try {
       // Get the selected package
       const selectedPackage = packagesQuery.data.find(
@@ -215,6 +243,7 @@ function ProposalForm({ initialData }) {
         // Also store the discount data
         discounts,
         includeTax,
+        validityDays,
       };
 
       // First try to get or create the client
@@ -277,6 +306,7 @@ function ProposalForm({ initialData }) {
           // Add the order ID
           order_id: orderId,
           include_tax: includeTax,
+          validity_days: validityDays,
         })
         .select()
         .single();
@@ -359,7 +389,7 @@ function ProposalForm({ initialData }) {
   // Loading state
   if (packagesQuery.isLoading || servicesQuery.isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-900 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600 mb-4"></div>
           <p className="text-zinc-400">Loading packages and services...</p>
@@ -372,7 +402,7 @@ function ProposalForm({ initialData }) {
   if (packagesQuery.isError || servicesQuery.isError) {
     const error = packagesQuery.error || servicesQuery.error;
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-900 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
         <div className="text-center max-w-md">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -409,7 +439,7 @@ function ProposalForm({ initialData }) {
     !showProposal
   ) {
     return (
-      <div className="min-h-screen pt-40 flex items-center justify-center bg-zinc-900 text-white">
+      <div className="min-h-screen pt-40 flex items-center justify-center bg-zinc-950 text-white">
         <div className="text-center max-w-md">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -449,12 +479,12 @@ function ProposalForm({ initialData }) {
     packagesQuery.data.find((p) => p.id === selectedPackageId) || null;
 
   return (
-    <div className="min-h-screen pt-40 bg-zinc-900 text-white py-8">
+    <div className="min-h-screen bg-neutral-950 text-white py-8">
       <div className="container mx-auto px-4">
         {!showProposal ? (
           // Proposal Generator Form
           <div>
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
                 Proposal Generator
               </h1>
@@ -474,6 +504,8 @@ function ProposalForm({ initialData }) {
                 setProposalDate={setProposalDate}
                 additionalInfo={additionalInfo}
                 setAdditionalInfo={setAdditionalInfo}
+                validityDays={validityDays}
+                setValidityDays={setValidityDays}
               />
 
               {/* Package Selection */}
@@ -535,10 +567,10 @@ function ProposalForm({ initialData }) {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Generating Proposal...
+                      {editMode ? "Updating Proposal..." : "Generating Proposal..."}
                     </div>
                   ) : (
-                    "Generate Proposal"
+                    editMode ? "Update Proposal" : "Generate Proposal"
                   )}
                 </button>
                 {saveError && (
