@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import type { Database } from "@/types/supabase";
@@ -16,8 +15,7 @@ interface InvoicePageProps {
 }
 
 export default async function InvoicePage({ params }: InvoicePageProps) {
-  const cookieStore = await cookies();
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
+  const supabase = await createClient();
 
   // Check auth
   const { data: { user } } = await supabase.auth.getUser();

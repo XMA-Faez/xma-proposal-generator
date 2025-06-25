@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
 import type { CreateInvoiceRequest, InvoiceLineItem } from "@/types/invoice";
@@ -18,8 +17,7 @@ const COMPANY_INFO = {
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore });
+    const supabase = await createClient();
 
     // Check if user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -106,8 +104,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore });
+    const supabase = await createClient();
 
     // Check if user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser();
