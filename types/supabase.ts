@@ -343,6 +343,111 @@ export interface Database {
         };
         Relationships: [];
       };
+      invoices: {
+        Row: {
+          id: string;
+          invoice_number: string;
+          proposal_id: string | null;
+          order_id: string;
+          issuer_name: string;
+          issuer_address: string;
+          issuer_phone: string;
+          issuer_trn: string;
+          client_name: string;
+          client_company: string;
+          client_address: string;
+          client_trn: string | null;
+          issue_date: string;
+          due_date: string;
+          currency: string;
+          line_items: Json;
+          bank_account_holder: string;
+          iban: string;
+          swift_code: string;
+          bank_address: string;
+          subtotal: number;
+          vat_amount: number;
+          total_amount: number;
+          status: string | null;
+          created_by: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          invoice_number?: string;
+          proposal_id?: string | null;
+          order_id: string;
+          issuer_name?: string;
+          issuer_address: string;
+          issuer_phone: string;
+          issuer_trn?: string;
+          client_name: string;
+          client_company: string;
+          client_address: string;
+          client_trn?: string | null;
+          issue_date?: string;
+          due_date: string;
+          currency?: string;
+          line_items: Json;
+          bank_account_holder?: string;
+          iban: string;
+          swift_code: string;
+          bank_address: string;
+          subtotal: number;
+          vat_amount: number;
+          total_amount: number;
+          status?: string | null;
+          created_by?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          invoice_number?: string;
+          proposal_id?: string | null;
+          order_id?: string;
+          issuer_name?: string;
+          issuer_address?: string;
+          issuer_phone?: string;
+          issuer_trn?: string;
+          client_name?: string;
+          client_company?: string;
+          client_address?: string;
+          client_trn?: string | null;
+          issue_date?: string;
+          due_date?: string;
+          currency?: string;
+          line_items?: Json;
+          bank_account_holder?: string;
+          iban?: string;
+          swift_code?: string;
+          bank_address?: string;
+          subtotal?: number;
+          vat_amount?: number;
+          total_amount?: number;
+          status?: string | null;
+          created_by?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoices_proposal_id_fkey";
+            columns: ["proposal_id"];
+            isOneToOne: false;
+            referencedRelation: "proposals";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoices_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

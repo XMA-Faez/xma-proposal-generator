@@ -5,7 +5,9 @@ import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
 import CountdownTimer from "./CountdownTimer";
-import { Trash2, Share2, Copy, RefreshCw, Edit } from "lucide-react";
+import { Trash2, Share2, Copy, RefreshCw, Edit, FileText, MoreVertical } from "lucide-react";
+import { InvoiceGeneratorDialog } from "@/components/invoice/InvoiceGeneratorDialog";
+import { Dropdown, DropdownItem, DropdownSeparator } from "@/components/ui/dropdown";
 
 interface ProposalCardProps {
   proposal: any;
@@ -238,48 +240,74 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          {/* Renew Button - only show for expired proposals that have expiration dates */}
-          {hasValidExpiration && (isExpired || status === "expired") && (
-            <button
-              className="bg-green-700 hover:bg-green-600 text-white px-3 py-2 rounded flex items-center transition-colors disabled:opacity-50"
-              onClick={handleRenew}
-              disabled={isRenewing}
-            >
-              <RefreshCw size={16} className={`mr-1 ${isRenewing ? 'animate-spin' : ''}`} />
-              {isRenewing ? 'Renewing...' : 'Renew'}
-            </button>
-          )}
-
-          {/* Edit Button */}
-          <Link
-            href={`/proposals/edit/${proposal.id}`}
-            className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 py-2 rounded flex items-center transition-colors"
-          >
-            <Edit size={16} className="mr-1" />
-            Edit
-          </Link>
-
-          {/* Delete Button */}
-          <button
-            className="bg-zinc-700 hover:bg-red-700 text-white px-3 py-2 rounded flex items-center transition-colors"
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            <Trash2 size={16} className="mr-1" />
-            Delete
-          </button>
-
+        {/* Action Buttons - Single row layout */}
+        <div className="flex gap-2 items-center">
+          {/* View Proposal Button */}
           {token && (
             <Link
               href={`/proposal?token=${token}`}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-center px-3 py-2 rounded text-sm transition-colors flex items-center justify-center"
+              className="flex-1 bg-red-600 hover:bg-red-700 text-center px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center"
               target="_blank"
             >
               <Share2 size={14} className="mr-1" />
-              View Proposal
+              View
             </Link>
           )}
+
+          {/* Invoice Button */}
+          <div className="flex-1">
+            <InvoiceGeneratorDialog
+              proposal={proposal}
+              trigger={
+                <button className="w-full bg-purple-700 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm flex items-center justify-center transition-colors">
+                  <FileText size={14} className="mr-1" />
+                  Invoice
+                </button>
+              }
+            />
+          </div>
+
+          {/* Kebab Menu */}
+          <Dropdown
+            trigger={
+              <button className="p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700 rounded transition-colors">
+                <MoreVertical size={16} />
+              </button>
+            }
+            align="right"
+          >
+            {/* Edit Option */}
+            <Link href={`/proposals/edit/${proposal.id}`}>
+              <DropdownItem>
+                <Edit size={14} className="mr-2" />
+                Edit Proposal
+              </DropdownItem>
+            </Link>
+
+            {/* Renew Option - only for expired proposals */}
+            {hasValidExpiration && (isExpired || status === "expired") && (
+              <>
+                <DropdownSeparator />
+                <DropdownItem 
+                  onClick={handleRenew}
+                  disabled={isRenewing}
+                >
+                  <RefreshCw size={14} className={`mr-2 ${isRenewing ? 'animate-spin' : ''}`} />
+                  {isRenewing ? 'Renewing...' : 'Renew Proposal'}
+                </DropdownItem>
+              </>
+            )}
+
+            {/* Delete Option */}
+            <DropdownSeparator />
+            <DropdownItem 
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-red-400 hover:bg-red-900/20"
+            >
+              <Trash2 size={14} className="mr-2" />
+              Delete Proposal
+            </DropdownItem>
+          </Dropdown>
         </div>
 
         {/* Renewal Error */}
