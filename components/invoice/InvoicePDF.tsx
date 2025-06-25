@@ -275,23 +275,23 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Status Badge */}
-        {invoice.status && (
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(invoice.status) + "20" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.statusText,
-                { color: getStatusColor(invoice.status) },
-              ]}
-            >
-              {invoice.status}
-            </Text>
-          </View>
-        )}
+        {/* {invoice.status && ( */}
+        {/*   <View */}
+        {/*     style={[ */}
+        {/*       styles.statusBadge, */}
+        {/*       { backgroundColor: getStatusColor(invoice.status) + "20" }, */}
+        {/*     ]} */}
+        {/*   > */}
+        {/*     <Text */}
+        {/*       style={[ */}
+        {/*         styles.statusText, */}
+        {/*         { color: getStatusColor(invoice.status) }, */}
+        {/*       ]} */}
+        {/*     > */}
+        {/*       {invoice.status} */}
+        {/*     </Text> */}
+        {/*   </View> */}
+        {/* )} */}
 
         {/* Header */}
         <View style={styles.header}>
