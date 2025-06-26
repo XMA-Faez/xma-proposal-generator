@@ -1,30 +1,18 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
     const supabase = await createClient();
-
-    // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.role !== "admin") {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
-    }
 
     const resolvedParams = await params;
     
@@ -50,24 +38,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
     const supabase = await createClient();
-
-    // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.role !== "admin") {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
-    }
 
     const body = await request.json();
     const { status, dueDate, lineItems, clientTrn, clientAddress } = body;

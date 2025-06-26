@@ -1,9 +1,14 @@
 // File: app/api/update-proposal-status/route.ts
 
 import { createClient } from "@/utils/supabase/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function POST(request: Request) {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
     // Parse the request body
     let body;
     try {

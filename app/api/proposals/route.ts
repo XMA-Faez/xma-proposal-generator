@@ -4,9 +4,14 @@ import {
   generateOrderId,
   getNextSequentialNumber,
 } from "@/lib/orderIdGenerator";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function POST(request: Request) {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
     const body = await request.json();
     const { proposalData, encodedData } = body;
 
@@ -113,6 +118,10 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
     const { data, error } = await supabase
       .from("proposals")
       .select(

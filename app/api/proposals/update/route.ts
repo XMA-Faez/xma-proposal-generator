@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function PUT(request: NextRequest) {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
     const body = await request.json();
     const { proposalId, formData } = body;
 
@@ -13,17 +18,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-
     const supabase = await createClient();
-    
-    // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
 
     // Calculate expiration date
     const expiresAt = new Date();

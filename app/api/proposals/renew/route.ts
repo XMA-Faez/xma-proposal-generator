@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createClient } from "@/utils/supabase/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
+    const supabase = await createClient();
     const { id } = await request.json();
 
     if (!id) {

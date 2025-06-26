@@ -1,11 +1,12 @@
-import { createServerSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const token = params.token;
+    const resolvedParams = await params;
+    const token = resolvedParams.token;
     
     if (!token) {
       return Response.json(
@@ -14,7 +15,7 @@ export async function GET(
       );
     }
     
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     
     // Find the proposal link
     const { data: link, error: linkError } = await supabase

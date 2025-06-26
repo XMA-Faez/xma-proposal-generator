@@ -1,27 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { generateOrderId, getNextSequentialNumber } from "@/lib/orderIdGenerator";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication
+    const { error: authError } = await requireAdmin();
+    if (authError) return authError;
+
     const supabase = await createClient();
-    
-    // Check auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check admin role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
 
     const proposalData = await request.json();
     const { clientInfo, services, discount, discountType, taxIncluded, terms, customTerms } = proposalData;
