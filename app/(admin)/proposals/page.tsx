@@ -37,7 +37,7 @@ export default async function ProposalsPage() {
 
   return (
     <div className="pt-8 px-4 pb-12">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent mb-6">
           Proposals
         </h1>
