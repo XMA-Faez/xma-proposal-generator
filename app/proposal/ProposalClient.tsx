@@ -106,7 +106,10 @@ const ProposalPage = () => {
               `
               *,
               client:clients(*),
-              package:packages(*),
+              package:packages(
+                *,
+                features:package_features(*)
+              ),
               proposal_services(
                 *,
                 service:services(*)
