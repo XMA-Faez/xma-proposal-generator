@@ -27,13 +27,12 @@ export function AuthProvider({
   const supabase = createClient();
   const [session, setSession] = useState<Session | null>(initialSession);
   const [user, setUser] = useState<User | null>(initialSession?.user || null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
-        setIsLoading(true);
         try {
           const { data, error } = await supabase
             .from("profiles")
@@ -44,6 +43,7 @@ export function AuthProvider({
           if (error) {
             console.error("Error fetching profile:", error);
             setUserRole(null);
+            setIsLoading(false);
             return;
           }
 
@@ -86,18 +86,23 @@ export function AuthProvider({
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setSession(session);
-        setUser(session.user);
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (event === "SIGNED_IN" && newSession) {
+        setSession(newSession);
+        setUser(newSession.user);
+        router.refresh();
       } else if (event === "SIGNED_OUT") {
         setSession(null);
         setUser(null);
-      }
-
-      // Refresh the page on sign in or sign out
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         router.refresh();
+      } else if (event === "TOKEN_REFRESHED" && newSession) {
+        // Update session but don't refresh the page
+        setSession(newSession);
+        setUser(newSession.user);
+      } else if (event === "INITIAL_SESSION" && newSession) {
+        // Handle initial session
+        setSession(newSession);
+        setUser(newSession.user);
       }
     });
 

@@ -14,7 +14,8 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && (!user || (userRole !== null && userRole !== "admin"))) {
+    // Only redirect if we're not loading and the user is definitively not an admin
+    if (!isLoading && userRole !== null && (!user || userRole !== "admin")) {
       router.push(`/login?redirectTo=${encodeURIComponent(window.location.pathname)}`);
     }
   }, [isLoading, user, userRole, router]);

@@ -247,7 +247,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
             <Link
               href={`/proposal?token=${token}`}
               className="flex-1 bg-red-600 hover:bg-red-700 text-center px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center"
-              target="_blank"
+              prefetch={true}
             >
               <Share2 size={14} className="mr-1" />
               View
