@@ -86,27 +86,35 @@ const PackageDisplay: React.FC<PackageDisplayProps> = ({
             </div>
           </div>
 
-          {showAllPackages && selectedPackage.features && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-              {selectedPackage.features.map((feature, index) => (
-                <div key={index} className="flex items-start">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className={feature.is_bold ? "font-medium" : ""}>
-                    {feature.text}
-                  </span>
+          {showAllPackages && (
+            <div className="mt-6">
+              {selectedPackage.features && Array.isArray(selectedPackage.features) && selectedPackage.features.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedPackage.features.map((feature, index) => (
+                    <div key={index} className="flex items-start">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span className={typeof feature === 'string' ? '' : (feature.is_bold ? "font-medium" : "")}>
+                        {typeof feature === 'string' ? feature : feature.text}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="text-center text-zinc-400 py-4 bg-zinc-700/50 rounded">
+                  No additional details available for this package.
+                </div>
+              )}
             </div>
           )}
         </div>
