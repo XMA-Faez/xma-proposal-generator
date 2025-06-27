@@ -79,6 +79,33 @@ export default function ProposalsList({
       ? proposals
       : proposals.filter((p) => p.status?.toLowerCase() === filter);
 
+  // Group proposals by month
+  const groupProposalsByMonth = (proposals: any[]) => {
+    const grouped: { [key: string]: any[] } = {};
+    
+    proposals.forEach((proposal) => {
+      const date = new Date(proposal.created_at);
+      const monthYear = date.toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+      
+      if (!grouped[monthYear]) {
+        grouped[monthYear] = [];
+      }
+      grouped[monthYear].push(proposal);
+    });
+    
+    // Convert to array and sort by date (newest first)
+    return Object.entries(grouped).sort((a, b) => {
+      const dateA = new Date(a[1][0].created_at);
+      const dateB = new Date(b[1][0].created_at);
+      return dateB.getTime() - dateA.getTime();
+    });
+  };
+
+  const groupedProposals = groupProposalsByMonth(filteredProposals);
+
   if (proposals.length === 0) {
     return (
       <div className="bg-zinc-800 rounded-lg p-12 text-center">
@@ -186,13 +213,38 @@ export default function ProposalsList({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredProposals.map((proposal) => (
-          <ProposalCard 
-            key={proposal.id} 
-            proposal={proposal} 
-            onDelete={handleDelete}
-          />
+      <div className="space-y-8">
+        {groupedProposals.map(([monthYear, monthProposals]) => (
+          <div key={monthYear}>
+            <h2 className="text-xl font-semibold text-zinc-300 mb-4 pb-2 border-b border-zinc-700 flex items-center justify-between">
+              <span>{monthYear}</span>
+              <span className="text-sm font-normal text-zinc-400">
+                {(() => {
+                  const businessNames = monthProposals
+                    .map(p => p.client?.company_name)
+                    .filter(name => name && name.trim() !== '');
+                  const uniqueBusinesses = new Set(businessNames).size;
+                  return (
+                    <>
+                      {monthProposals.length} {monthProposals.length === 1 ? 'proposal' : 'proposals'} 
+                      <span className="text-zinc-500 ml-2">
+                        ({uniqueBusinesses} unique {uniqueBusinesses === 1 ? 'proposal' : 'proposals'})
+                      </span>
+                    </>
+                  );
+                })()}
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {monthProposals.map((proposal) => (
+                <ProposalCard 
+                  key={proposal.id} 
+                  proposal={proposal} 
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>
