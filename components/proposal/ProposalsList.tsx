@@ -5,7 +5,7 @@ import Link from "next/link";
 import ProposalCard from "./ProposalCard";
 import Toast from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
-import { RefreshCw, Plus } from "lucide-react";
+import { RefreshCw, Plus, Search } from "lucide-react";
 
 interface ProposalsListProps {
   initialProposals: any[];
@@ -17,6 +17,7 @@ export default function ProposalsList({
   const [proposals, setProposals] = useState(initialProposals);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState("all"); // Filter state
+  const [searchQuery, setSearchQuery] = useState(""); // Search state
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -71,11 +72,29 @@ export default function ProposalsList({
     setToast({...toast, visible: false});
   };
 
-  // Filter proposals based on status
-  const filteredProposals =
-    filter === "all"
-      ? proposals
-      : proposals.filter((p) => p.status?.toLowerCase() === filter);
+  // Filter proposals based on status and search query
+  const filteredProposals = proposals.filter((proposal) => {
+    // Status filter
+    if (filter !== "all" && proposal.status?.toLowerCase() !== filter) {
+      return false;
+    }
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const clientName = proposal.client?.name?.toLowerCase() || "";
+      const companyName = proposal.client?.company_name?.toLowerCase() || "";
+      const orderId = proposal.order_id?.toLowerCase() || "";
+      
+      return (
+        clientName.includes(query) ||
+        companyName.includes(query) ||
+        orderId.includes(query)
+      );
+    }
+    
+    return true;
+  });
 
   // Group proposals by month
   const groupProposalsByMonth = (proposals: any[]) => {
@@ -142,72 +161,86 @@ export default function ProposalsList({
         onClose={handleCloseToast}
       />
       
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <div className="flex items-center">
-          <p className="text-zinc-400 mr-4">
-            {filteredProposals.length} proposals found
-          </p>
-
-          {/* Status filter */}
-          <div className="bg-zinc-800 rounded-lg p-1 flex">
-            <button
-              onClick={() => setFilter("all")}
-              className={`px-3 py-1 text-sm rounded-md ${filter === "all" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setFilter("draft")}
-              className={`px-3 py-1 text-sm rounded-md ${filter === "draft" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
-            >
-              Draft
-            </button>
-            <button
-              onClick={() => setFilter("sent")}
-              className={`px-3 py-1 text-sm rounded-md ${filter === "sent" ? "bg-blue-900 text-blue-300" : "text-zinc-400 hover:text-white"}`}
-            >
-              Sent
-            </button>
-            <button
-              onClick={() => setFilter("accepted")}
-              className={`px-3 py-1 text-sm rounded-md ${filter === "accepted" ? "bg-green-900 text-green-300" : "text-zinc-400 hover:text-white"}`}
-            >
-              Accepted
-            </button>
-            <button
-              onClick={() => setFilter("paid")}
-              className={`px-3 py-1 text-sm rounded-md ${filter === "paid" ? "bg-purple-900 text-purple-300" : "text-zinc-400 hover:text-white"}`}
-            >
-              Paid
-            </button>
-          </div>
+      <div className="flex flex-col gap-4 mb-6">
+        {/* Search bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400" />
+          <input
+            type="text"
+            placeholder="Search by client name, company, or order ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:border-red-600"
+          />
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={refreshProposals}
-            className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 py-2 rounded-lg transition-colors flex items-center"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <RefreshCw className="animate-spin h-4 w-4 mr-2" />
-                Refreshing...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </>
-            )}
-          </button>
-          <Link
-            href="/proposal-generator"
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Proposal
-          </Link>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center">
+            <p className="text-zinc-400 mr-4">
+              {filteredProposals.length} proposals found
+            </p>
+
+            {/* Status filter */}
+            <div className="bg-zinc-800 rounded-lg p-1 flex">
+              <button
+                onClick={() => setFilter("all")}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "all" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilter("draft")}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "draft" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
+              >
+                Draft
+              </button>
+              <button
+                onClick={() => setFilter("sent")}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "sent" ? "bg-blue-900 text-blue-300" : "text-zinc-400 hover:text-white"}`}
+              >
+                Sent
+              </button>
+              <button
+                onClick={() => setFilter("accepted")}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "accepted" ? "bg-green-900 text-green-300" : "text-zinc-400 hover:text-white"}`}
+              >
+                Accepted
+              </button>
+              <button
+                onClick={() => setFilter("paid")}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "paid" ? "bg-purple-900 text-purple-300" : "text-zinc-400 hover:text-white"}`}
+              >
+                Paid
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={refreshProposals}
+              className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 py-2 rounded-lg transition-colors flex items-center"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <RefreshCw className="animate-spin h-4 w-4 mr-2" />
+                  Refreshing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </>
+              )}
+            </button>
+            <Link
+              href="/proposal-generator"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create New Proposal
+            </Link>
+          </div>
         </div>
       </div>
 
