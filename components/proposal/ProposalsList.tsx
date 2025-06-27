@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import ProposalCard from "./ProposalCard";
 import Toast from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
@@ -23,7 +22,6 @@ export default function ProposalsList({
     message: "",
     type: "success" as "success" | "error" | "info"
   });
-  const router = useRouter();
 
   // Function to refresh proposals data
   const refreshProposals = async () => {
