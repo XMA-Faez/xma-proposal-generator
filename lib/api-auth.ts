@@ -29,6 +29,17 @@ export async function authenticateRequest(): Promise<{ user: AuthenticatedUser |
     .eq("id", user.id)
     .single();
 
+  // Check if user is deactivated
+  if (profile?.role === "deactivated") {
+    return {
+      user: null,
+      error: NextResponse.json(
+        { error: "Access has been revoked" },
+        { status: 403 }
+      )
+    };
+  }
+
   return {
     user: {
       id: user.id,

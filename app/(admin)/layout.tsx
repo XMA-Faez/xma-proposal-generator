@@ -14,9 +14,18 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // Only redirect if we're not loading and the user is definitively not an admin
-    if (!isLoading && userRole !== null && (!user || userRole !== "admin")) {
-      router.push(`/login?redirectTo=${encodeURIComponent(window.location.pathname)}`);
+    // Only redirect if we're not loading and the user role is determined
+    if (!isLoading && userRole !== null) {
+      if (!user) {
+        // Not logged in, redirect to login
+        router.push(`/login?redirectTo=${encodeURIComponent(window.location.pathname)}`);
+      } else if (userRole === "deactivated") {
+        // Access revoked, redirect to access revoked page
+        router.push("/access-revoked");
+      } else if (userRole !== "admin" && userRole !== "sales_rep") {
+        // Unknown role, redirect to login
+        router.push("/login");
+      }
     }
   }, [isLoading, user, userRole, router]);
 
@@ -29,13 +38,14 @@ export default function AdminLayout({
     );
   }
 
-  if (!user || userRole !== "admin") {
+  // Only show layout for authenticated users with valid roles
+  if (!user || userRole === "deactivated" || (userRole !== "admin" && userRole !== "sales_rep")) {
     return null; // Return nothing as we're redirecting
   }
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <Navbar user={user} />
+      <Navbar user={user} userRole={userRole} />
       <main className="pt-16">{children}</main>
     </div>
   );

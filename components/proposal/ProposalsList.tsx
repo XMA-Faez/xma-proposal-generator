@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import ProposalCard from "./ProposalCard";
 import Toast from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
@@ -9,15 +10,22 @@ import { RefreshCw, Plus, Search } from "lucide-react";
 
 interface ProposalsListProps {
   initialProposals: any[];
+  userRole: "admin" | "sales_rep";
 }
 
 export default function ProposalsList({
   initialProposals,
+  userRole,
 }: ProposalsListProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [proposals, setProposals] = useState(initialProposals);
   const [isLoading, setIsLoading] = useState(false);
-  const [filter, setFilter] = useState("all"); // Filter state
-  const [searchQuery, setSearchQuery] = useState(""); // Search state
+  
+  // Get filter and search from URL parameters
+  const filter = searchParams.get("filter") || "all";
+  const searchQuery = searchParams.get("search") || "";
+  const createdBy = searchParams.get("created_by");
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -28,28 +36,59 @@ export default function ProposalsList({
   const refreshProposals = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("proposals")
-        .select(
-          `
-          *,
-          client:clients(*),
-          links:proposal_links(*),
-          package:packages(*)
-        `,
-        )
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        throw error;
+      const params = new URLSearchParams();
+      if (filter === "archived") {
+        params.set("archivedOnly", "true");
+      } else {
+        // For non-archived filters, we want to exclude archived proposals
+        params.set("includeArchived", "false");
       }
-
-      setProposals(data || []);
+      if (createdBy) {
+        params.set("createdBy", createdBy);
+      }
+      
+      const response = await fetch(`/api/proposals?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch proposals');
+      }
+      
+      const result = await response.json();
+      setProposals(result.proposals || []);
     } catch (error) {
       console.error("Error refreshing proposals:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Refresh data when URL parameters change
+  useEffect(() => {
+    refreshProposals();
+  }, [filter, createdBy]);
+
+  // Function to update URL parameters
+  const updateUrlParams = (newFilter?: string, newSearch?: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (newFilter !== undefined) {
+      if (newFilter === "all") {
+        params.delete("filter");
+      } else {
+        params.set("filter", newFilter);
+      }
+    }
+    
+    if (newSearch !== undefined) {
+      if (newSearch === "") {
+        params.delete("search");
+      } else {
+        params.set("search", newSearch);
+      }
+    }
+    
+    // Keep other params like created_by
+    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+    router.push(newUrl);
   };
 
   // Handle proposal deletion
@@ -74,16 +113,22 @@ export default function ProposalsList({
 
   // Filter proposals based on status and search query
   const filteredProposals = proposals.filter((proposal) => {
-    // Status filter
-    if (filter !== "all" && proposal.status?.toLowerCase() !== filter) {
-      return false;
+    // Archived filter
+    if (filter === "archived") {
+      return proposal.archived_at !== null;
+    } else if (filter !== "all") {
+      // Regular status filter (only for non-archived)
+      return proposal.archived_at === null && proposal.status?.toLowerCase() === filter;
+    } else {
+      // "all" filter - only show non-archived
+      return proposal.archived_at === null;
     }
-    
+  }).filter((proposal) => {
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       const clientName = proposal.client?.name?.toLowerCase() || "";
-      const companyName = proposal.client?.company_name?.toLowerCase() || "";
+      const companyName = proposal.client?.company_name?.toLowerCase() || proposal.company_name?.toLowerCase() || "";
       const orderId = proposal.order_id?.toLowerCase() || "";
       
       return (
@@ -169,7 +214,7 @@ export default function ProposalsList({
             type="text"
             placeholder="Search by client name, company, or order ID..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => updateUrlParams(undefined, e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:border-red-600"
           />
         </div>
@@ -183,34 +228,40 @@ export default function ProposalsList({
             {/* Status filter */}
             <div className="bg-zinc-800 rounded-lg p-1 flex">
               <button
-                onClick={() => setFilter("all")}
+                onClick={() => updateUrlParams("all")}
                 className={`px-3 py-1 text-sm rounded-md ${filter === "all" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
               >
                 All
               </button>
               <button
-                onClick={() => setFilter("draft")}
+                onClick={() => updateUrlParams("draft")}
                 className={`px-3 py-1 text-sm rounded-md ${filter === "draft" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
               >
                 Draft
               </button>
               <button
-                onClick={() => setFilter("sent")}
+                onClick={() => updateUrlParams("sent")}
                 className={`px-3 py-1 text-sm rounded-md ${filter === "sent" ? "bg-blue-900 text-blue-300" : "text-zinc-400 hover:text-white"}`}
               >
                 Sent
               </button>
               <button
-                onClick={() => setFilter("accepted")}
+                onClick={() => updateUrlParams("accepted")}
                 className={`px-3 py-1 text-sm rounded-md ${filter === "accepted" ? "bg-green-900 text-green-300" : "text-zinc-400 hover:text-white"}`}
               >
                 Accepted
               </button>
               <button
-                onClick={() => setFilter("paid")}
+                onClick={() => updateUrlParams("paid")}
                 className={`px-3 py-1 text-sm rounded-md ${filter === "paid" ? "bg-purple-900 text-purple-300" : "text-zinc-400 hover:text-white"}`}
               >
                 Paid
+              </button>
+              <button
+                onClick={() => updateUrlParams("archived")}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "archived" ? "bg-orange-900 text-orange-300" : "text-zinc-400 hover:text-white"}`}
+              >
+                Archived
               </button>
             </div>
           </div>
@@ -272,6 +323,7 @@ export default function ProposalsList({
                   key={proposal.id} 
                   proposal={proposal} 
                   onDelete={handleDelete}
+                  userRole={userRole}
                 />
               ))}
             </div>

@@ -9,9 +9,10 @@ import { useAuth } from "@/components/auth/AuthProvider";
 
 interface NavbarProps {
   user: User;
+  userRole: "admin" | "sales_rep" | null;
 }
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar({ user, userRole }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
@@ -79,16 +80,30 @@ export default function Navbar({ user }: NavbarProps) {
             >
               View Proposals
             </Link>
-            <Link
-              href="/reports"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                isActive("/reports")
-                  ? "bg-red-600 text-white"
-                  : "text-gray-300 hover:bg-zinc-700 hover:text-white"
-              }`}
-            >
-              Reports
-            </Link>
+            {userRole === "admin" && (
+              <>
+                <Link
+                  href="/reports"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive("/reports")
+                      ? "bg-red-600 text-white"
+                      : "text-gray-300 hover:bg-zinc-700 hover:text-white"
+                  }`}
+                >
+                  Reports
+                </Link>
+                <Link
+                  href="/sales-team"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive("/sales-team")
+                      ? "bg-red-600 text-white"
+                      : "text-gray-300 hover:bg-zinc-700 hover:text-white"
+                  }`}
+                >
+                  Sales Team
+                </Link>
+              </>
+            )}
 
             {/* Profile dropdown */}
             <div className="relative ml-4">
@@ -176,17 +191,32 @@ export default function Navbar({ user }: NavbarProps) {
             >
               View Proposals
             </Link>
-            <Link
-              href="/reports"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive("/reports")
-                  ? "bg-red-600 text-white"
-                  : "text-gray-300 hover:bg-zinc-600 hover:text-white"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Reports
-            </Link>
+            {userRole === "admin" && (
+              <>
+                <Link
+                  href="/reports"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isActive("/reports")
+                      ? "bg-red-600 text-white"
+                      : "text-gray-300 hover:bg-zinc-600 hover:text-white"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Reports
+                </Link>
+                <Link
+                  href="/sales-team"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isActive("/sales-team")
+                      ? "bg-red-600 text-white"
+                      : "text-gray-300 hover:bg-zinc-600 hover:text-white"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sales Team
+                </Link>
+              </>
+            )}
           </div>
           <div className="pt-4 pb-3 border-t border-zinc-600">
             <div className="px-2 space-y-1">

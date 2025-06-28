@@ -1,16 +1,40 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
 import {
   generateOrderId,
   getNextSequentialNumber,
 } from "@/lib/orderIdGenerator";
-import { requireAdmin } from "@/lib/api-auth";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(request: Request) {
   try {
-    // Require admin authentication
-    const { error: authError } = await requireAdmin();
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
     if (authError) return authError;
+
+    if (!user || !user.id) {
+      console.error("User or user.id is null:", { user });
+      return Response.json(
+        { error: "Invalid user session" },
+        { status: 401 }
+      );
+    }
+
+    const supabase = await createClient();
+
+    // Verify user has a valid profile record
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return Response.json(
+        { error: "User profile not found. Please contact an administrator." },
+        { status: 400 }
+      );
+    }
 
     const body = await request.json();
     const { proposalData, encodedData } = body;
@@ -63,14 +87,23 @@ export async function POST(request: Request) {
       .insert({
         client_id: clientId,
         title: `Proposal for ${proposalData.companyName}`,
+        client_name: proposalData.clientName,
+        company_name: proposalData.companyName,
         proposal_date: proposalData.proposalDate,
         additional_info: proposalData.additionalInfo || null,
+        include_package: proposalData.includePackage || false,
+        package_id: proposalData.includePackage ? proposalData.selectedPackageId : null,
+        package_discount_type: proposalData.packageDiscountType || "percentage",
+        package_discount_value: proposalData.packageDiscountValue || 0,
+        overall_discount_type: proposalData.overallDiscountType || "percentage",
+        overall_discount_value: proposalData.overallDiscountValue || 0,
+        include_tax: proposalData.includeTax || false,
+        validity_days: proposalData.validityDays || 30,
         proposal_data: proposalData,
         encoded_data: encodedData,
         status: "draft",
-        order_id: orderId, // Add the order ID to the proposal
-        client_name: proposalData.clientName,
-        company_name: proposalData.companyName,
+        order_id: orderId,
+        created_by: user.id,
       })
       .select()
       .single();
@@ -116,26 +149,61 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Require admin authentication
-    const { error: authError } = await requireAdmin();
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
     if (authError) return authError;
 
-    const { data, error } = await supabase
+    const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const includeArchived = searchParams.get("includeArchived") === "true";
+    const archivedOnly = searchParams.get("archivedOnly") === "true";
+    const createdBy = searchParams.get("createdBy");
+    
+    // Get user role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+
+    let query = supabase
       .from("proposals")
       .select(
         `
         *,
         client:clients(*),
-        links:proposal_links(*)
+        links:proposal_links(*),
+        created_by_profile:profiles!created_by(name, email)
       `,
-      )
-      .order("created_at", { ascending: false });
+      );
+
+    // Role-based filtering
+    if (profile?.role === "sales_rep") {
+      // Sales reps can only see their own proposals
+      query = query.eq("created_by", user.id);
+    } else if (createdBy) {
+      // Admin filtering by specific creator
+      query = query.eq("created_by", createdBy);
+    }
+    // Admins can see all proposals (no additional filter needed)
+
+    // Archive filtering
+    if (archivedOnly) {
+      query = query.not("archived_at", "is", null);
+    } else if (!includeArchived) {
+      query = query.is("archived_at", null);
+    }
+    // If includeArchived is true, we don't add any archive filter
+
+    const { data, error } = await query.order("created_at", { ascending: false });
 
     if (error) {
       throw error;
     }
+
 
     return Response.json({ proposals: data });
   } catch (error) {

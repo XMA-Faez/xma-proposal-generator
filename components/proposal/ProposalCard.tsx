@@ -5,21 +5,23 @@ import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
 import CountdownTimer from "./CountdownTimer";
-import { Trash2, Share2, Copy, RefreshCw, Edit, FileText, MoreVertical } from "lucide-react";
+import { Trash2, Share2, Copy, RefreshCw, Edit, FileText, MoreVertical, Archive } from "lucide-react";
 import { InvoiceGeneratorDialog } from "@/components/invoice/InvoiceGeneratorDialog";
 import { Dropdown, DropdownItem, DropdownSeparator } from "@/components/ui/dropdown";
 
 interface ProposalCardProps {
   proposal: any;
   onDelete?: (id: string) => void;
+  userRole?: "admin" | "sales_rep";
 }
 
-const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
+const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete, userRole }) => {
   const [copied, setCopied] = useState(false);
   const [status, setStatus] = useState(proposal.status || "draft");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
   const [isRenewing, setIsRenewing] = useState(false);
   const [renewError, setRenewError] = useState<string | null>(null);
 
@@ -167,19 +169,72 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
     }
   };
 
+  // Archive the proposal
+  const handleArchive = async () => {
+    if (!proposal.id) return;
+
+    setIsArchiving(true);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch("/api/proposals/archive", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ proposalId: proposal.id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to archive proposal");
+      }
+
+      // Notify parent component about archival to update the list
+      if (onDelete) {
+        onDelete(proposal.id);
+      } else {
+        // If no callback provided, refresh the page
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error archiving proposal:", error);
+      setDeleteError(
+        error instanceof Error ? error.message : "Failed to archive proposal",
+      );
+    } finally {
+      setIsArchiving(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const isArchived = proposal.archived_at !== null;
+
   return (
-    <div className="bg-zinc-800 rounded-lg shadow-lg">
+    <div className={`bg-zinc-800 rounded-lg shadow-lg ${isArchived ? 'opacity-75 border border-orange-500/30' : ''}`}>
       {/* Header with Status Badge */}
       <div className="px-4 py-3 flex justify-between items-center">
-        <div>
-          <h2 className="text-lg font-bold">{proposal.client?.company_name}</h2>
-          <p className="text-sm text-zinc-400">{proposal.client?.name}</p>
+        <div className="flex items-center gap-3">
+          {isArchived && <Archive className="h-5 w-5 text-orange-400" />}
+          <div>
+            <h2 className={`text-lg font-bold ${isArchived ? 'text-gray-300' : 'text-white'}`}>
+              {proposal.client?.company_name || proposal.company_name}
+            </h2>
+            <p className="text-sm text-zinc-400">{proposal.client?.name || proposal.client_name}</p>
+          </div>
         </div>
-        <StatusBadge
-          status={status}
-          proposalId={proposal.id}
-          onStatusChange={handleStatusChange}
-        />
+        <div className="flex items-center gap-2">
+          {isArchived && (
+            <span className="text-xs bg-orange-900/30 text-orange-300 px-2 py-1 rounded">
+              Archived
+            </span>
+          )}
+          <StatusBadge
+            status={status}
+            proposalId={proposal.id}
+            onStatusChange={handleStatusChange}
+          />
+        </div>
       </div>
 
       {/* Order ID Bar if available */}
@@ -196,6 +251,9 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
           <div>
             <p>Proposal Date: {proposalDate}</p>
             <p>Created: {createDate}</p>
+            {proposal.created_by_profile && (
+              <p>Created by: {proposal.created_by_profile.name || proposal.created_by_profile.email}</p>
+            )}
           </div>
           <div className="text-right">
             <p>Views: {viewCount}</p>
@@ -299,15 +357,26 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
               </>
             )}
 
-            {/* Delete Option */}
+            {/* Delete/Archive Option */}
             <DropdownSeparator />
-            <DropdownItem 
-              onClick={() => setShowDeleteConfirm(true)}
-              className="text-red-400 hover:bg-red-900/20"
-            >
-              <Trash2 size={14} className="mr-2" />
-              Delete Proposal
-            </DropdownItem>
+            {userRole === "admin" ? (
+              <DropdownItem 
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-red-400 hover:bg-red-900/20"
+              >
+                <Trash2 size={14} className="mr-2" />
+                Delete Proposal
+              </DropdownItem>
+            ) : (
+              <DropdownItem 
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-orange-400 hover:bg-orange-900/20"
+                disabled={isArchiving}
+              >
+                <Trash2 size={14} className="mr-2" />
+                {isArchiving ? 'Archiving...' : 'Archive Proposal'}
+              </DropdownItem>
+            )}
           </Dropdown>
         </div>
 
@@ -319,24 +388,24 @@ const ProposalCard: React.FC<ProposalCardProps> = ({ proposal, onDelete }) => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete/Archive Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteConfirm}
-        title="Confirm Deletion"
+        title={userRole === "admin" ? "Confirm Deletion" : "Confirm Archive"}
         message={
           <p>
-            Are you sure you want to delete the proposal for{" "}
+            Are you sure you want to {userRole === "admin" ? "delete" : "archive"} the proposal for{" "}
             <span className="font-semibold text-white">
               {proposal.client?.company_name}
             </span>
-            ? This action cannot be undone.
+            ? {userRole === "admin" ? "This action cannot be undone." : "You can restore it later if needed."}
           </p>
         }
-        confirmText="Delete"
+        confirmText={userRole === "admin" ? "Delete" : "Archive"}
         cancelText="Cancel"
-        isProcessing={isDeleting}
+        isProcessing={userRole === "admin" ? isDeleting : isArchiving}
         error={deleteError}
-        onConfirm={handleDelete}
+        onConfirm={userRole === "admin" ? handleDelete : handleArchive}
         onCancel={() => setShowDeleteConfirm(false)}
         icon={<Trash2 size={24} />}
       />

@@ -118,7 +118,7 @@ export interface Database {
           email: string | null;
           id: string;
           name: string | null;
-          role: string | null;
+          role: "admin" | "sales_rep" | null;
           updated_at: string | null;
         };
         Insert: {
@@ -243,6 +243,9 @@ export interface Database {
           order_id: string | null; // Added the order_id field
           validity_days: number | null;
           expires_at: string | null;
+          created_by: string;
+          archived_at: string | null;
+          archived_by: string | null;
         };
         Insert: {
           additional_info?: string | null;
@@ -266,6 +269,9 @@ export interface Database {
           order_id?: string | null; // Added the order_id field
           validity_days?: number | null;
           expires_at?: string | null;
+          created_by: string;
+          archived_at?: string | null;
+          archived_by?: string | null;
         };
         Update: {
           additional_info?: string | null;
@@ -289,6 +295,9 @@ export interface Database {
           order_id?: string | null; // Added the order_id field
           validity_days?: number | null;
           expires_at?: string | null;
+          created_by?: string;
+          archived_at?: string | null;
+          archived_by?: string | null;
         };
         Relationships: [
           {
@@ -303,6 +312,64 @@ export interface Database {
             columns: ["package_id"];
             isOneToOne: false;
             referencedRelation: "packages";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "proposals_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "proposals_archived_by_fkey";
+            columns: ["archived_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      activity_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          action: string;
+          entity_type: string;
+          entity_id: string | null;
+          metadata: Json | null;
+          created_at: string;
+          ip_address: string | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          action: string;
+          entity_type: string;
+          entity_id?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+          ip_address?: string | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          action?: string;
+          entity_type?: string;
+          entity_id?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+          ip_address?: string | null;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -450,10 +517,87 @@ export interface Database {
       };
     };
     Views: {
-      [_ in never]: never;
+      active_proposals: {
+        Row: {
+          additional_info: string | null;
+          client_id: string | null;
+          company_name: string;
+          created_at: string | null;
+          encoded_data: string | null;
+          id: string;
+          include_package: boolean | null;
+          overall_discount_type: string | null;
+          overall_discount_value: number | null;
+          package_discount_type: string | null;
+          package_discount_value: number | null;
+          package_id: string | null;
+          proposal_data: Json | null;
+          proposal_date: string;
+          status: string | null;
+          title: string | null;
+          updated_at: string | null;
+          client_name: string;
+          order_id: string | null;
+          validity_days: number | null;
+          expires_at: string | null;
+          created_by: string;
+          archived_at: string | null;
+          archived_by: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "proposals_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "proposals_package_id_fkey";
+            columns: ["package_id"];
+            isOneToOne: false;
+            referencedRelation: "packages";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "proposals_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "proposals_archived_by_fkey";
+            columns: ["archived_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
-      [_ in never]: never;
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_sales_rep: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      log_activity: {
+        Args: {
+          p_action: string;
+          p_entity_type: string;
+          p_entity_id?: string;
+          p_metadata?: Json;
+        };
+        Returns: void;
+      };
+      generate_invoice_number: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

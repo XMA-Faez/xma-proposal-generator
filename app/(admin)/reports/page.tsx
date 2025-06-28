@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
+import { requireAdminRole } from "@/lib/auth-helpers";
 import ReportsClient from "./ReportsClient";
 
 export const metadata: Metadata = {
@@ -17,7 +18,8 @@ async function getProposalsData(startDate?: Date, endDate?: Date) {
         *,
         client:clients(*),
         links:proposal_links(*),
-        package:packages(*)
+        package:packages(*),
+        created_by_profile:profiles!created_by(name, email)
       `);
     
     // Add date filtering if provided
@@ -27,6 +29,7 @@ async function getProposalsData(startDate?: Date, endDate?: Date) {
         .lte('created_at', endDate.toISOString());
     }
     
+    // Note: Admin access is enforced at the page level, so we can fetch all proposals
     const { data, error } = await query.order("created_at", { ascending: false });
 
     if (error) {
@@ -41,6 +44,9 @@ async function getProposalsData(startDate?: Date, endDate?: Date) {
 }
 
 export default async function ReportsPage() {
+  // Require admin role to access reports
+  await requireAdminRole();
+  
   const proposals = await getProposalsData();
 
   return (

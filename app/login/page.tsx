@@ -12,16 +12,33 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { redirectTo?: string };
+  searchParams: Promise<{ redirectTo?: string }>;
 }) {
   const supabase = await createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // If already authenticated, redirect to dashboard
+  // If already authenticated, determine where to redirect based on role
   if (session) {
-    redirect(searchParams.redirectTo || "/proposal-generator");
+    const params = await searchParams;
+    
+    // Get user profile to determine role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+
+    // Determine redirect destination based on role
+    let redirectTo = params.redirectTo;
+    
+    if (!redirectTo) {
+      // Default redirect for all authenticated users
+      redirectTo = "/proposal-generator";
+    }
+    
+    redirect(redirectTo);
   }
 
   return (

@@ -1,5 +1,6 @@
 import { Metadata } from "next";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server";
+import { requireRole } from "@/lib/auth-helpers";
 import ProposalsList from "@/components/proposal/ProposalsList";
 
 export const metadata: Metadata = {
@@ -7,19 +8,43 @@ export const metadata: Metadata = {
   description: "View and manage all client proposals",
 };
 
-async function getProposalsData() {
+async function getProposalsData(
+  userId: string, 
+  userRole: "admin" | "sales_rep", 
+  showArchived: boolean = false, 
+  filterByCreator?: string
+) {
   try {
-    const { data, error } = await supabase
+    const supabase = await createClient();
+    let query = supabase
       .from("proposals")
       .select(
         `
         *,
         client:clients(*),
         links:proposal_links(*),
-        package:packages(*)
-      `,
-      )
-      .order("created_at", { ascending: false });
+        package:packages(*),
+        created_by_profile:profiles!created_by(name, email)
+      `
+      );
+
+    // Apply filters
+    if (userRole === "sales_rep") {
+      // Sales reps can only see their own proposals
+      query = query.eq("created_by", userId);
+    } else if (filterByCreator) {
+      // Admin filtering by specific creator
+      query = query.eq("created_by", filterByCreator);
+    }
+
+    // Archive filtering
+    if (showArchived) {
+      query = query.not("archived_at", "is", null);
+    } else {
+      query = query.is("archived_at", null);
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
 
     if (error) {
       throw error;
@@ -32,16 +57,31 @@ async function getProposalsData() {
   }
 }
 
-export default async function ProposalsPage() {
-  const proposals = await getProposalsData();
+export default async function ProposalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ 
+    filter?: string; 
+    search?: string; 
+    created_by?: string; 
+  }>;
+}) {
+  const user = await requireRole(["admin", "sales_rep"]);
+  const params = await searchParams;
+  
+  // Determine what proposals to fetch based on URL params
+  const showArchived = params.filter === "archived";
+  const filterByCreator = params.created_by;
+  
+  const proposals = await getProposalsData(user.id, user.role!, showArchived, filterByCreator);
 
   return (
     <div className="pt-8 px-4 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent mb-6">
-          Proposals
+          {user.role === "sales_rep" ? "My Proposals" : "All Proposals"}
         </h1>
-        <ProposalsList initialProposals={proposals} />
+        <ProposalsList initialProposals={proposals} userRole={user.role!} />
       </div>
     </div>
   );

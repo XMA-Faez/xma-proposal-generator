@@ -1,15 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { generateOrderId, getNextSequentialNumber } from "@/lib/orderIdGenerator";
-import { requireAdmin } from "@/lib/api-auth";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    // Require admin authentication
-    const { error: authError } = await requireAdmin();
+    // Require authentication
+    const { user, error: authError } = await requireAuth();
     if (authError) return authError;
 
+    if (!user || !user.id) {
+      console.error("User or user.id is null:", { user });
+      return NextResponse.json(
+        { error: "Invalid user session" },
+        { status: 401 }
+      );
+    }
+
     const supabase = await createClient();
+
+    // Verify user has a valid profile record
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json(
+        { error: "User profile not found. Please contact an administrator." },
+        { status: 400 }
+      );
+    }
 
     const proposalData = await request.json();
     const { clientInfo, services, discount, discountType, taxIncluded, terms, customTerms } = proposalData;
@@ -57,7 +79,6 @@ export async function POST(request: NextRequest) {
     const totalAmount = afterDiscount + taxAmount;
 
     // Prepare proposal data
-    console.log("Storing order_id:", orderId, typeof orderId);
     const proposalPayload = {
       order_id: orderId,
       client_id: clientId,
@@ -65,6 +86,7 @@ export async function POST(request: NextRequest) {
       company_name: clientInfo.companyName,
       status: "pending",
       proposal_date: clientInfo.proposalDate,
+      created_by: user.id,
       proposal_data: {
         clientInfo,
         services,

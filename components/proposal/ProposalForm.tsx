@@ -8,10 +8,6 @@ import PackageSelection from "./PackageSelection";
 import ServiceSelection from "./ServiceSelection";
 import GeneratorSummary from "./GeneratorSummary";
 import ProposalSuccess from "./ProposalSuccess";
-import {
-  generateOrderId,
-  getNextSequentialNumber,
-} from "@/lib/orderIdGenerator";
 
 // Main Component
 function ProposalForm({ initialData, editMode = false, existingProposal = null, onSubmit = null }) {
@@ -276,93 +272,45 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
         clientId = newClient.id;
       }
 
-      // Generate a unique order ID for this proposal
-      const nextSequence = await getNextSequentialNumber(supabase);
-      const orderId = generateOrderId(nextSequence);
+      // Save the proposal via API route (which handles order ID generation and created_by)
+      const response = await fetch('/api/proposals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          proposalData: {
+            clientName,
+            companyName,
+            proposalDate,
+            additionalInfo,
+            includePackage,
+            selectedPackageId,
+            packageDiscountType: discounts.packageDiscount.type,
+            packageDiscountValue: discounts.packageDiscount.value,
+            overallDiscountType: discounts.overallDiscount.type,
+            overallDiscountValue: discounts.overallDiscount.value,
+            includeTax,
+            validityDays,
+            selectedServices,
+            selectedPackage: includePackage ? selectedPackage : null,
+            selectedPackageIndex: includePackage ? selectedPackageIndex : null,
+            discounts,
+          },
+          encodedData: btoa(JSON.stringify(proposalDataWithSnapshots)),
+        }),
+      });
 
-      console.log("Generated Order ID:", orderId); // Add logging for debugging
-
-      // Save the proposal with the full data snapshots and order ID
-      const { data: proposal, error: proposalError } = await supabase
-        .from("proposals")
-        .insert({
-          client_id: clientId,
-          title: `Proposal for ${companyName}`,
-          client_name: clientName,
-          company_name: companyName,
-          proposal_date: proposalDate,
-          additional_info: additionalInfo || null,
-          include_package: includePackage,
-          // These are just for filtering or quick access
-          package_id: includePackage ? selectedPackageId : null,
-          package_discount_type: discounts.packageDiscount.type,
-          package_discount_value: discounts.packageDiscount.value,
-          overall_discount_type: discounts.overallDiscount.type,
-          overall_discount_value: discounts.overallDiscount.value,
-          status: "draft",
-          // Store the full data with snapshots here
-          proposal_data: proposalDataWithSnapshots,
-          encoded_data: btoa(JSON.stringify(proposalDataWithSnapshots)),
-          // Add the order ID
-          order_id: orderId,
-          include_tax: includeTax,
-          validity_days: validityDays,
-        })
-        .select()
-        .single();
-
-      if (proposalError) {
-        throw proposalError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create proposal');
       }
 
-      // The service entries are no longer needed since we store full snapshots
-      // but we can still store them for relationship purposes if needed
-      if (selectedServices.length > 0) {
-        const serviceEntries = selectedServices.map((service) => {
-          const discount = discounts.serviceDiscounts[service.id] || {
-            type: "percentage",
-            value: 0,
-          };
+      const result = await response.json();
+      const proposal = result.proposal;
 
-          return {
-            proposal_id: proposal.id,
-            service_id: service.id,
-            discount_type: discount.type,
-            discount_value: discount.value,
-          };
-        });
-
-        const { error: servicesError } = await supabase
-          .from("proposal_services")
-          .insert(serviceEntries);
-
-        if (servicesError) {
-          throw servicesError;
-        }
-      }
-
-      // Create a link token
-      const token = crypto.randomUUID();
-
-      const { data: link, error: linkError } = await supabase
-        .from("proposal_links")
-        .insert({
-          proposal_id: proposal.id,
-          token,
-          views_count: 0,
-        })
-        .select()
-        .single();
-
-      if (linkError) {
-        throw linkError;
-      }
-
-      // Create shareable link
-      const baseUrl = window.location.origin;
-      const url = `${baseUrl}/proposal?token=${token}`;
-
-      setProposalLink(url);
+      // API route already handled link creation, just use the returned link
+      setProposalLink(proposal.link);
       setShowProposal(true);
     } catch (error) {
       console.error("Error saving proposal:", error);

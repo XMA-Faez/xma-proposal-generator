@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { createClient } from "@/utils/supabase/server";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { Toaster } from "@/components/ui/toaster";
 import QueryProvider from "./QueryProvider";
 
 const geistSans = Geist({
@@ -42,6 +43,7 @@ export default async function RootLayout({
       >
         <QueryProvider>
           <AuthProvider initialSession={session}>{children}</AuthProvider>
+          <Toaster />
         </QueryProvider>
       </body>
     </html>
