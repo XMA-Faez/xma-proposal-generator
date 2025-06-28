@@ -163,6 +163,87 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
     const acceptedRate = total > 0 ? (accepted / total) * 100 : 0;
     const paidRate = total > 0 ? (paid / total) * 100 : 0;
 
+    // Calculate revenue and discounts
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let totalBeforeDiscount = 0;
+
+    filteredProposals.forEach((proposal) => {
+      // Only count revenue for paid proposals
+      if (proposal.proposal_data && proposal.status?.toLowerCase() === 'paid') {
+        const data = proposal.proposal_data;
+        const discounts = data.discounts || {
+          packageDiscount: { type: "percentage", value: 0 },
+          serviceDiscounts: {},
+          overallDiscount: { type: "percentage", value: 0 },
+        };
+
+        // Calculate package price
+        let packagePrice = 0;
+        let discountedPackagePrice = 0;
+        
+        if (data.includePackage !== false && data.selectedPackage) {
+          packagePrice = parseInt(data.selectedPackage.price?.toString().replace(/,/g, '') || '0');
+          
+          // Apply package discount
+          if (discounts.packageDiscount.type === 'percentage') {
+            discountedPackagePrice = packagePrice * (1 - discounts.packageDiscount.value / 100);
+          } else {
+            discountedPackagePrice = packagePrice - discounts.packageDiscount.value;
+          }
+          discountedPackagePrice = Math.max(0, discountedPackagePrice);
+        }
+
+        // Calculate services price
+        let servicesPrice = 0;
+        let discountedServicesPrice = 0;
+        
+        if (Array.isArray(data.selectedServices)) {
+          data.selectedServices.forEach((service) => {
+            const servicePrice = parseInt(service.price?.toString().replace(/,/g, '') || '0');
+            servicesPrice += servicePrice;
+            
+            // Apply service discount
+            const serviceDiscount = discounts.serviceDiscounts?.[service.id] || { type: "percentage", value: 0 };
+            let discountedServicePrice = servicePrice;
+            
+            if (serviceDiscount.type === 'percentage') {
+              discountedServicePrice = servicePrice * (1 - serviceDiscount.value / 100);
+            } else {
+              discountedServicePrice = servicePrice - serviceDiscount.value;
+            }
+            
+            discountedServicesPrice += Math.max(0, discountedServicePrice);
+          });
+        }
+
+        // Calculate subtotal after package and service discounts
+        const subtotal = discountedPackagePrice + discountedServicesPrice;
+        
+        // Apply overall discount
+        let finalPriceBeforeTax = subtotal;
+        if (discounts.overallDiscount.type === 'percentage') {
+          finalPriceBeforeTax = subtotal * (1 - discounts.overallDiscount.value / 100);
+        } else {
+          finalPriceBeforeTax = subtotal - discounts.overallDiscount.value;
+        }
+        finalPriceBeforeTax = Math.max(0, finalPriceBeforeTax);
+
+        // Add tax if applicable
+        const includeTax = data.includeTax !== false;
+        const taxAmount = includeTax ? finalPriceBeforeTax * 0.05 : 0;
+        const finalPrice = finalPriceBeforeTax + taxAmount;
+
+        // Calculate total discount amount
+        const originalTotal = packagePrice + servicesPrice;
+        const discountAmount = originalTotal - finalPriceBeforeTax;
+
+        totalBeforeDiscount += originalTotal;
+        totalDiscount += discountAmount;
+        totalRevenue += finalPrice;
+      }
+    });
+
     return {
       total,
       statusCounts,
@@ -171,6 +252,13 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
         close: closeRate,
         accepted: acceptedRate,
         paid: paidRate,
+      },
+      revenue: {
+        total: totalRevenue,
+        totalBeforeDiscount,
+        totalDiscount,
+        averagePerProposal: paid > 0 ? totalRevenue / paid : 0,
+        discountPercentage: totalBeforeDiscount > 0 ? (totalDiscount / totalBeforeDiscount) * 100 : 0,
       },
       chartData: {
         status: [
@@ -284,6 +372,47 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.rates.paid.toFixed(1)}%</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Revenue Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.total))}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Discounts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.totalDiscount))}</div>
+            <div className="text-xs text-zinc-500 mt-1">{metrics.revenue.discountPercentage.toFixed(1)}% of original</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Average Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.averagePerProposal))}</div>
+            <div className="text-xs text-zinc-500 mt-1">per paid proposal</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Revenue Before Discount</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.totalBeforeDiscount))}</div>
           </CardContent>
         </Card>
       </div>
