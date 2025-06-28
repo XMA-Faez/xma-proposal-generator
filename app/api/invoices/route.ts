@@ -19,7 +19,7 @@ const COMPANY_INFO = {
 export async function POST(request: Request) {
   try {
     // Require admin authentication
-    const { error: authError } = await requireAdmin();
+    const { user, error: authError } = await requireAdmin();
     if (authError) return authError;
 
     const supabase = await createClient();
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         vat_amount: vatAmount,
         total_amount: totalAmount,
         status: "draft",
-        created_by: user.id
+        created_by: user!.id
       })
       .select()
       .single();
