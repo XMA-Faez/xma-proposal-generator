@@ -143,8 +143,8 @@ const ProposalPage = () => {
           // Merge fresh database data with proposal_data
           const enhancedProposalData = {
             ...proposal.proposal_data,
-            // Override with fresh package data from database
-            selectedPackage: proposal.package,
+            // Use package from database if available, otherwise use from proposal_data
+            selectedPackage: proposal.package || proposal.proposal_data?.selectedPackage,
             includePackage: proposal.include_package,
             // Update services with fresh data
             selectedServices: proposal.proposal_services?.map(ps => ({
@@ -155,6 +155,7 @@ const ProposalPage = () => {
               }
             })) || proposal.proposal_data?.selectedServices || []
           };
+          console.log(enhancedProposalData)
 
           return {
             proposalData: enhancedProposalData,

@@ -31,12 +31,20 @@ export async function GET(
       );
     }
     
-    // Get the proposal
+    // Get the proposal with package and services data
     const { data: proposal, error: proposalError } = await supabase
       .from('proposals')
       .select(`
         *,
-        client:clients(*)
+        client:clients(*),
+        package:packages(
+          *,
+          features:package_features(*)
+        ),
+        proposal_services(
+          *,
+          service:services(*)
+        )
       `)
       .eq('id', link.proposal_id)
       .single();
