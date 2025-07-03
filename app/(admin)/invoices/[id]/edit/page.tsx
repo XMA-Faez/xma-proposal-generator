@@ -44,8 +44,10 @@ export default async function InvoiceEditPage({ params }: InvoiceEditPageProps) 
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <InvoiceEditForm invoice={invoice} />
+    <div className="min-h-screen bg-zinc-900">
+      <div className="container mx-auto py-8">
+        <InvoiceEditForm invoice={invoice} />
+      </div>
     </div>
   );
 }

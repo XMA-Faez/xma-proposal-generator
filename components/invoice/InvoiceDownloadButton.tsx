@@ -24,44 +24,85 @@ export const InvoiceDownloadButton: React.FC<InvoiceDownloadButtonProps> = ({
   }, []);
 
   const handleDownload = async () => {
-    if (!mounted) return;
+    if (!mounted || typeof window === 'undefined') return;
     
     setIsGenerating(true);
     try {
-      // Dynamic import on client side only
-      const React = await import("react");
-      const { pdf } = await import("@react-pdf/renderer");
-      const { InvoicePDF } = await import("./InvoicePDF");
+      // Ensure we're in the browser environment
+      if (typeof document === 'undefined') {
+        throw new Error('PDF generation is only available in the browser');
+      }
+
+      console.log('Starting PDF generation...');
+      console.log('Invoice data:', invoice);
       
-      console.log('Creating PDF document...');
+      // Dynamic import with error handling
+      const [React, { pdf }, { InvoicePDF }] = await Promise.all([
+        import("react"),
+        import("@react-pdf/renderer"),
+        import("./InvoicePDF")
+      ]);
       
-      // Create the PDF document element
-      const pdfDocument = React.createElement(InvoicePDF, { invoice });
+      console.log('Modules imported successfully');
       
-      console.log('Generating PDF blob...');
+      // Validate invoice data
+      if (!invoice || !invoice.invoiceNumber) {
+        throw new Error('Invalid invoice data');
+      }
+
+      // Ensure line items exist and are properly formatted
+      const processedInvoice = {
+        ...invoice,
+        lineItems: invoice.lineItems || [],
+        subtotal: invoice.subtotal || 0,
+        vatAmount: invoice.vatAmount || 0,
+        totalAmount: invoice.totalAmount || 0,
+      };
       
-      // Generate PDF blob
-      const blob = await pdf(pdfDocument).toBlob();
+      // Create the PDF document element with proper React context
+      const pdfDocument = React.createElement(InvoicePDF, { invoice: processedInvoice });
       
-      console.log('PDF blob generated successfully');
+      console.log('PDF document created, generating blob...');
       
-      // Create download link
+      // Generate PDF with timeout
+      const pdfInstance = pdf(pdfDocument);
+      const blob = await Promise.race([
+        pdfInstance.toBlob(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('PDF generation timeout')), 30000)
+        )
+      ]);
+      
+      console.log('PDF blob generated successfully, size:', blob.size);
+      
+      // Validate blob
+      if (!blob || blob.size === 0) {
+        throw new Error('Generated PDF is empty');
+      }
+      
+      // Create and trigger download
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Invoice_${invoice.invoiceNumber}_${invoice.clientCompany.replace(/\s+/g, "_")}.pdf`;
+      link.download = `Invoice_${invoice.invoiceNumber}_${invoice.clientCompany?.replace(/\s+/g, "_") || 'Unknown'}.pdf`;
+      
+      // Ensure the link is properly attached to the document
       document.body.appendChild(link);
       link.click();
       
-      // Cleanup
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Cleanup with delay to ensure download starts
+      setTimeout(() => {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+        URL.revokeObjectURL(url);
+      }, 100);
       
-      console.log('PDF download completed');
+      console.log('PDF download initiated successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      console.error('Error details:', error);
-      alert(`Failed to generate PDF: ${error.message || 'Unknown error'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to generate PDF: ${errorMessage}`);
     } finally {
       setIsGenerating(false);
     }

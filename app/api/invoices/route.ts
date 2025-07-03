@@ -23,71 +23,181 @@ export async function POST(request: Request) {
     if (authError) return authError;
 
     const supabase = await createClient();
+    const body = await request.json();
+    
+    // Check if this is a proposal-based invoice or standalone
+    if (body.proposalId) {
+      // Original proposal-based invoice creation
+      const { proposalId, dueDate, lineItems, clientTrn, clientAddress } = body;
 
-    const body: CreateInvoiceRequest = await request.json();
-    const { proposalId, dueDate, lineItems, clientTrn, clientAddress } = body;
+      // Fetch proposal data
+      const { data: proposal, error: proposalError } = await supabase
+        .from("proposals")
+        .select("*")
+        .eq("id", proposalId)
+        .single();
 
-    // Fetch proposal data
-    const { data: proposal, error: proposalError } = await supabase
-      .from("proposals")
-      .select("*")
-      .eq("id", proposalId)
-      .single();
+      if (proposalError || !proposal) {
+        return NextResponse.json({ error: "Proposal not found" }, { status: 404 });
+      }
 
-    if (proposalError || !proposal) {
-      return NextResponse.json({ error: "Proposal not found" }, { status: 404 });
-    }
+      // Calculate totals
+      const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + item.lineTotal, 0);
+      const vatAmount = subtotal * 0.05; // 5% VAT
+      const totalAmount = subtotal + vatAmount;
 
-    // Calculate totals
-    const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + item.lineTotal, 0);
-    const vatAmount = subtotal * 0.05; // 5% VAT
-    const totalAmount = subtotal + vatAmount;
+      // Generate invoice number
+      const { data: invoiceNumber } = await supabase.rpc("generate_monthly_invoice_number");
 
-    // Generate invoice number
-    const { data: invoiceNumber } = await supabase.rpc("generate_invoice_number");
+      // Create invoice
+      const { data: invoice, error: invoiceError } = await supabase
+        .from("invoices")
+        .insert({
+          invoice_number: invoiceNumber,
+          proposal_id: proposalId,
+          order_id: proposal.order_id || "",
+          issuer_name: COMPANY_INFO.name,
+          issuer_address: COMPANY_INFO.address,
+          issuer_phone: COMPANY_INFO.phone,
+          issuer_trn: COMPANY_INFO.trn,
+          client_name: proposal.client_name,
+          client_company: proposal.company_name,
+          client_address: clientAddress || COMPANY_INFO.address, // Default if not provided
+          client_trn: clientTrn,
+          issue_date: new Date().toISOString().split('T')[0],
+          due_date: dueDate,
+          currency: "AED",
+          line_items: lineItems,
+          bank_account_holder: COMPANY_INFO.bankAccountHolder,
+          iban: COMPANY_INFO.iban,
+          swift_code: COMPANY_INFO.swiftCode,
+          bank_address: COMPANY_INFO.bankAddress,
+          subtotal,
+          vat_amount: vatAmount,
+          total_amount: totalAmount,
+          status: "draft",
+          created_by: user!.id
+        })
+        .select()
+        .single();
 
-    // Create invoice
-    const { data: invoice, error: invoiceError } = await supabase
-      .from("invoices")
-      .insert({
-        invoice_number: invoiceNumber,
-        proposal_id: proposalId,
-        order_id: proposal.order_id || "",
-        issuer_name: COMPANY_INFO.name,
-        issuer_address: COMPANY_INFO.address,
-        issuer_phone: COMPANY_INFO.phone,
-        issuer_trn: COMPANY_INFO.trn,
-        client_name: proposal.client_name,
-        client_company: proposal.company_name,
-        client_address: clientAddress || COMPANY_INFO.address, // Default if not provided
-        client_trn: clientTrn,
-        issue_date: new Date().toISOString().split('T')[0],
-        due_date: dueDate,
-        currency: "AED",
-        line_items: lineItems,
-        bank_account_holder: COMPANY_INFO.bankAccountHolder,
-        iban: COMPANY_INFO.iban,
-        swift_code: COMPANY_INFO.swiftCode,
-        bank_address: COMPANY_INFO.bankAddress,
+      if (invoiceError) {
+        console.error("Invoice creation error:", invoiceError);
+        return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 });
+      }
+
+      return NextResponse.json(invoice);
+    } else {
+      // Standalone invoice creation
+      const {
+        client_name,
+        client_company,
+        client_address,
+        client_trn,
+        issue_date,
+        due_date,
+        line_items,
         subtotal,
-        vat_amount: vatAmount,
-        total_amount: totalAmount,
-        status: "draft",
-        created_by: user!.id
-      })
-      .select()
-      .single();
+        vat_amount,
+        total_amount,
+        notes,
+        is_recurring,
+        recurring_interval,
+        recurring_start_date
+      } = body;
 
-    if (invoiceError) {
-      console.error("Invoice creation error:", invoiceError);
-      return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 });
+      // Generate invoice number
+      const { data: invoiceNumber } = await supabase.rpc("generate_monthly_invoice_number");
+
+      // Generate a standalone order ID
+      const orderDate = new Date();
+      const year = orderDate.getFullYear();
+      const month = String(orderDate.getMonth() + 1).padStart(2, '0');
+      const timestamp = Date.now().toString().slice(-5);
+      const orderId = `XMA-${year}-${month}-${timestamp}`;
+
+      // Create invoice
+      const { data: invoice, error: invoiceError } = await supabase
+        .from("invoices")
+        .insert({
+          invoice_number: invoiceNumber,
+          order_id: orderId,
+          issuer_name: COMPANY_INFO.name,
+          issuer_address: COMPANY_INFO.address,
+          issuer_phone: COMPANY_INFO.phone,
+          issuer_trn: COMPANY_INFO.trn,
+          client_name,
+          client_company,
+          client_address,
+          client_trn,
+          issue_date,
+          due_date,
+          currency: "AED",
+          line_items,
+          bank_account_holder: COMPANY_INFO.bankAccountHolder,
+          iban: COMPANY_INFO.iban,
+          swift_code: COMPANY_INFO.swiftCode,
+          bank_address: COMPANY_INFO.bankAddress,
+          subtotal,
+          vat_amount,
+          total_amount,
+          status: "draft",
+          notes,
+          is_recurring,
+          recurring_interval,
+          recurring_start_date,
+          created_by: user!.id
+        })
+        .select()
+        .single();
+
+      if (invoiceError) {
+        console.error("Invoice creation error:", invoiceError);
+        return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 });
+      }
+
+      // If it's a recurring invoice, create a recurring template
+      if (is_recurring) {
+        await supabase
+          .from("recurring_invoice_templates")
+          .insert({
+            name: `Recurring invoice for ${client_company}`,
+            client_name,
+            client_company,
+            client_address,
+            client_trn,
+            line_items,
+            recurring_interval,
+            next_invoice_date: calculateNextInvoiceDate(recurring_start_date, recurring_interval),
+            is_active: true,
+            created_by: user!.id
+          });
+      }
+
+      return NextResponse.json(invoice);
     }
-
-    return NextResponse.json({ invoice });
   } catch (error) {
     console.error("Error creating invoice:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+function calculateNextInvoiceDate(startDate: string, interval: string): string {
+  const date = new Date(startDate);
+  
+  switch (interval) {
+    case 'monthly':
+      date.setMonth(date.getMonth() + 1);
+      break;
+    case 'quarterly':
+      date.setMonth(date.getMonth() + 3);
+      break;
+    case 'annually':
+      date.setFullYear(date.getFullYear() + 1);
+      break;
+  }
+  
+  return date.toISOString().split('T')[0];
 }
 
 export async function GET(request: Request) {

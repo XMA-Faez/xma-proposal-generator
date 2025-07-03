@@ -21,7 +21,13 @@ export const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice }) => 
   const [clientAddress, setClientAddress] = useState(invoice.client_address || "");
   const [dueDate, setDueDate] = useState(invoice.due_date);
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>(
-    invoice.line_items || []
+    invoice.line_items?.map((item: any) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unit_price || item.unitPrice || 0,
+      taxRate: item.taxRate || 5,
+      lineTotal: item.total || item.lineTotal || 0,
+    })) || []
   );
 
   const addLineItem = () => {
@@ -77,7 +83,12 @@ export const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice }) => 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           dueDate,
-          lineItems: lineItems.filter(item => item.description && item.lineTotal > 0),
+          lineItems: lineItems.filter(item => item.description && item.lineTotal > 0).map(item => ({
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unitPrice,
+            total: item.lineTotal,
+          })),
           clientTrn: clientTrn || undefined,
           clientAddress: clientAddress || undefined,
         }),

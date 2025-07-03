@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import type { Database } from "@/types/supabase";
 import type { InvoiceData } from "@/types/invoice";
-import { InvoiceDownloadButton } from "@/components/invoice/InvoiceDownloadButton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import InvoiceActions from "@/components/invoice/InvoiceActions";
 
 interface InvoicePageProps {
   params: Promise<{
@@ -74,7 +74,10 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
     status: invoice.status as any,
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null || isNaN(amount)) {
+      return "AED 0.00";
+    }
     return `AED ${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
   };
 
@@ -94,13 +97,14 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   };
 
   return (
-    <div className="container mx-auto py-8 min-h-screen text-white">
+    <div className="min-h-screen bg-zinc-900">
+      <div className="container mx-auto py-8 text-white">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/proposals">
+          <Link href="/invoices">
             <Button variant="ghost" size="sm" className="text-white hover:bg-zinc-800">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Proposals
+              Back to Invoices
             </Button>
           </Link>
           <h1 className="text-2xl font-bold text-white">Invoice #{invoice.invoice_number}</h1>
@@ -108,14 +112,12 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
             {invoice.status || "draft"}
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href={`/invoices/${invoice.id}/edit`}>
-            <Button variant="outline" size="sm" className="border-zinc-600 bg-zinc-700 text-white hover:bg-zinc-600">
-              Edit Invoice
-            </Button>
-          </Link>
-          <InvoiceDownloadButton invoice={invoiceData} />
-        </div>
+        <InvoiceActions 
+          invoiceId={invoice.id}
+          invoiceNumber={invoice.invoice_number}
+          invoiceStatus={invoice.status || "draft"}
+          invoiceData={invoiceData}
+        />
       </div>
 
       <div className="bg-zinc-800 rounded-lg shadow-md p-8">
@@ -170,8 +172,8 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
               <tr key={index} className="border-b border-zinc-700">
                 <td className="py-3 text-white">{item.description}</td>
                 <td className="text-center py-3 text-white">{item.quantity}</td>
-                <td className="text-right py-3 text-white">{formatCurrency(item.unitPrice)}</td>
-                <td className="text-right py-3 text-white">{formatCurrency(item.lineTotal)}</td>
+                <td className="text-right py-3 text-white">{formatCurrency(item.unit_price || item.unitPrice)}</td>
+                <td className="text-right py-3 text-white">{formatCurrency(item.total || item.lineTotal)}</td>
               </tr>
             ))}
           </tbody>
@@ -217,6 +219,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

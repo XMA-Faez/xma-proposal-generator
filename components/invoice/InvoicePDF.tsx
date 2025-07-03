@@ -267,7 +267,10 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
     });
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null || isNaN(amount)) {
+      return "AED 0.00";
+    }
     return `AED ${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
   };
 
@@ -368,10 +371,10 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
                 {item.quantity}
               </Text>
               <Text style={[styles.tableText, styles.priceCol]}>
-                {formatCurrency(item.unitPrice)}
+                {formatCurrency((item as any).unit_price || (item as any).unitPrice)}
               </Text>
               <Text style={[styles.tableText, styles.totalCol]}>
-                {formatCurrency(item.lineTotal)}
+                {formatCurrency((item as any).total || (item as any).lineTotal)}
               </Text>
             </View>
           ))}
