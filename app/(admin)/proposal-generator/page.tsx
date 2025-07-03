@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import ProposalGeneratorClient from '@/components/proposal/ProposalGeneratorClient';
+import ProposalGeneratorTabs from '@/components/proposal/ProposalGeneratorTabs';
 import { supabase } from '@/lib/supabase';
 
 export const metadata: Metadata = {
@@ -45,9 +45,5 @@ export default async function ProposalGeneratorPage() {
   // Fetch initial data on the server
   const initialData = await getInitialData();
 
-  return (
-    <div className="bg-zinc-900 min-h-screen">
-      <ProposalGeneratorClient initialData={initialData} />
-    </div>
-  );
+  return <ProposalGeneratorTabs initialData={initialData} />;
 }

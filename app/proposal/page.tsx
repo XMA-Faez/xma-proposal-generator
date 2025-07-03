@@ -4,12 +4,13 @@ import { decodeProposalData } from "@/lib/proposalUtils";
 import ProposalClient from "./ProposalClient";
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const token = searchParams.token as string | undefined;
-  const proposal = searchParams.proposal as string | undefined;
+  const params = await searchParams;
+  const token = params.token as string | undefined;
+  const proposal = params.proposal as string | undefined;
 
   let title = "Proposal - XMA Agency";
   let description = "View your custom proposal from XMA Agency";

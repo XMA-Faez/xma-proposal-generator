@@ -28,7 +28,7 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
   setValidityDays,
 }) => {
   return (
-    <div className="bg-zinc-900 rounded-lg p-6 mb-8">
+    <div className="bg-zinc-900 rounded-lg mb-8">
       <h2 className="text-xl font-bold mb-4 text-red-500">
         Client Information
       </h2>

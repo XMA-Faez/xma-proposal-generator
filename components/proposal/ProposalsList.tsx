@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProposalCard from "./ProposalCard";
@@ -26,6 +26,11 @@ export default function ProposalsList({
   const filter = searchParams.get("filter") || "all";
   const searchQuery = searchParams.get("search") || "";
   const createdBy = searchParams.get("created_by");
+  
+  // Local state for search input
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -65,6 +70,27 @@ export default function ProposalsList({
   useEffect(() => {
     refreshProposals();
   }, [filter, createdBy]);
+
+  // Sync local search query with URL search query when it changes externally
+  useEffect(() => {
+    setLocalSearchQuery(searchQuery);
+  }, [searchQuery]);
+
+  // Handle search input change with debouncing
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocalSearchQuery(value);
+    
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Set new timeout
+    searchTimeoutRef.current = setTimeout(() => {
+      updateUrlParams(undefined, value);
+    }, 300);
+  };
 
   // Function to update URL parameters
   const updateUrlParams = (newFilter?: string, newSearch?: string) => {
@@ -112,34 +138,36 @@ export default function ProposalsList({
   };
 
   // Filter proposals based on status and search query
-  const filteredProposals = proposals.filter((proposal) => {
-    // Archived filter
-    if (filter === "archived") {
-      return proposal.archived_at !== null;
-    } else if (filter !== "all") {
-      // Regular status filter (only for non-archived)
-      return proposal.archived_at === null && proposal.status?.toLowerCase() === filter;
-    } else {
-      // "all" filter - only show non-archived
-      return proposal.archived_at === null;
-    }
-  }).filter((proposal) => {
-    // Search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      const clientName = proposal.client?.name?.toLowerCase() || "";
-      const companyName = proposal.client?.company_name?.toLowerCase() || proposal.company_name?.toLowerCase() || "";
-      const orderId = proposal.order_id?.toLowerCase() || "";
+  const filteredProposals = useMemo(() => {
+    return proposals.filter((proposal) => {
+      // Archived filter
+      if (filter === "archived") {
+        return proposal.archived_at !== null;
+      } else if (filter !== "all") {
+        // Regular status filter (only for non-archived)
+        return proposal.archived_at === null && proposal.status?.toLowerCase() === filter;
+      } else {
+        // "all" filter - only show non-archived
+        return proposal.archived_at === null;
+      }
+    }).filter((proposal) => {
+      // Search filter - use localSearchQuery for immediate feedback
+      if (localSearchQuery.trim()) {
+        const query = localSearchQuery.toLowerCase();
+        const clientName = proposal.client?.name?.toLowerCase() || "";
+        const companyName = proposal.client?.company_name?.toLowerCase() || proposal.company_name?.toLowerCase() || "";
+        const orderId = proposal.order_id?.toLowerCase() || "";
+        
+        return (
+          clientName.includes(query) ||
+          companyName.includes(query) ||
+          orderId.includes(query)
+        );
+      }
       
-      return (
-        clientName.includes(query) ||
-        companyName.includes(query) ||
-        orderId.includes(query)
-      );
-    }
-    
-    return true;
-  });
+      return true;
+    });
+  }, [proposals, filter, localSearchQuery]);
 
   // Group proposals by month
   const groupProposalsByMonth = (proposals: any[]) => {
@@ -213,8 +241,8 @@ export default function ProposalsList({
           <input
             type="text"
             placeholder="Search by client name, company, or order ID..."
-            value={searchQuery}
-            onChange={(e) => updateUrlParams(undefined, e.target.value)}
+            value={localSearchQuery}
+            onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:border-red-600"
           />
         </div>

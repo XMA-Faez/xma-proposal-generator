@@ -28,7 +28,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
   includePackage,
 }) => {
   return (
-    <div className="bg-zinc-900 rounded-lg p-6 mb-8">
+    <div className="bg-zinc-900 rounded-lg mb-8">
       <h2 className="text-xl font-bold mb-4 text-red-500">
         {includePackage ? "Additional Services (Optional)" : "Services"}
       </h2>

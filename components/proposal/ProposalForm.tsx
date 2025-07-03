@@ -10,8 +10,15 @@ import GeneratorSummary from "./GeneratorSummary";
 import ProposalSuccess from "./ProposalSuccess";
 
 // Main Component
-function ProposalForm({ initialData, editMode = false, existingProposal = null, onSubmit = null }) {
-  const [includeTax, setIncludeTax] = useState(existingProposal?.includeTax ?? true);
+function ProposalForm({
+  initialData,
+  editMode = false,
+  existingProposal = null,
+  onSubmit = null,
+}) {
+  const [includeTax, setIncludeTax] = useState(
+    existingProposal?.includeTax ?? true,
+  );
   // Use React Query with initialData
   const packagesQuery = useQuery({
     queryKey: ["packages"],
@@ -48,28 +55,42 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
   });
 
   // State for form inputs
-  const [clientName, setClientName] = useState(existingProposal?.clientName || "");
-  const [companyName, setCompanyName] = useState(existingProposal?.companyName || "");
+  const [clientName, setClientName] = useState(
+    existingProposal?.clientName || "",
+  );
+  const [companyName, setCompanyName] = useState(
+    existingProposal?.companyName || "",
+  );
   const [proposalDate, setProposalDate] = useState(
     existingProposal?.proposalDate || new Date().toISOString().split("T")[0],
   );
-  const [additionalInfo, setAdditionalInfo] = useState(existingProposal?.additionalInfo || "");
-  const [selectedPackageId, setSelectedPackageId] = useState(existingProposal?.selectedPackage?.id || null);
-  const [selectedServices, setSelectedServices] = useState(existingProposal?.selectedServices || []);
+  const [additionalInfo, setAdditionalInfo] = useState(
+    existingProposal?.additionalInfo || "",
+  );
+  const [selectedPackageId, setSelectedPackageId] = useState(
+    existingProposal?.selectedPackage?.id || null,
+  );
+  const [selectedServices, setSelectedServices] = useState(
+    existingProposal?.selectedServices || [],
+  );
   const [showProposal, setShowProposal] = useState(false);
   const [proposalLink, setProposalLink] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
-  const [includePackage, setIncludePackage] = useState(existingProposal?.includePackage ?? true);
+  const [includePackage, setIncludePackage] = useState(
+    existingProposal?.includePackage ?? true,
+  );
   const [discounts, setDiscounts] = useState(
     existingProposal?.discounts || {
       packageDiscount: { type: "percentage", value: 0 },
       serviceDiscounts: {},
       overallDiscount: { type: "percentage", value: 0 },
-    }
+    },
   );
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const [validityDays, setValidityDays] = useState(existingProposal?.validityDays || 30);
+  const [validityDays, setValidityDays] = useState(
+    existingProposal?.validityDays || 30,
+  );
 
   // Set default selected package when packages are loaded
   useEffect(() => {
@@ -198,7 +219,7 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
         includeTax,
         validityDays,
       };
-      
+
       try {
         await onSubmit(formData);
       } catch (error) {
@@ -273,10 +294,10 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
       }
 
       // Save the proposal via API route (which handles order ID generation and created_by)
-      const response = await fetch('/api/proposals', {
-        method: 'POST',
+      const response = await fetch("/api/proposals", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           proposalData: {
@@ -303,7 +324,7 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create proposal');
+        throw new Error(errorData.error || "Failed to create proposal");
       }
 
       const result = await response.json();
@@ -337,7 +358,7 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
   // Loading state
   if (packagesQuery.isLoading || servicesQuery.isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+      <div className="min-h-screen flex items-center justify-center text-white">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600 mb-4"></div>
           <p className="text-zinc-400">Loading packages and services...</p>
@@ -350,7 +371,7 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
   if (packagesQuery.isError || servicesQuery.isError) {
     const error = packagesQuery.error || servicesQuery.error;
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+      <div className="min-h-screen flex items-center justify-center text-white">
         <div className="text-center max-w-md">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -387,7 +408,7 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
     !showProposal
   ) {
     return (
-      <div className="min-h-screen pt-40 flex items-center justify-center bg-zinc-950 text-white">
+      <div className="min-h-screen pt-40 flex items-center justify-center text-white">
         <div className="text-center max-w-md">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -427,108 +448,101 @@ function ProposalForm({ initialData, editMode = false, existingProposal = null, 
     packagesQuery.data.find((p) => p.id === selectedPackageId) || null;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen text-white">
+      <div className="mx-auto">
         {!showProposal ? (
           // Proposal Generator Form
-          <div>
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
-                Proposal Generator
-              </h1>
-              <p className="text-zinc-400 mt-2">
-                Create a customized proposal for your client
-              </p>
-            </div>
+          <form onSubmit={generateProposal} className="">
+            {/* Client Information */}
+            <ClientInformationForm
+              clientName={clientName}
+              setClientName={setClientName}
+              companyName={companyName}
+              setCompanyName={setCompanyName}
+              proposalDate={proposalDate}
+              setProposalDate={setProposalDate}
+              additionalInfo={additionalInfo}
+              setAdditionalInfo={setAdditionalInfo}
+              validityDays={validityDays}
+              setValidityDays={setValidityDays}
+            />
 
-            <form onSubmit={generateProposal} className="max-w-6xl mx-auto">
-              {/* Client Information */}
-              <ClientInformationForm
-                clientName={clientName}
-                setClientName={setClientName}
-                companyName={companyName}
-                setCompanyName={setCompanyName}
-                proposalDate={proposalDate}
-                setProposalDate={setProposalDate}
-                additionalInfo={additionalInfo}
-                setAdditionalInfo={setAdditionalInfo}
-                validityDays={validityDays}
-                setValidityDays={setValidityDays}
-              />
+            {/* Package Selection */}
+            <PackageSelection
+              packages={packagesQuery.data}
+              selectedPackageId={selectedPackageId}
+              setSelectedPackageId={setSelectedPackageId}
+              includePackage={includePackage}
+              setIncludePackage={setIncludePackage}
+            />
 
-              {/* Package Selection */}
-              <PackageSelection
-                packages={packagesQuery.data}
-                selectedPackageId={selectedPackageId}
-                setSelectedPackageId={setSelectedPackageId}
+            {/* Additional Services */}
+            <ServiceSelection
+              services={servicesQuery.data}
+              selectedServices={selectedServices}
+              toggleService={toggleService}
+              includePackage={includePackage}
+            />
+
+            {/* Summary and Discounts Section */}
+            {(includePackage || selectedServices.length > 0) && (
+              <GeneratorSummary
                 includePackage={includePackage}
-                setIncludePackage={setIncludePackage}
-              />
-
-              {/* Additional Services */}
-              <ServiceSelection
-                services={servicesQuery.data}
+                selectedPackage={selectedPackage}
                 selectedServices={selectedServices}
-                toggleService={toggleService}
-                includePackage={includePackage}
+                discounts={discounts}
+                includeTax={includeTax}
+                onDiscountChange={handleDiscountChange}
+                onTaxToggle={setIncludeTax}
               />
+            )}
 
-              {/* Summary and Discounts Section */}
-              {(includePackage || selectedServices.length > 0) && (
-                <GeneratorSummary
-                  includePackage={includePackage}
-                  selectedPackage={selectedPackage}
-                  selectedServices={selectedServices}
-                  discounts={discounts}
-                  includeTax={includeTax}
-                  onDiscountChange={handleDiscountChange}
-                  onTaxToggle={setIncludeTax}
-                />
-              )}
-
-              {/* Submit Button */}
-              <div className="text-center">
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSaving ? (
-                    <div className="flex items-center">
-                      <svg
-                        className="animate-spin h-5 w-5 mr-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      {editMode ? "Updating Proposal..." : "Generating Proposal..."}
-                    </div>
-                  ) : (
-                    editMode ? "Update Proposal" : "Generate Proposal"
-                  )}
-                </button>
-                {saveError && (
-                  <div className="mt-2 text-red-500 text-sm">
-                    Error: {saveError}
+            {/* Submit Button */}
+            <div className="text-center">
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    {editMode
+                      ? "Updating Proposal..."
+                      : "Generating Proposal..."}
                   </div>
+                ) : editMode ? (
+                  "Update Proposal"
+                ) : (
+                  "Generate Proposal"
                 )}
-              </div>
-            </form>
-          </div>
+              </button>
+              {saveError && (
+                <div className="mt-2 text-red-500 text-sm">
+                  Error: {saveError}
+                </div>
+              )}
+            </div>
+          </form>
         ) : (
           // Proposal Success View
           <ProposalSuccess
