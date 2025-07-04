@@ -29,7 +29,7 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
 }) => {
   return (
     <div className="bg-zinc-900 rounded-lg mb-8">
-      <h2 className="text-xl font-bold mb-4 text-red-500">
+      <h2 className="text-xl font-bold mb-4">
         Client Information
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

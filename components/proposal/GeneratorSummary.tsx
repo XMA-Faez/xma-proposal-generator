@@ -116,7 +116,7 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
   return (
     <div className="bg-zinc-900 rounded-lg mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-red-500">Summary & Discounts</h2>
+        <h2 className="text-xl font-bold">Summary & Discounts</h2>
         <button
           onClick={() => setShowDiscounts(!showDiscounts)}
           className="text-sm bg-zinc-700 hover:bg-zinc-600 px-3 py-1 rounded text-zinc-300 transition-colors"

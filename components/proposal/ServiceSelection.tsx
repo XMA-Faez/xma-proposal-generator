@@ -29,7 +29,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
 }) => {
   return (
     <div className="bg-zinc-900 rounded-lg mb-8">
-      <h2 className="text-xl font-bold mb-4 text-red-500">
+      <h2 className="text-xl font-bold mb-4">
         {includePackage ? "Additional Services (Optional)" : "Services"}
       </h2>
       <div className="space-y-4">
