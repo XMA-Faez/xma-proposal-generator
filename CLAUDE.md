@@ -3,13 +3,6 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 use Bun for installing any packages, running scripts, and building the project.
 
-## Build Commands
-- `bun run dev`: Start development server
-- `bun run build`: Build for production
-- `bun run start`: Start production server
-- `bun run lint`: Run ESLint
-- `bun run seed:admin`: Create admin user (takes email and password arguments)
-
 ## Code Style Guidelines
 - **TypeScript**: Strict typing required, follow tsconfig.json settings
 - **ESLint**: Next.js core-web-vitals and typescript rules
@@ -126,3 +119,8 @@ Each can be percentage or fixed amount.
 
 ### Testing Note
 **No automated tests exist** - TypeScript and ESLint errors are ignored in build configuration. Manual testing is required for all changes.
+
+## Developer Personas
+- Imagine you are expert frontend developer in fortune 500.
+- Follow uiux principles and best practices.
+- Focus on maintainability, scalability, and performance.
