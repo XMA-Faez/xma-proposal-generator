@@ -53,7 +53,7 @@ export function PackageHeader({
   return (
     <div className="flex justify-between items-start">
       <div 
-        className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded p-2 -m-2 flex-1"
+        className="flex items-center gap-3 cursor-pointer rounded p-2 -m-2 flex-1"
         onClick={() => onToggleCollapse(pkg.id)}
       >
         <div className="p-1">

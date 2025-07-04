@@ -86,7 +86,7 @@ export function SortableFeature({
       style={style}
       className={`flex items-center gap-3 p-2 rounded transition-all ${
         isSelected
-          ? "bg-blue-50 border-blue-200"
+          ? "bg-slate-900 border-blue-200"
           : "hover:bg-zinc-900 border-transparent hover:border-zinc-700"
       } border`}
     >
@@ -196,43 +196,6 @@ export function SortableFeature({
         >
           {feature.text}
         </p>
-      )}
-
-      {isEditMode ? (
-        <Select
-          value={feature.color || "default"}
-          onValueChange={(value) => {
-            setPackagesAction((prev) =>
-              prev.map((p) =>
-                p.id === packageId
-                  ? {
-                      ...p,
-                      features: p.features.map((f) =>
-                        f.id === feature.id
-                          ? { ...f, color: value === "default" ? null : value }
-                          : f,
-                      ),
-                    }
-                  : p,
-              ),
-            );
-            markAsChanged();
-          }}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="default">Default</SelectItem>
-            <SelectItem value="green">Green</SelectItem>
-            <SelectItem value="blue">Blue</SelectItem>
-            <SelectItem value="yellow">Yellow</SelectItem>
-          </SelectContent>
-        </Select>
-      ) : (
-        <div className="w-32 text-xs text-gray-500">
-          {feature.color || "Default"}
-        </div>
       )}
 
       <Button

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { useAuth } from "@/components/auth/AuthProvider";
+import Image from "next/image";
 
 interface NavbarProps {
   user: User;
@@ -40,10 +41,12 @@ export default function Navbar({ user, userRole }: NavbarProps) {
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
             <Link href="/proposal-generator">
-              <img
+              <Image
                 src="/XMA-White.svg"
                 alt="XMA Agency Logo"
                 className="h-8 w-auto"
+                width={32}
+                height={32}
               />
             </Link>
           </div>
@@ -118,7 +121,15 @@ export default function Navbar({ user, userRole }: NavbarProps) {
               </button>
 
               {isProfileOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-zinc-700 ring-1 ring-black ring-opacity-5">
+                <div className="origin-top-right overflow-hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-zinc-700 ring-1 ring-black ring-opacity-5">
+                  <div>
+                    <Link 
+                      href="/admin/packages"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-zinc-600"
+                      >
+                      Packages
+                    </Link>
+                  </div>
                   <div
                     className="py-1"
                     role="menu"
