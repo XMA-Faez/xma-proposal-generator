@@ -203,7 +203,7 @@ const ProposalPage = () => {
           };
 
           // Initialize service discounts
-          let initialDiscounts = normalizeDiscounts(normalizedData.discounts);
+          const initialDiscounts = normalizeDiscounts(normalizedData.discounts);
           
           if (
             !normalizedData.discounts && 

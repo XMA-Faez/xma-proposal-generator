@@ -48,6 +48,7 @@ export interface Database {
           order_index: number;
           package_id: string;
           text: string;
+          color: string | null;
         };
         Insert: {
           id?: string;
@@ -56,6 +57,7 @@ export interface Database {
           order_index: number;
           package_id: string;
           text: string;
+          color?: string | null;
         };
         Update: {
           id?: string;
@@ -64,6 +66,7 @@ export interface Database {
           order_index?: number;
           package_id?: string;
           text?: string;
+          color?: string | null;
         };
         Relationships: [
           {

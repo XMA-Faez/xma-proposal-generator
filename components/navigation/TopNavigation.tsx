@@ -10,7 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, ChevronDown, User } from "lucide-react";
+import { Bell, ChevronDown, User, Package } from "lucide-react";
+import Link from "next/link";
 import type { Database } from "@/types/supabase";
 
 type UserRole = Database["public"]["Tables"]["profiles"]["Row"]["role"];
@@ -103,6 +104,16 @@ export function TopNavigation({ userRole }: TopNavigationProps) {
               <User className="mr-2 h-4 w-4" />
               <span>Profile Settings</span>
             </DropdownMenuItem>
+            {userRole === "admin" && (
+              <>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/admin/packages">
+                    <Package className="mr-2 h-4 w-4" />
+                    <span>Package Management</span>
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="cursor-pointer text-red-600 focus:text-red-600"

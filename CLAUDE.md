@@ -1,13 +1,14 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+use Bun for installing any packages, running scripts, and building the project.
 
 ## Build Commands
-- `npm run dev`: Start development server
-- `npm run build`: Build for production
-- `npm run start`: Start production server
-- `npm run lint`: Run ESLint
-- `npm run seed:admin`: Create admin user (takes email and password arguments)
+- `bun run dev`: Start development server
+- `bun run build`: Build for production
+- `bun run start`: Start production server
+- `bun run lint`: Run ESLint
+- `bun run seed:admin`: Create admin user (takes email and password arguments)
 
 ## Code Style Guidelines
 - **TypeScript**: Strict typing required, follow tsconfig.json settings
