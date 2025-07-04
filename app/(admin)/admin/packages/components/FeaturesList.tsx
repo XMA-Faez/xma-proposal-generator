@@ -65,7 +65,11 @@ export function FeaturesList({
   markAsChanged,
 }: FeaturesListProps) {
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -75,40 +79,60 @@ export function FeaturesList({
     <div className="border-t pt-4">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold">Features</h3>
-        <Button
-          size="sm"
-          onClick={() => onAddFeature(pkg.id)}
-        >
-          <Plus className="mr-1 h-3 w-3" /> Add Feature
-        </Button>
+        {isEditMode && (
+          <Button
+            size="sm"
+            onClick={() => onAddFeature(pkg.id)}
+          >
+            <Plus className="mr-1 h-3 w-3" /> Add Feature
+          </Button>
+        )}
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={(event) => onDragEnd(event, pkg.id)}
-      >
-        <SortableContext
-          items={pkg.features.map((f) => f.id)}
-          strategy={verticalListSortingStrategy}
+      {isEditMode ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(event) => onDragEnd(event, pkg.id)}
         >
-          <div className="space-y-2">
-            {pkg.features.map((feature) => (
-              <SortableFeature
-                key={feature.id}
-                feature={feature}
-                onDeleteFeature={onDeleteFeature}
-                setPackagesAction={setPackagesAction}
-                packageId={pkg.id}
-                selectedFeatures={selectedFeatures}
-                toggleFeatureSelection={toggleFeatureSelection}
-                markAsChanged={markAsChanged}
-                isEditMode={isEditMode}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={pkg.features.map((f) => f.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {pkg.features.map((feature) => (
+                <SortableFeature
+                  key={feature.id}
+                  feature={feature}
+                  onDeleteFeature={onDeleteFeature}
+                  setPackagesAction={setPackagesAction}
+                  packageId={pkg.id}
+                  selectedFeatures={selectedFeatures}
+                  toggleFeatureSelection={toggleFeatureSelection}
+                  markAsChanged={markAsChanged}
+                  isEditMode={isEditMode}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      ) : (
+        <div className="space-y-2">
+          {pkg.features.map((feature) => (
+            <SortableFeature
+              key={feature.id}
+              feature={feature}
+              onDeleteFeature={onDeleteFeature}
+              setPackagesAction={setPackagesAction}
+              packageId={pkg.id}
+              selectedFeatures={selectedFeatures}
+              toggleFeatureSelection={toggleFeatureSelection}
+              markAsChanged={markAsChanged}
+              isEditMode={isEditMode}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

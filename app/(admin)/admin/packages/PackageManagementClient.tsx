@@ -38,6 +38,7 @@ interface PackageState {
 
 type PackageAction = 
   | { type: 'SET_PACKAGES'; payload: Package[] }
+  | { type: 'SET_PACKAGE_SNAPSHOTS'; payload: Record<string, Package> }
   | { type: 'TOGGLE_COLLAPSE'; payload: string }
   | { type: 'TOGGLE_FEATURE_SELECTION'; payload: string }
   | { type: 'START_EDIT'; payload: { packageId: string; package: Package } }
@@ -74,7 +75,9 @@ function deepClone<T>(obj: T): T {
 const packageReducer = (state: PackageState, action: PackageAction): PackageState => {
   switch (action.type) {
     case 'SET_PACKAGES':
-      return { ...state, packages: action.payload };
+      return { ...state, packages: Array.isArray(action.payload) ? action.payload : state.packages };
+    case 'SET_PACKAGE_SNAPSHOTS':
+      return { ...state, packageSnapshots: action.payload };
     case 'TOGGLE_COLLAPSE':
       return {
         ...state,
@@ -142,26 +145,37 @@ export default function PackageManagementClient({
 
   const { packages, collapsedPackages, selectedFeatures, editingPackages, packageSnapshots } = state;
 
-  const setPackages = useCallback((newPackages: Package[]) => {
-    dispatch({ type: 'SET_PACKAGES', payload: newPackages });
-  }, []);
+  const setPackages = useCallback((updater: Package[] | ((prev: Package[]) => Package[])) => {
+    if (typeof updater === 'function') {
+      const newPackages = updater(packages);
+      dispatch({ type: 'SET_PACKAGES', payload: newPackages });
+    } else {
+      dispatch({ type: 'SET_PACKAGES', payload: updater });
+    }
+  }, [packages]);
 
   const setPackageSnapshots = useCallback((updater: (prev: Record<string, Package>) => Record<string, Package>) => {
     const newSnapshots = updater(packageSnapshots);
-    dispatch({ type: 'SET_PACKAGES', payload: packages.map(pkg => {
-      const snapshot = newSnapshots[pkg.id];
-      return snapshot || pkg;
-    }) });
-  }, [packages, packageSnapshots]);
+    dispatch({ type: 'SET_PACKAGE_SNAPSHOTS', payload: newSnapshots });
+  }, [packageSnapshots]);
 
   const setEditingPackages = useCallback((updater: (prev: Set<string>) => Set<string>) => {
     const newEditingPackages = updater(editingPackages);
+    
+    // Handle packages being added to edit mode
     newEditingPackages.forEach(id => {
       if (!editingPackages.has(id)) {
         const pkg = packages.find(p => p.id === id);
         if (pkg) {
           dispatch({ type: 'START_EDIT', payload: { packageId: id, package: pkg } });
         }
+      }
+    });
+    
+    // Handle packages being removed from edit mode
+    editingPackages.forEach(id => {
+      if (!newEditingPackages.has(id)) {
+        dispatch({ type: 'CANCEL_EDIT', payload: id });
       }
     });
   }, [packages, editingPackages]);
@@ -217,7 +231,7 @@ export default function PackageManagementClient({
   );
 
   const memoizedPackageCards = useMemo(() => 
-    packages.map((pkg) => (
+    Array.isArray(packages) ? packages.map((pkg) => (
       <PackageCard
         key={pkg.id}
         pkg={pkg}
@@ -239,7 +253,7 @@ export default function PackageManagementClient({
         onDragEndAction={handleDragEnd}
         markAsChangedAction={() => {}}
       />
-    )), 
+    )) : [], 
     [
       packages, 
       collapsedPackages, 

@@ -304,7 +304,7 @@ export function usePackageOperations(
     }
   };
 
-  const handleDragEnd = async (event: DragEndEvent, packageId: string) => {
+  const handleDragEnd = (event: DragEndEvent, packageId: string) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
@@ -321,38 +321,25 @@ export function usePackageOperations(
       (feature) => feature.id === over.id,
     );
 
-    const newFeatures = arrayMove(pkg.features, oldIndex, newIndex);
+    if (oldIndex === -1 || newIndex === -1) return;
 
+    const newFeatures = arrayMove(pkg.features, oldIndex, newIndex);
+    
+    // Update order_index for all features based on their new position
+    const reorderedFeatures = newFeatures.map((feature, index) => ({
+      ...feature,
+      order_index: index,
+    }));
+
+    // Only update local state - no database persistence until package is saved
     setPackages((prev) =>
       prev.map((p) =>
-        p.id === packageId ? { ...p, features: newFeatures } : p,
+        p.id === packageId ? { ...p, features: reorderedFeatures } : p,
       ),
     );
 
-    try {
-      const updates = newFeatures.map((feature, index) => ({
-        id: feature.id,
-        order_index: index,
-      }));
-
-      for (const update of updates) {
-        await supabase
-          .from("package_features")
-          .update({ order_index: update.order_index })
-          .eq("id", update.id);
-      }
-
-      toast.success("Features reordered successfully");
-    } catch (error) {
-      console.error("Error reordering features:", error);
-      toast.error("Failed to reorder features");
-
-      setPackages((prev) =>
-        prev.map((p) =>
-          p.id === packageId ? { ...p, features: pkg.features } : p,
-        ),
-      );
-    }
+    // These should already be handled by the UI when entering edit mode
+    // The drag operation should only work when already in edit mode
   };
 
   const handleBulkDeleteFeatures = async (selectedFeatures: Set<string>, setSelectedFeatures: React.Dispatch<React.SetStateAction<Set<string>>>) => {

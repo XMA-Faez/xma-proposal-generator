@@ -5,13 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// Color selection components removed since feature coloring was disabled
 import {
   GripVertical,
   Trash2,
@@ -90,19 +84,23 @@ export function SortableFeature({
           : "hover:bg-zinc-900 border-transparent hover:border-zinc-700"
       } border`}
     >
-      <Checkbox
-        checked={isSelected}
-        onCheckedChange={() => toggleFeatureSelection(feature.id)}
-        className="mr-2"
-      />
+      {isEditMode && (
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => toggleFeatureSelection(feature.id)}
+          className="mr-2"
+        />
+      )}
 
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing p-1 hover:bg-zinc-800 rounded"
-      >
-        <GripVertical className="h-4 w-4 text-gray-400" />
-      </div>
+      {isEditMode && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-zinc-800 rounded"
+        >
+          <GripVertical className="h-4 w-4 text-gray-400" />
+        </div>
+      )}
 
       {isEditMode ? (
         <Checkbox
@@ -161,9 +159,7 @@ export function SortableFeature({
           <label className="text-sm">Bold</label>
         </>
       ) : (
-        <div className="ml-2 text-xs text-gray-500">
-          {feature.is_bold ? "Bold" : ""}
-        </div>
+        <></>
       )}
 
       {isEditMode ? (
@@ -198,13 +194,15 @@ export function SortableFeature({
         </p>
       )}
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onDeleteFeature(packageId, feature.id)}
-      >
-        <Trash2 className="h-4 w-4 text-red-500 transition" />
-      </Button>
+      {isEditMode && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDeleteFeature(packageId, feature.id)}
+        >
+          <Trash2 className="h-4 w-4 text-red-500 transition" />
+        </Button>
+      )}
     </div>
   );
 }
