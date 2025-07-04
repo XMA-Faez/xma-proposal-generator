@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button } from "@/components/ui/button";
+import { brandButtonVariants } from "@/lib/design-system";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 // Color selection components removed since feature coloring was disabled
@@ -80,8 +80,8 @@ export function SortableFeature({
       style={style}
       className={`flex items-center gap-3 p-2 rounded transition-all ${
         isSelected
-          ? "bg-slate-900 border-blue-200"
-          : "hover:bg-zinc-900 border-transparent hover:border-zinc-700"
+          ? "bg-surface-interactive border-brand-primary"
+          : "hover:bg-surface-elevated border-transparent hover:border-border-primary"
       } border`}
     >
       {isEditMode && (
@@ -96,9 +96,9 @@ export function SortableFeature({
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing p-1 hover:bg-zinc-800 rounded"
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-surface-interactive rounded"
         >
-          <GripVertical className="h-4 w-4 text-gray-400" />
+          <GripVertical className="h-4 w-4 text-text-muted" />
         </div>
       )}
 
@@ -126,9 +126,9 @@ export function SortableFeature({
       ) : (
         <div className="w-4 h-4 flex items-center justify-center">
           {feature.is_included !== false ? (
-            <Check className="h-3 w-3 text-green-500" />
+            <Check className="h-3 w-3 text-status-accepted" />
           ) : (
-            <X className="h-3 w-3 text-red-500" />
+            <X className="h-3 w-3 text-status-rejected" />
           )}
         </div>
       )}
@@ -156,7 +156,7 @@ export function SortableFeature({
             }}
             className="ml-2"
           />
-          <label className="text-sm">Bold</label>
+          <label className="text-sm text-text-secondary">Bold</label>
         </>
       ) : (
         <></>
@@ -186,7 +186,7 @@ export function SortableFeature({
         />
       ) : (
         <p
-          className={`flex-1 ${
+          className={`flex-1 text-text-primary ${
             feature.is_bold ? "font-bold" : ""
           }`}
         >
@@ -195,13 +195,12 @@ export function SortableFeature({
       )}
 
       {isEditMode && (
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
+          className={brandButtonVariants({ variant: "ghost" })}
           onClick={() => onDeleteFeature(packageId, feature.id)}
         >
-          <Trash2 className="h-4 w-4 text-red-500 transition" />
-        </Button>
+          <Trash2 className="h-4 w-4 text-semantic-error transition" />
+        </button>
       )}
     </div>
   );

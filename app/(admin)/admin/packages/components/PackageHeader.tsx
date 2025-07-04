@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { brandButtonVariants } from "@/lib/design-system";
 import {
   ChevronDown,
   ChevronRight,
@@ -58,14 +58,14 @@ export function PackageHeader({
       >
         <div className="p-1">
           {isCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 text-text-muted" />
           ) : (
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-4 w-4 text-text-muted" />
           )}
         </div>
-        <h2 className="text-lg font-semibold">{pkg.name}</h2>
+        <h2 className="text-lg font-semibold text-text-primary">{pkg.name}</h2>
         {pkg.is_popular && (
-          <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded">
+          <span className="bg-semantic-warning/20 text-semantic-warning text-xs font-medium px-2 py-1 rounded">
             Popular
           </span>
         )}
@@ -73,16 +73,15 @@ export function PackageHeader({
       <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
         {isEditMode ? (
           <>
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              className={brandButtonVariants({ variant: "secondary" })}
               onClick={() => onCancelEdit(pkg.id)}
             >
               <X className="h-4 w-4 mr-1" />
               Cancel
-            </Button>
-            <Button
-              size="sm"
+            </button>
+            <button
+              className={brandButtonVariants({ variant: "primary" })}
               onClick={() => onSave(pkg.id)}
               disabled={isSaving}
             >
@@ -92,33 +91,30 @@ export function PackageHeader({
                 <Check className="h-4 w-4 mr-1" />
               )}
               {isSaving ? "Saving..." : "Save"}
-            </Button>
+            </button>
           </>
         ) : (
           <>
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              className={brandButtonVariants({ variant: "secondary" })}
               onClick={() => onStartEdit(pkg.id)}
             >
               <Edit className="h-4 w-4 mr-1" />
               Edit
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+            <button
+              className={brandButtonVariants({ variant: "secondary" })}
               onClick={() => onDuplicate(pkg.id)}
             >
               <Copy className="h-4 w-4 mr-1" />
               Duplicate
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
+            </button>
+            <button
+              className={brandButtonVariants({ variant: "destructive" })}
               onClick={() => onDelete(pkg.id)}
             >
               <Trash2 className="h-4 w-4" />
-            </Button>
+            </button>
           </>
         )}
       </div>

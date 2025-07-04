@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { brandButtonVariants } from "@/lib/design-system";
 import { Plus } from "lucide-react";
 import {
   DndContext,
@@ -76,16 +76,16 @@ export function FeaturesList({
   );
 
   return (
-    <div className="border-t pt-4">
+    <div className="border-t border-border-secondary pt-4">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-semibold">Features</h3>
+        <h3 className="text-lg font-semibold text-text-primary">Features</h3>
         {isEditMode && (
-          <Button
-            size="sm"
+          <button
+            className={brandButtonVariants({ variant: "primary" })}
             onClick={() => onAddFeature(pkg.id)}
           >
             <Plus className="mr-1 h-3 w-3" /> Add Feature
-          </Button>
+          </button>
         )}
       </div>
 

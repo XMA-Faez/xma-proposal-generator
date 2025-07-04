@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/design-card";
+import { brandButtonVariants } from "@/lib/design-system";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -112,90 +113,92 @@ export default function NewSalesRepPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="outline" size="sm" asChild className="border-zinc-600 text-gray-300">
-          <Link href="/sales-team">
+    <div className="bg-surface-primary min-h-screen">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <Link 
+            href="/sales-team"
+            className="px-3 py-1.5 text-sm border border-border-primary text-text-secondary hover:bg-surface-interactive rounded-md transition-colors flex items-center"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Sales Team
           </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Add Sales Representative</h1>
-          <p className="text-gray-400">Create a new sales rep account</p>
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary">Add Sales Representative</h1>
+            <p className="text-text-muted">Create a new sales rep account</p>
+          </div>
         </div>
-      </div>
 
-      {/* Form */}
-      <Card className="bg-zinc-800 border-zinc-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            Sales Rep Details
-          </CardTitle>
-          <CardDescription className="text-gray-400">
-            Fill in the information below to create a new sales representative account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {error && (
-            <Alert className="border-red-500 bg-red-500/10">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-red-400">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Form */}
+        <Card variant="primary" size="lg">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Sales Rep Details
+            </h3>
+            <p className="text-sm text-text-muted">
+              Fill in the information below to create a new sales representative account.
+            </p>
+          </div>
+          <div className="space-y-6">
+            {error && (
+              <Alert className="border-semantic-error bg-semantic-error/10">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-semantic-error">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
 
-          {success && (
-            <Alert className="border-green-500 bg-green-500/10">
-              <AlertDescription className="text-green-400">
-                {success}
-              </AlertDescription>
-            </Alert>
-          )}
+            {success && (
+              <Alert className="border-status-accepted bg-status-accepted/10">
+                <AlertDescription className="text-status-accepted">
+                  {success}
+                </AlertDescription>
+              </Alert>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-300">
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter full name"
-                className="bg-zinc-900 border-zinc-600 text-white placeholder:text-gray-500"
-                required
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-text-secondary">
+                  Full Name
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter full name"
+                  className="bg-surface-elevated border-border-primary text-text-primary placeholder:text-text-muted"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter email address"
-                className="bg-zinc-900 border-zinc-600 text-white placeholder:text-gray-500"
-                required
-              />
-              <p className="text-xs text-gray-500">
-                This will be used for login and notifications
-              </p>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-text-secondary">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter email address"
+                  className="bg-surface-elevated border-border-primary text-text-primary placeholder:text-text-muted"
+                  required
+                />
+                <p className="text-xs text-text-subtle">
+                  This will be used for login and notifications
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
-                Temporary Password
-              </Label>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-text-secondary">
+                  Temporary Password
+                </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -204,7 +207,7 @@ export default function NewSalesRepPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter temporary password"
-                  className="bg-zinc-900 border-zinc-600 text-white placeholder:text-gray-500 pr-24"
+                  className="bg-surface-elevated border-border-primary text-text-primary placeholder:text-text-muted pr-24"
                   required
                   minLength={6}
                 />
@@ -214,7 +217,7 @@ export default function NewSalesRepPage() {
                     variant="ghost"
                     size="sm"
                     onClick={togglePasswordVisibility}
-                    className="h-full px-2 text-gray-400 hover:text-white"
+                    className="h-full px-2 text-text-muted hover:text-text-primary"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
@@ -224,7 +227,7 @@ export default function NewSalesRepPage() {
                     size="sm"
                     onClick={handleCopyPassword}
                     disabled={!formData.password}
-                    className="h-full px-2 text-gray-400 hover:text-white disabled:opacity-50"
+                    className="h-full px-2 text-text-muted hover:text-text-primary disabled:opacity-50"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -236,7 +239,7 @@ export default function NewSalesRepPage() {
                   variant="outline"
                   size="sm"
                   onClick={handleGeneratePassword}
-                  className="border-zinc-600 text-gray-300 hover:bg-zinc-700 flex items-center gap-2"
+                  className="border-border-primary text-text-secondary hover:bg-surface-interactive flex items-center gap-2"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Generate Password
@@ -247,48 +250,48 @@ export default function NewSalesRepPage() {
                   size="sm"
                   onClick={handleCopyPassword}
                   disabled={!formData.password}
-                  className="border-zinc-600 text-gray-300 hover:bg-zinc-700 disabled:opacity-50 flex items-center gap-2"
+                  className="border-border-primary text-text-secondary hover:bg-surface-interactive disabled:opacity-50 flex items-center gap-2"
                 >
                   <Copy className="h-3 w-3" />
                   Copy Password
                 </Button>
               </div>
-              <p className="text-xs text-gray-500">
-                Click "Generate Password" for a secure random password. The user should change this on first login.
-              </p>
-            </div>
+                <p className="text-xs text-text-subtle">
+                  Click "Generate Password" for a secure random password. The user should change this on first login.
+                </p>
+              </div>
 
-            <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700">
-              <h4 className="text-sm font-medium text-white mb-2">Permissions Summary</h4>
-              <ul className="text-sm text-gray-400 space-y-1">
-                <li>• Create and manage their own proposals</li>
-                <li>• View only their own proposals and data</li>
-                <li>• Archive proposals (cannot permanently delete)</li>
-                <li>• Access to sales dashboard with personal analytics</li>
-                <li>• Cannot access admin functions or other reps' data</li>
-              </ul>
-            </div>
+              <div className="bg-surface-elevated p-4 rounded-lg border border-border-secondary">
+                <h4 className="text-sm font-medium text-text-primary mb-2">Permissions Summary</h4>
+                <ul className="text-sm text-text-muted space-y-1">
+                  <li>• Create and manage their own proposals</li>
+                  <li>• View only their own proposals and data</li>
+                  <li>• Archive proposals (cannot permanently delete)</li>
+                  <li>• Access to sales dashboard with personal analytics</li>
+                  <li>• Cannot access admin functions or other reps' data</li>
+                </ul>
+              </div>
 
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="flex-1"
-              >
-                {loading ? "Creating..." : "Create Sales Rep"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push("/sales-team")}
-                className="border-zinc-600 text-gray-300 hover:bg-zinc-700"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`flex-1 ${brandButtonVariants({ variant: "primary" })} disabled:opacity-50`}
+                >
+                  {loading ? "Creating..." : "Create Sales Rep"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/sales-team")}
+                  className="px-3 py-1.5 text-sm border border-border-primary text-text-secondary hover:bg-surface-interactive rounded-md transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

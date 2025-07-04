@@ -33,7 +33,7 @@ export function PackageFields({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div>
-          <label className="text-sm font-medium text-zinc-500">
+          <label className="text-sm font-medium text-text-muted">
             Name
           </label>
           {isEditMode ? (
@@ -46,14 +46,14 @@ export function PackageFields({
               className="mt-1"
             />
           ) : (
-            <p className="mt-1 font-medium">
+            <p className="mt-1 font-medium text-text-primary">
               {pkg.name}
             </p>
           )}
         </div>
 
         <div>
-          <label className="text-sm font-medium text-zinc-500">
+          <label className="text-sm font-medium text-text-muted">
             AED Price
           </label>
           {isEditMode ? (
@@ -71,14 +71,14 @@ export function PackageFields({
               className="mt-1"
             />
           ) : (
-            <p className="mt-1 font-medium">
+            <p className="mt-1 font-medium text-text-primary">
               {pkg.price} AED
             </p>
           )}
         </div>
 
         <div>
-          <label className="text-sm font-medium text-zinc-500">
+          <label className="text-sm font-medium text-text-muted">
             USD Price
           </label>
           {isEditMode ? (
@@ -96,7 +96,7 @@ export function PackageFields({
               className="mt-1"
             />
           ) : (
-            <p className="mt-1 font-medium">
+            <p className="mt-1 font-medium text-text-primary">
               ${pkg.usd_price || 0} USD
             </p>
           )}
@@ -113,10 +113,10 @@ export function PackageFields({
                     onMarkAsChanged();
                   }}
                 />
-                <label className="text-sm font-medium">Popular</label>
+                <label className="text-sm font-medium text-text-secondary">Popular</label>
               </>
             ) : (
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-text-secondary">
                 {pkg.is_popular ? "Popular Package" : ""}
               </p>
             )}
@@ -125,7 +125,7 @@ export function PackageFields({
       </div>
 
       <div className="mb-4">
-        <label className="text-sm font-medium text-zinc-500">
+        <label className="text-sm font-medium text-text-muted">
           Description
         </label>
         {isEditMode ? (
@@ -143,7 +143,7 @@ export function PackageFields({
             placeholder="Package description..."
           />
         ) : (
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-text-muted">
             {pkg.description || "No description"}
           </p>
         )}

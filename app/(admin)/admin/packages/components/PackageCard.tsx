@@ -1,6 +1,7 @@
 "use client";
 
 import { DragEndEvent } from "@dnd-kit/core";
+import { Card } from "@/components/ui/design-card";
 import { PackageHeader } from "./PackageHeader";
 import { PackageFields } from "./PackageFields";
 import { FeaturesList } from "./FeaturesList";
@@ -70,8 +71,8 @@ export function PackageCard({
   markAsChangedAction,
 }: PackageCardProps) {
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="p-6 space-y-4">
+    <Card variant="primary" size="lg">
+      <div className="space-y-4">
         <PackageHeader
           pkg={pkg}
           isCollapsed={isCollapsed}
@@ -108,6 +109,6 @@ export function PackageCard({
           </>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

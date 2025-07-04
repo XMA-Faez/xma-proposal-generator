@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/design-card";
+import { brandButtonVariants } from "@/lib/design-system";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Users, FileText, Archive, Mail, Calendar, UserMinus } from "lucide-react";
 import Link from "next/link";
@@ -88,108 +88,108 @@ export default function SalesTeamPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <div className="text-white">Loading...</div>
+      <div className="bg-surface-primary min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <div className="text-text-primary">Loading...</div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Sales Team Management</h1>
-          <p className="text-gray-400">Manage your sales representatives and monitor their performance</p>
-        </div>
-        <Button asChild>
-          <Link href="/sales-team/new">
+    <div className="bg-surface-primary min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary">Sales Team Management</h1>
+            <p className="text-text-muted">Manage your sales representatives and monitor their performance</p>
+          </div>
+          <Link 
+            href="/sales-team/new"
+            className={brandButtonVariants({ variant: "primary" })}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Sales Rep
           </Link>
-        </Button>
-      </div>
+        </div>
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-zinc-800 border-zinc-700">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Total Sales Reps</CardTitle>
-            <Users className="h-4 w-4 text-blue-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{salesReps?.length || 0}</div>
-            <p className="text-xs text-gray-400">
+        {/* Overview Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card variant="elevated" size="md">
+            <div className="flex flex-row items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-text-muted">Total Sales Reps</h3>
+              <Users className="h-4 w-4 text-status-sent" />
+            </div>
+            <div className="text-2xl font-bold text-text-primary">{salesReps?.length || 0}</div>
+            <p className="text-xs text-text-subtle">
               Active team members
             </p>
-          </CardContent>
-        </Card>
+          </Card>
 
-        <Card className="bg-zinc-800 border-zinc-700">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Total Proposals</CardTitle>
-            <FileText className="h-4 w-4 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
+          <Card variant="elevated" size="md">
+            <div className="flex flex-row items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-text-muted">Total Proposals</h3>
+              <FileText className="h-4 w-4 text-status-accepted" />
+            </div>
+            <div className="text-2xl font-bold text-text-primary">
               {salesRepStats.reduce((sum, rep) => sum + rep.totalActive, 0)}
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-text-subtle">
               Active proposals
             </p>
-          </CardContent>
-        </Card>
+          </Card>
 
-        <Link href="/proposals?filter=archived">
-          <Card className="bg-zinc-800 border-zinc-700 hover:bg-zinc-750 transition-colors cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">Archived</CardTitle>
-              <Archive className="h-4 w-4 text-gray-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">
+          <Link href="/proposals?filter=archived">
+            <Card variant="elevated" size="md" className="hover:bg-surface-interactive transition-colors cursor-pointer">
+              <div className="flex flex-row items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-text-muted">Archived</h3>
+                <Archive className="h-4 w-4 text-text-muted" />
+              </div>
+              <div className="text-2xl font-bold text-text-primary">
                 {salesRepStats.reduce((sum, rep) => sum + rep.totalArchived, 0)}
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-text-subtle">
                 Archived proposals
               </p>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
+            </Card>
+          </Link>
+        </div>
 
-      {/* Sales Reps List */}
-      <Card className="bg-zinc-800 border-zinc-700">
-        <CardHeader>
-          <CardTitle className="text-white">Sales Representatives</CardTitle>
-          <CardDescription className="text-gray-400">
-            Manage your sales team and monitor their performance
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        {/* Sales Reps List */}
+        <Card variant="primary" size="lg">
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold text-text-primary">Sales Representatives</h3>
+            <p className="text-sm text-text-muted">
+              Manage your sales team and monitor their performance
+            </p>
+          </div>
+          <div>
           {salesRepStats && salesRepStats.length > 0 ? (
             <div className="space-y-4">
               {salesRepStats.map((rep) => (
-                <div
+                <Card
                   key={rep.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-850 transition-colors"
+                  variant="elevated"
+                  size="md"
+                  className="flex items-center justify-between transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-medium">
+                      <div className="w-10 h-10 rounded-full bg-brand-primary flex items-center justify-center text-text-primary font-medium">
                         {rep.name ? rep.name.charAt(0).toUpperCase() : rep.email!.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-medium text-white">
+                        <h3 className="font-medium text-text-primary">
                           {rep.name || rep.email?.split("@")[0]}
                         </h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <div className="flex items-center gap-2 text-sm text-text-muted">
                           <Mail className="h-3 w-3" />
                           {rep.email}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <div className="flex items-center gap-2 text-sm text-text-muted">
                           <Calendar className="h-3 w-3" />
                           Joined {new Date(rep.created_at).toLocaleDateString()}
                         </div>
@@ -200,25 +200,25 @@ export default function SalesTeamPage() {
                   <div className="flex items-center gap-6">
                     {/* Stats */}
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-white">{rep.totalActive}</div>
-                      <div className="text-xs text-gray-400">Active</div>
+                      <div className="text-lg font-semibold text-text-primary">{rep.totalActive}</div>
+                      <div className="text-xs text-text-muted">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-white">{rep.statusCounts.accepted || 0}</div>
-                      <div className="text-xs text-gray-400">Accepted</div>
+                      <div className="text-lg font-semibold text-text-primary">{rep.statusCounts.accepted || 0}</div>
+                      <div className="text-xs text-text-muted">Accepted</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-white">{rep.totalArchived}</div>
-                      <div className="text-xs text-gray-400">Archived</div>
+                      <div className="text-lg font-semibold text-text-primary">{rep.totalArchived}</div>
+                      <div className="text-xs text-text-muted">Archived</div>
                     </div>
 
                     {/* Status Badges */}
                     <div className="flex flex-col gap-1">
-                      <Badge variant="secondary" className="bg-green-600 text-white">
+                      <Badge variant="secondary" className="bg-status-accepted text-text-primary">
                         Active
                       </Badge>
                       {rep.statusCounts.sent > 0 && (
-                        <Badge variant="outline" className="border-blue-400 text-blue-400">
+                        <Badge variant="outline" className="border-status-sent text-status-sent">
                           {rep.statusCounts.sent} Sent
                         </Badge>
                       )}
@@ -226,68 +226,60 @@ export default function SalesTeamPage() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="border-zinc-600 text-gray-300 hover:bg-zinc-700"
+                      <Link 
+                        href={`/sales-team/${rep.id}`}
+                        className="px-3 py-1.5 text-sm border border-border-primary text-text-secondary bg-surface-elevated hover:bg-surface-interactive rounded-md transition-colors"
                       >
-                        <Link href={`/sales-team/${rep.id}`}>
-                          View Details
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="border-zinc-600 text-gray-300 hover:bg-zinc-700"
+                        View Details
+                      </Link>
+                      <Link 
+                        href={`/proposals?created_by=${rep.id}`}
+                        className="px-3 py-1.5 text-sm border border-border-primary text-text-secondary hover:bg-surface-interactive rounded-md transition-colors"
                       >
-                        <Link href={`/proposals?created_by=${rep.id}`}>
-                          View Proposals
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
+                        View Proposals
+                      </Link>
+                      <button
                         onClick={() => handleDeactivate(rep.id, rep.email!)}
                         disabled={deactivatingId === rep.id}
-                        className="border-red-600 text-red-400 hover:bg-red-900/20"
+                        className="px-3 py-1.5 text-sm border border-semantic-error text-semantic-error hover:bg-semantic-error/20 rounded-md transition-colors disabled:opacity-50 flex items-center"
                       >
                         <UserMinus className="mr-1 h-3 w-3" />
                         {deactivatingId === rep.id ? "Removing..." : "Remove Access"}
-                      </Button>
+                      </button>
                     </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
-              <Users className="mx-auto h-12 w-12 text-gray-600" />
-              <h3 className="mt-2 text-sm font-medium text-gray-300">No sales representatives</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <Users className="mx-auto h-12 w-12 text-text-subtle" />
+              <h3 className="mt-2 text-sm font-medium text-text-secondary">No sales representatives</h3>
+              <p className="mt-1 text-sm text-text-muted">
                 Get started by adding your first sales representative.
               </p>
               <div className="mt-6">
-                <Button asChild>
-                  <Link href="/sales-team/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Sales Rep
-                  </Link>
-                </Button>
+                <Link 
+                  href="/sales-team/new"
+                  className={brandButtonVariants({ variant: "primary" })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Sales Rep
+                </Link>
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </div>
+        </Card>
 
-      {/* Toast notification */}
-      <Toast
-        isVisible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onClose={handleCloseToast}
-      />
+        {/* Toast notification */}
+        <Toast
+          isVisible={toast.visible}
+          message={toast.message}
+          type={toast.type}
+          onClose={handleCloseToast}
+        />
+      </div>
     </div>
   );
 }

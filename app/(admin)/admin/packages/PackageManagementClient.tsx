@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducer, useMemo, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { brandButtonVariants } from "@/lib/design-system";
 import { Plus, Trash2 } from "lucide-react";
 import { PackageCard } from "./components/PackageCard";
 import { usePackageOperations } from "./hooks/usePackageOperations";
@@ -276,27 +276,32 @@ export default function PackageManagementClient({
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Package Management</h1>
-        <div className="flex gap-2">
-          {selectedFeatures.size > 0 && (
-            <Button 
-              variant="destructive" 
-              onClick={() => handleBulkDeleteFeaturesWithClear(selectedFeatures)}
+    <div className="bg-surface-primary min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-text-primary">Package Management</h1>
+          <div className="flex gap-2">
+            {selectedFeatures.size > 0 && (
+              <button 
+                className={`${brandButtonVariants({ variant: "destructive" })} flex items-center`}
+                onClick={() => handleBulkDeleteFeaturesWithClear(selectedFeatures)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete {selectedFeatures.size} Features
+              </button>
+            )}
+            <button 
+              className={`${brandButtonVariants({ variant: "primary" })} flex items-center`}
+              onClick={handleAddPackage}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete {selectedFeatures.size} Features
-            </Button>
-          )}
-          <Button onClick={handleAddPackage}>
-            <Plus className="mr-2 h-4 w-4" /> Add Package
-          </Button>
+              <Plus className="mr-2 h-4 w-4" /> Add Package
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="space-y-6">
-        {memoizedPackageCards}
+        <div className="space-y-6">
+          {memoizedPackageCards}
+        </div>
       </div>
     </div>
   );
