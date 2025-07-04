@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProposalCard from "./ProposalCard";
 import Toast from "@/components/ui/Toast";
+import { Card } from "@/components/ui/design-card";
+import { commonClasses, brandButtonVariants } from "@/lib/design-system";
 import { supabase } from "@/lib/supabase";
 import { RefreshCw, Plus, Search } from "lucide-react";
 
@@ -198,10 +200,10 @@ export default function ProposalsList({
 
   if (proposals.length === 0) {
     return (
-      <div className="bg-zinc-800 rounded-lg p-12 text-center">
+      <Card variant="elevated" className="p-12 text-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-16 w-16 text-zinc-600 mx-auto mb-4"
+          className="h-16 w-16 text-text-subtle mx-auto mb-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -213,14 +215,14 @@ export default function ProposalsList({
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           />
         </svg>
-        <p className="text-zinc-400 mb-6">No proposals found</p>
+        <p className="text-text-muted mb-6">No proposals found</p>
         <Link
           href="/proposal-generator"
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors inline-block"
+          className={`${brandButtonVariants({ variant: "primary", size: "lg" })} inline-block`}
         >
           Create Your First Proposal
         </Link>
-      </div>
+      </Card>
     );
   }
 
@@ -237,57 +239,57 @@ export default function ProposalsList({
       <div className="flex flex-col gap-4 mb-6">
         {/* Search bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-text-muted" />
           <input
             type="text"
             placeholder="Search by client name, company, or order ID..."
             value={localSearchQuery}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:border-red-600"
+            className={`w-full pl-10 pr-4 py-2 ${commonClasses.input} rounded-lg focus:outline-none focus:ring-2 focus:ring-border-focus`}
           />
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center">
-            <p className="text-zinc-400 mr-4">
+            <p className="text-text-muted mr-4">
               {filteredProposals.length} proposals found
             </p>
 
             {/* Status filter */}
-            <div className="bg-zinc-800 rounded-lg p-1 flex">
+            <div className="bg-surface-elevated rounded-lg p-1 flex">
               <button
                 onClick={() => updateUrlParams("all")}
-                className={`px-3 py-1 text-sm rounded-md ${filter === "all" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "all" ? "bg-surface-interactive text-text-primary" : "text-text-muted hover:text-text-primary"}`}
               >
                 All
               </button>
               <button
                 onClick={() => updateUrlParams("draft")}
-                className={`px-3 py-1 text-sm rounded-md ${filter === "draft" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-white"}`}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "draft" ? "bg-surface-interactive text-text-primary" : "text-text-muted hover:text-text-primary"}`}
               >
                 Draft
               </button>
               <button
                 onClick={() => updateUrlParams("sent")}
-                className={`px-3 py-1 text-sm rounded-md ${filter === "sent" ? "bg-blue-900 text-blue-300" : "text-zinc-400 hover:text-white"}`}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "sent" ? "bg-status-sent text-status-sent-foreground" : "text-text-muted hover:text-text-primary"}`}
               >
                 Sent
               </button>
               <button
                 onClick={() => updateUrlParams("accepted")}
-                className={`px-3 py-1 text-sm rounded-md ${filter === "accepted" ? "bg-green-900 text-green-300" : "text-zinc-400 hover:text-white"}`}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "accepted" ? "bg-status-accepted text-status-accepted-foreground" : "text-text-muted hover:text-text-primary"}`}
               >
                 Accepted
               </button>
               <button
                 onClick={() => updateUrlParams("paid")}
-                className={`px-3 py-1 text-sm rounded-md ${filter === "paid" ? "bg-purple-900 text-purple-300" : "text-zinc-400 hover:text-white"}`}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "paid" ? "bg-status-paid text-status-paid-foreground" : "text-text-muted hover:text-text-primary"}`}
               >
                 Paid
               </button>
               <button
                 onClick={() => updateUrlParams("archived")}
-                className={`px-3 py-1 text-sm rounded-md ${filter === "archived" ? "bg-orange-900 text-orange-300" : "text-zinc-400 hover:text-white"}`}
+                className={`px-3 py-1 text-sm rounded-md ${filter === "archived" ? "bg-status-expired text-status-expired-foreground" : "text-text-muted hover:text-text-primary"}`}
               >
                 Archived
               </button>
@@ -297,7 +299,7 @@ export default function ProposalsList({
           <div className="flex items-center gap-2">
             <button
               onClick={refreshProposals}
-              className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 py-2 rounded-lg transition-colors flex items-center"
+              className="bg-surface-interactive hover:bg-interactive-secondary-hover text-text-primary px-3 py-2 rounded-lg transition-colors flex items-center"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -314,7 +316,7 @@ export default function ProposalsList({
             </button>
             <Link
               href="/proposal-generator"
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+              className="bg-brand-primary hover:bg-interactive-primary-hover text-text-primary px-4 py-2 rounded-lg transition-colors flex items-center"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create New Proposal
@@ -326,9 +328,9 @@ export default function ProposalsList({
       <div className="space-y-8">
         {groupedProposals.map(([monthYear, monthProposals]) => (
           <div key={monthYear}>
-            <h2 className="text-xl font-semibold text-zinc-300 mb-4 pb-2 border-b border-zinc-700 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-text-secondary mb-4 pb-2 border-b border-border-secondary flex items-center justify-between">
               <span>{monthYear}</span>
-              <span className="text-sm font-normal text-zinc-400">
+              <span className="text-sm font-normal text-text-muted">
                 {(() => {
                   const businessNames = monthProposals
                     .map(p => p.client?.company_name)
@@ -337,7 +339,7 @@ export default function ProposalsList({
                   return (
                     <>
                       {monthProposals.length} {monthProposals.length === 1 ? 'proposal' : 'proposals'} 
-                      <span className="text-zinc-500 ml-2">
+                      <span className="text-text-subtle ml-2">
                         ({uniqueBusinesses} unique {uniqueBusinesses === 1 ? 'proposal' : 'proposals'})
                       </span>
                     </>

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
 import { requireRole } from "@/lib/auth-helpers";
+import { commonClasses } from "@/lib/design-system";
 import ProposalsList from "@/components/proposal/ProposalsList";
 
 export const metadata: Metadata = {
@@ -76,9 +77,9 @@ export default async function ProposalsPage({
   const proposals = await getProposalsData(user.id, user.role!, showArchived, filterByCreator);
 
   return (
-    <div className="pt-8 px-4 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent mb-6">
+    <div className={commonClasses.pageContainer}>
+      <div className={commonClasses.contentContainer}>
+        <h1 className="text-3xl font-bold mb-6">
           {user.role === "sales_rep" ? "My Proposals" : "All Proposals"}
         </h1>
         <ProposalsList initialProposals={proposals} userRole={user.role!} />
