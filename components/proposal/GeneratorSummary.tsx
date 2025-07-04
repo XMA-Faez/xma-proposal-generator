@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { formatPrice, TAX_RATE } from "@/lib/proposalUtils";
+import { Card } from "@/components/ui/design-card";
 import DiscountControl from "./DiscountControl";
 
 interface GeneratorSummaryProps {
@@ -114,27 +115,27 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
     );
 
   return (
-    <div className="bg-zinc-900 rounded-lg mb-8">
+    <Card className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Summary & Discounts</h2>
+        <h2 className="text-xl font-bold text-text-primary">Summary & Discounts</h2>
         <button
           onClick={() => setShowDiscounts(!showDiscounts)}
-          className="text-sm bg-zinc-700 hover:bg-zinc-600 px-3 py-1 rounded text-zinc-300 transition-colors"
+          className="text-sm bg-surface-interactive hover:bg-interactive-secondary-hover px-3 py-1 rounded text-text-secondary transition-colors"
         >
           {showDiscounts ? "Hide Discounts" : "Show Discounts"}
         </button>
       </div>
 
       {showDiscounts && (
-        <div className="bg-zinc-800 p-4 rounded-lg mb-6">
-          <h3 className="font-medium mb-4">Discount Settings</h3>
+        <div className="bg-surface-elevated p-4 rounded-lg mb-6">
+          <h3 className="font-medium mb-4 text-text-primary">Discount Settings</h3>
 
           <div className="space-y-4">
             {/* Package discount */}
             {includePackage && selectedPackage && (
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 pb-3 border-b border-zinc-800">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 pb-3 border-b border-border-secondary">
                 <div className="md:col-span-4">
-                  <span className="text-sm text-zinc-400">
+                  <span className="text-sm text-text-muted">
                     {selectedPackage.name} Package Discount:
                   </span>
                 </div>
@@ -163,10 +164,10 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
                   return (
                     <div
                       key={service.id}
-                      className="grid grid-cols-1 md:grid-cols-12 gap-2 pb-3 border-b border-zinc-800"
+                      className="grid grid-cols-1 md:grid-cols-12 gap-2 pb-3 border-b border-border-secondary"
                     >
                       <div className="md:col-span-4">
-                        <span className="text-sm text-zinc-400">
+                        <span className="text-sm text-text-muted">
                           {service.name} Discount:
                         </span>
                       </div>
@@ -189,9 +190,9 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
             )}
 
             {/* Overall discount */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 pt-3 border-b border-zinc-800 pb-3">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 pt-3 border-b border-border-secondary pb-3">
               <div className="md:col-span-4">
-                <span className="text-sm text-zinc-400">Overall Discount:</span>
+                <span className="text-sm text-text-muted">Overall Discount:</span>
               </div>
               <div className="md:col-span-8">
                 <DiscountControl
@@ -210,7 +211,7 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
             {/* Tax toggle */}
             <div className="flex items-center gap-2 pt-3">
               <div className="">
-                <span className="text-sm text-zinc-400">
+                <span className="text-sm text-text-muted">
                   Include {(TAX_RATE * 100).toFixed(0)}% VAT:
                 </span>
               </div>
@@ -223,13 +224,13 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
                     className="sr-only"
                   />
                   <div
-                    className={`relative w-10 h-5 rounded-full transition-colors ${includeTax ? "bg-red-500" : "bg-zinc-700"}`}
+                    className={`relative w-10 h-5 rounded-full transition-colors ${includeTax ? "bg-brand-primary" : "bg-surface-interactive"}`}
                   >
                     <div
                       className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${includeTax ? "translate-x-5" : ""}`}
                     />
                   </div>
-                  <span className="ml-2 text-sm text-zinc-300">
+                  <span className="ml-2 text-sm text-text-secondary">
                     {includeTax ? "Yes" : "No"}
                   </span>
                 </label>
@@ -240,14 +241,14 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
       )}
 
       {/* Price Summary */}
-      <div className="bg-zinc-800 p-4 rounded-lg">
+      <div className="bg-surface-elevated p-4 rounded-lg">
         <div className="space-y-2 mb-4">
           {includePackage && selectedPackage && (
             <div className="flex justify-between items-center text-sm">
               <span>{selectedPackage.name} Package:</span>
               <div className="text-right">
                 {discounts.packageDiscount.value > 0 && (
-                  <span className="text-xs line-through text-zinc-500 block">
+                  <span className="text-xs line-through text-text-subtle block">
                     {formatPrice(selectedPackage.price)}{" "}
                     {selectedPackage.currency}
                   </span>
@@ -286,7 +287,7 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
                   <span>{service.name}:</span>
                   <div className="text-right">
                     {serviceDiscount && serviceDiscount.value > 0 && (
-                      <span className="text-xs line-through text-zinc-500 block">
+                      <span className="text-xs line-through text-text-subtle block">
                         {formatPrice(service.price)} {service.currency}
                       </span>
                     )}
@@ -298,13 +299,13 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
               );
             })}
 
-          <div className="flex justify-between items-center text-sm pt-2 border-t border-zinc-800">
+          <div className="flex justify-between items-center text-sm pt-2 border-t border-border-secondary text-text-primary">
             <span>Subtotal:</span>
             <span>{formatPrice(subtotal)} AED</span>
           </div>
 
           {discounts.overallDiscount.value > 0 && (
-            <div className="flex justify-between items-center text-sm text-green-400">
+            <div className="flex justify-between items-center text-sm text-semantic-success">
               <span>Overall Discount:</span>
               <span>
                 {discounts.overallDiscount.type === "percentage"
@@ -316,7 +317,7 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
 
           {/* Show total before tax when tax is included */}
           {includeTax && (
-            <div className="flex justify-between items-center text-sm pt-2 border-t border-zinc-800">
+            <div className="flex justify-between items-center text-sm pt-2 border-t border-border-secondary text-text-primary">
               <span>Total before tax:</span>
               <span>{formatPrice(finalTotalBeforeTax)} AED</span>
             </div>
@@ -324,14 +325,14 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
 
           {/* Tax line */}
           {includeTax && (
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex justify-between items-center text-sm text-text-primary">
               <span>VAT ({(TAX_RATE * 100).toFixed(0)}%):</span>
               <span>{formatPrice(taxAmount)} AED</span>
             </div>
           )}
         </div>
 
-        <div className="flex justify-between items-center border-t border-zinc-800 pt-3">
+        <div className="flex justify-between items-center border-t border-border-secondary pt-3 text-text-primary">
           <span className="text-lg font-medium">
             Total Investment {includeTax ? "(Inc. VAT)" : ""}:
           </span>
@@ -341,12 +342,12 @@ const GeneratorSummary: React.FC<GeneratorSummaryProps> = ({
         </div>
 
         {monthlyFees > 0 && (
-          <div className="text-sm text-zinc-400 mt-2 text-right">
+          <div className="text-sm text-text-muted mt-2 text-right">
             Plus {formatPrice(monthlyFees)} AED monthly fee(s)
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { statusVariants } from "@/lib/design-system";
 
 interface StatusBadgeProps {
   status: string;
@@ -11,12 +12,12 @@ interface StatusBadgeProps {
 }
 
 const statusOptions = [
-  { value: "draft", label: "DRAFT", color: "bg-zinc-700 text-zinc-300" },
-  { value: "sent", label: "SENT", color: "bg-blue-900 text-blue-300" },
-  { value: "accepted", label: "ACCEPTED", color: "bg-green-900 text-green-300" },
-  { value: "paid", label: "PAID", color: "bg-purple-900 text-purple-300" },
-  { value: "rejected", label: "REJECTED", color: "bg-red-900 text-red-300" },
-  { value: "expired", label: "EXPIRED", color: "bg-orange-900 text-orange-300" }
+  { value: "draft", label: "DRAFT" },
+  { value: "sent", label: "SENT" },
+  { value: "accepted", label: "ACCEPTED" },
+  { value: "paid", label: "PAID" },
+  { value: "rejected", label: "REJECTED" },
+  { value: "expired", label: "EXPIRED" }
 ];
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ 
@@ -115,7 +116,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
           e.stopPropagation(); // Prevent event bubbling
           setIsOpen(!isOpen);
         }}
-        className={`${statusObj.color} ${isUpdating ? "opacity-50" : ""} text-xs px-2 py-1 rounded flex items-center justify-between min-w-20`}
+        className={`${statusVariants({ status: currentStatus as any })} ${isUpdating ? "opacity-50" : ""} flex items-center justify-between min-w-20`}
         disabled={isUpdating}
       >
         <span>{statusObj.label}</span>
@@ -130,7 +131,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-40 mt-1 right-0 bg-zinc-800 border border-zinc-700 rounded shadow-lg min-w-32">
+        <div className="absolute z-40 mt-1 right-0 bg-surface-elevated border-border-primary rounded shadow-lg min-w-32">
           {statusOptions.map((option) => (
             <button
               key={option.value}
@@ -138,10 +139,10 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
                 e.stopPropagation(); // Prevent event bubbling
                 handleStatusChange(option.value);
               }}
-              className={`block w-full text-left px-3 py-2 text-xs hover:bg-zinc-700 transition-colors
-                ${option.value === currentStatus ? "bg-zinc-700" : ""}`}
+              className={`block w-full text-left px-3 py-2 text-xs hover:bg-surface-interactive transition-colors text-text-primary
+                ${option.value === currentStatus ? "bg-surface-interactive" : ""}`}
             >
-              <span className={`inline-block w-3 h-3 rounded-full mr-2 ${option.color.split(" ")[0]}`}></span>
+              <span className={`inline-block w-3 h-3 rounded-full mr-2 ${statusVariants({ status: option.value as any }).split(" ")[0]}`}></span>
               {option.label}
             </button>
           ))}
@@ -149,7 +150,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       )}
       
       {error && (
-        <div className="absolute top-full mt-1 right-0 bg-red-900/80 text-red-200 text-xs p-2 rounded shadow-lg z-50">
+        <div className="absolute top-full mt-1 right-0 bg-semantic-error/80 text-semantic-error-foreground text-xs p-2 rounded shadow-lg z-50">
           {error}
         </div>
       )}

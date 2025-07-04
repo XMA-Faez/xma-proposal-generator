@@ -2,6 +2,7 @@
 
 import React from "react";
 import { formatPrice } from "@/lib/proposalUtils";
+import { Card } from "@/components/ui/design-card";
 
 interface Feature {
   text: string;
@@ -28,37 +29,36 @@ interface PackageCardProps {
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) => (
-  <div
-    className={`flex flex-col h-full rounded-xl border ${
-      isSelected ? "border-red-500 shadow-lg" : "border-zinc-700"
-    } ${
-      pkg.is_popular && !isSelected ? "border-zinc-600" : ""
-    } ${
-      isSelected ? "bg-zinc-800" : "bg-zinc-800/50 opacity-70"
-    } backdrop-blur-sm transition-all hover:shadow-xl cursor-pointer ${
-      !isSelected ? "hover:opacity-90" : ""
-    }`}
+  <Card
+    variant="interactive"
+    size="none"
+    selected={isSelected}
     onClick={() => onSelect(pkg.id)}
+    className={`flex flex-col h-full rounded-xl backdrop-blur-sm transition-all hover:shadow-xl ${
+      pkg.is_popular && !isSelected ? "border-border-interactive" : ""
+    } ${
+      !isSelected ? "opacity-70 hover:opacity-90" : ""
+    }`}
   >
     {pkg.is_popular && (
-      <div className="bg-red-600 text-white text-center py-1 px-4 text-sm font-medium rounded-t-xl">
+      <div className="bg-brand-primary text-brand-primary-foreground text-center py-1 px-4 text-sm font-medium rounded-t-xl">
         Most Popular
       </div>
     )}
     <div className="p-6 flex flex-col h-full">
       <h3
-        className={`text-xl font-bold ${pkg.is_popular ? "text-red-500" : "text-white"} mb-2`}
+        className={`text-xl font-bold mb-2 ${pkg.is_popular ? "text-brand-primary" : "text-text-primary"}`}
       >
         {pkg.name}
       </h3>
       <div className="mb-6">
         <div className="flex items-end">
-          <span className="text-3xl font-bold text-white">
+          <span className="text-3xl font-bold text-text-primary">
             {formatPrice(pkg.price)}
           </span>
-          <span className="text-zinc-400 ml-2 mb-1">{pkg.currency}</span>
+          <span className="text-text-muted ml-2 mb-1">{pkg.currency}</span>
         </div>
-        <div className="text-zinc-400 text-sm mt-1">
+        <div className="text-text-muted text-sm mt-1">
           ${formatPrice(pkg.usd_price)} USD
         </div>
       </div>
@@ -73,7 +73,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) 
                     {feature.is_included ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-red-500"
+                        className="h-5 w-5 text-brand-primary"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -86,7 +86,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) 
                     ) : (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-zinc-600"
+                        className="h-5 w-5 text-text-subtle"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -99,7 +99,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) 
                     )}
                   </div>
                   <span
-                    className={`${feature.is_included ? "" : "text-zinc-500"} ${feature.is_bold ? "font-bold" : ""}`}
+                    className={`${feature.is_included ? "text-text-primary" : "text-text-subtle"} ${feature.is_bold ? "font-bold" : ""}`}
                   >
                     {feature.text}
                   </span>
@@ -107,18 +107,18 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, isSelected, onSelect }) 
               ))}
         </ul>
       </div>
-      <div className="mt-6 text-sm text-zinc-400">{pkg.description}</div>
+      <div className="mt-6 text-sm text-text-muted">{pkg.description}</div>
       <button
-        className={`mt-4 w-full py-2 text-center rounded-md ${
+        className={`mt-4 w-full py-2 text-center rounded-md transition-colors ${
           isSelected
-            ? "bg-red-600 text-white font-medium"
-            : "bg-zinc-800 text-zinc-300"
+            ? "bg-brand-primary text-brand-primary-foreground font-medium"
+            : "bg-surface-interactive text-text-secondary hover:bg-interactive-secondary-hover"
         }`}
       >
         {isSelected ? "Selected" : "Select Package"}
       </button>
     </div>
-  </div>
+  </Card>
 );
 
 export default PackageCard;

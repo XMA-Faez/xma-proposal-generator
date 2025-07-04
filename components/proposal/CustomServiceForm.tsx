@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { commonClasses, brandButtonVariants } from "@/lib/design-system";
 import { Plus, Trash2, Edit2, Check, X, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { CustomService, PaymentType } from "./CustomProposalClient";
 
@@ -148,30 +149,30 @@ export default function CustomServiceForm({
     <div className="space-y-4">
       {/* Existing Services */}
       {services.map((service) => (
-        <Card key={service.id} className="p-4 bg-zinc-700 border-zinc-600">
+        <Card key={service.id} variant="elevated" size="md">
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-white">{service.name}</h3>
+                <h3 className="font-semibold text-text-primary">{service.name}</h3>
                 {service.isMainService && (
-                  <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">
+                  <span className="text-xs bg-brand-primary text-text-primary px-2 py-1 rounded">
                     Main Service
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-300 mt-1">{service.description}</p>
+              <p className="text-sm text-text-secondary mt-1">{service.description}</p>
               <ul className="mt-2 space-y-1">
                 {service.features.map((feature, idx) => (
-                  <li key={idx} className="text-sm text-gray-400">
+                  <li key={idx} className="text-sm text-text-muted">
                     • {feature}
                   </li>
                 ))}
               </ul>
               <div className="mt-3 flex items-center gap-4 text-sm">
-                <span className="text-white font-medium">
+                <span className="text-text-primary font-medium">
                   {service.price.toLocaleString()} AED
                 </span>
-                <span className="text-gray-400">
+                <span className="text-text-muted">
                   {service.paymentType === "monthly" ? "per month" : "one-time"}
                 </span>
               </div>
@@ -181,7 +182,7 @@ export default function CustomServiceForm({
                 size="sm"
                 variant="ghost"
                 onClick={() => startEdit(service)}
-                className="text-gray-400 hover:text-white"
+                className="text-text-muted hover:text-text-primary"
               >
                 <Edit2 className="h-4 w-4" />
               </Button>
@@ -189,7 +190,7 @@ export default function CustomServiceForm({
                 size="sm"
                 variant="ghost"
                 onClick={() => onRemoveService(service.id)}
-                className="text-gray-400 hover:text-red-400"
+                className="text-text-muted hover:text-semantic-error"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -200,17 +201,17 @@ export default function CustomServiceForm({
 
       {/* Add/Edit Form */}
       {isAdding ? (
-        <Card className="p-4 bg-zinc-700 border-zinc-600">
+        <Card variant="elevated" size="md">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Input
                 placeholder="Service Name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-zinc-600 border-zinc-500 text-white"
+                className="bg-surface-interactive border-border-interactive text-text-primary"
               />
               {!hasMainService && !editingId && (
-                <label className="flex items-center gap-2 text-sm text-gray-300 whitespace-nowrap">
+                <label className="flex items-center gap-2 text-sm text-text-secondary whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={formData.isMainService}
@@ -228,12 +229,12 @@ export default function CustomServiceForm({
               placeholder="Service Description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="bg-zinc-600 border-zinc-500 text-white"
+              className="bg-surface-interactive border-border-interactive text-text-primary"
               rows={3}
             />
 
             <div>
-              <label className="text-sm font-medium text-gray-300 mb-2 block">Features</label>
+              <label className="text-sm font-medium text-text-secondary mb-2 block">Features</label>
               
               {/* Always-ready input for new features */}
               <div className="mb-3">
@@ -242,10 +243,10 @@ export default function CustomServiceForm({
                   value={currentFeature}
                   onChange={(e) => setCurrentFeature(e.target.value)}
                   onKeyPress={handleFeatureKeyPress}
-                  className="bg-zinc-600 border-zinc-500 text-white"
+                  className="bg-surface-interactive border-border-interactive text-text-primary"
                   placeholder={`Feature ${formData.features.length + 1} (Press Enter to add)`}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   Press Enter to add the feature and move to the next one
                 </p>
               </div>
@@ -253,8 +254,8 @@ export default function CustomServiceForm({
               {/* Existing Features */}
               {formData.features.map((feature, index) => (
                 <div key={index} className="flex gap-2 mb-2 items-center">
-                  <span className="text-sm text-gray-400 w-6">{index + 1}.</span>
-                  <span className="flex-1 text-sm text-gray-300 bg-zinc-700 px-3 py-2 rounded border border-zinc-600">
+                  <span className="text-sm text-text-muted w-6">{index + 1}.</span>
+                  <span className="flex-1 text-sm text-text-secondary bg-surface-elevated px-3 py-2 rounded border border-border-primary">
                     {feature}
                   </span>
                   
@@ -265,7 +266,7 @@ export default function CustomServiceForm({
                       variant="ghost"
                       onClick={() => moveFeatureUp(index)}
                       disabled={index === 0}
-                      className="text-gray-400 hover:text-white p-1 h-auto"
+                      className="text-text-muted hover:text-text-primary p-1 h-auto"
                     >
                       <ChevronUp className="h-3 w-3" />
                     </Button>
@@ -274,7 +275,7 @@ export default function CustomServiceForm({
                       variant="ghost"
                       onClick={() => moveFeatureDown(index)}
                       disabled={index === formData.features.length - 1}
-                      className="text-gray-400 hover:text-white p-1 h-auto"
+                      className="text-text-muted hover:text-text-primary p-1 h-auto"
                     >
                       <ChevronDown className="h-3 w-3" />
                     </Button>
@@ -284,7 +285,7 @@ export default function CustomServiceForm({
                     size="sm"
                     variant="ghost"
                     onClick={() => handleRemoveFeature(index)}
-                    className="text-gray-400 hover:text-red-400"
+                    className="text-text-muted hover:text-semantic-error"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -292,7 +293,7 @@ export default function CustomServiceForm({
               ))}
 
               {formData.features.length === 0 && (
-                <p className="text-sm text-gray-500 italic">
+                <p className="text-sm text-text-muted italic">
                   No features added yet. Start typing above to add your first feature.
                 </p>
               )}
@@ -300,7 +301,7 @@ export default function CustomServiceForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-300 mb-1 block">Price (AED)</label>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Price (AED)</label>
                 <Input
                   type="number"
                   placeholder="0"
@@ -312,17 +313,17 @@ export default function CustomServiceForm({
                     const numValue = value === "" ? 0 : parseFloat(value);
                     setFormData({ ...formData, price: isNaN(numValue) ? 0 : numValue });
                   }}
-                  className="bg-zinc-600 border-zinc-500 text-white"
+                  className="bg-surface-interactive border-border-interactive text-text-primary"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-300 mb-1 block">Payment Type</label>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Payment Type</label>
                 <select
                   value={formData.paymentType}
                   onChange={(e) =>
                     setFormData({ ...formData, paymentType: e.target.value as PaymentType })
                   }
-                  className="w-full rounded-md bg-zinc-600 border-zinc-500 text-white px-3 py-2"
+                  className="w-full rounded-md bg-surface-interactive border-border-interactive text-text-primary px-3 py-2"
                 >
                   <option value="monthly">Monthly</option>
                   <option value="fixed">One-time</option>
@@ -335,14 +336,14 @@ export default function CustomServiceForm({
                 size="sm"
                 variant="ghost"
                 onClick={resetForm}
-                className="text-gray-400 hover:text-white"
+                className="text-text-muted hover:text-text-primary"
               >
                 Cancel
               </Button>
               <Button
                 size="sm"
                 onClick={handleSubmit}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-brand-primary hover:bg-interactive-primary-hover text-text-primary"
               >
                 <Check className="h-4 w-4 mr-1" />
                 {editingId ? "Update" : "Add"} Service
@@ -354,7 +355,7 @@ export default function CustomServiceForm({
         <Button
           onClick={() => setIsAdding(true)}
           variant="outline"
-          className="w-full bg-zinc-700 border-zinc-600 text-gray-300 hover:text-white hover:bg-zinc-700"
+          className="w-full bg-surface-elevated border-border-primary text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Service

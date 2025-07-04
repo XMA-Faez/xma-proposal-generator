@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { commonClasses, brandButtonVariants } from "@/lib/design-system";
 import { Trash2, Edit2, Check, X } from "lucide-react";
 
 interface CustomTermsFormProps {
@@ -84,11 +85,11 @@ export default function CustomTermsForm({
   return (
     <div className="space-y-4">
       <div>
-        <label className="text-sm font-medium text-gray-300 mb-2 block">Terms Type</label>
+        <label className="text-sm font-medium text-text-secondary mb-2 block">Terms Type</label>
         <select
           value={terms}
           onChange={(e) => onTermsChange(e.target.value as "standard" | "custom", customTerms)}
-          className="w-full rounded-md bg-zinc-700 border-zinc-600 text-white px-3 py-2"
+          className="w-full rounded-md bg-surface-elevated border-border-primary text-text-primary px-3 py-2"
         >
           <option value="standard">Standard Terms</option>
           <option value="custom">Custom Terms</option>
@@ -97,7 +98,7 @@ export default function CustomTermsForm({
 
       {terms === "custom" && (
         <div className="space-y-3">
-          <label className="text-sm font-medium text-gray-300">Custom Terms & Conditions</label>
+          <label className="text-sm font-medium text-text-secondary">Custom Terms & Conditions</label>
           
           {/* Always-ready input for new terms */}
           <div className="mb-4">
@@ -106,24 +107,24 @@ export default function CustomTermsForm({
               value={currentInput}
               onChange={(e) => setCurrentInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="bg-zinc-600 border-zinc-500 text-white"
+              className="bg-surface-interactive border-border-interactive text-text-primary"
               placeholder={`${customTerms.length + 1}. Enter term or condition (Press Enter to add)`}
               autoFocus
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-text-muted mt-1">
               Press Enter to add the term and move to the next one
             </p>
           </div>
           
           {/* Existing Terms */}
           {customTerms.map((term, index) => (
-            <Card key={index} className="p-4 bg-zinc-700 border-zinc-600">
+            <Card key={index} variant="elevated" size="md">
               {editingIndex === index ? (
                 <div className="space-y-3">
                   <Input
                     value={newTerm}
                     onChange={(e) => setNewTerm(e.target.value)}
-                    className="bg-zinc-600 border-zinc-500 text-white"
+                    className="bg-surface-interactive border-border-interactive text-text-primary"
                     placeholder="Enter term or condition"
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
@@ -136,14 +137,14 @@ export default function CustomTermsForm({
                       size="sm"
                       variant="ghost"
                       onClick={cancelEdit}
-                      className="text-gray-400 hover:text-white"
+                      className="text-text-muted hover:text-text-primary"
                     >
                       <X className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => handleEditTerm(index, newTerm)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      className="bg-brand-primary hover:bg-interactive-primary-hover text-text-primary"
                     >
                       <Check className="h-4 w-4" />
                     </Button>
@@ -152,14 +153,14 @@ export default function CustomTermsForm({
               ) : (
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <p className="text-sm text-gray-300 leading-relaxed">{term}</p>
+                    <p className="text-sm text-text-secondary leading-relaxed">{term}</p>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => startEdit(index)}
-                      className="text-gray-400 hover:text-white"
+                      className="text-text-muted hover:text-text-primary"
                     >
                       <Edit2 className="h-4 w-4" />
                     </Button>
@@ -167,7 +168,7 @@ export default function CustomTermsForm({
                       size="sm"
                       variant="ghost"
                       onClick={() => handleRemoveTerm(index)}
-                      className="text-gray-400 hover:text-red-400"
+                      className="text-text-muted hover:text-semantic-error"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -178,7 +179,7 @@ export default function CustomTermsForm({
           ))}
 
           {customTerms.length === 0 && (
-            <p className="text-sm text-gray-500 italic">
+            <p className="text-sm text-text-muted italic">
               No custom terms added yet. Start typing above to add your first term.
             </p>
           )}

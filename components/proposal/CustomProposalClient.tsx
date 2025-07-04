@@ -7,7 +7,7 @@ import CustomServiceForm from "./CustomServiceForm";
 import CustomProposalSummary from "./CustomProposalSummary";
 import CustomTermsForm from "./CustomTermsForm";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/design-card";
 
 export type PaymentType = "monthly" | "fixed";
 
@@ -141,16 +141,16 @@ export default function CustomProposalClient() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-8">
-        <Card className="p-6 bg-zinc-800 border-zinc-700">
-          <h2 className="text-xl font-semibold text-white mb-4">Client Information</h2>
+        <Card>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">Client Information</h2>
           <CustomClientInformationForm
             clientInfo={proposalData.clientInfo}
             onChange={handleClientInfoChange}
           />
         </Card>
 
-        <Card className="p-6 bg-zinc-800 border-zinc-700">
-          <h2 className="text-xl font-semibold text-white mb-4">Custom Services</h2>
+        <Card>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">Custom Services</h2>
           <CustomServiceForm
             services={proposalData.services}
             onAddService={handleAddService}
@@ -159,8 +159,8 @@ export default function CustomProposalClient() {
           />
         </Card>
 
-        <Card className="p-6 bg-zinc-800 border-zinc-700">
-          <h2 className="text-xl font-semibold text-white mb-4">Terms & Conditions</h2>
+        <Card>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">Terms & Conditions</h2>
           <CustomTermsForm
             terms={proposalData.terms}
             customTerms={proposalData.customTerms}

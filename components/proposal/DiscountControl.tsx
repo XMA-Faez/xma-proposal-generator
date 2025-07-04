@@ -1,5 +1,6 @@
 import React from 'react';
 import { Discount } from '@/lib/proposalUtils';
+import { commonClasses } from '@/lib/design-system';
 
 interface DiscountControlProps {
   id: string;
@@ -48,7 +49,7 @@ const DiscountControl: React.FC<DiscountControlProps> = ({
 
   return (
     <div className={`flex items-center justify-between ${className}`}>
-      <label htmlFor={id} className="text-sm font-medium">
+      <label htmlFor={id} className={`${commonClasses.label}`}>
         {label}
       </label>
       <div className="flex items-center">
@@ -59,12 +60,12 @@ const DiscountControl: React.FC<DiscountControlProps> = ({
           max={discount.type === 'percentage' ? 100 : undefined}
           value={discount.value}
           onChange={handleValueChange}
-          className="w-20 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-right text-white focus:outline-none focus:ring-1 focus:ring-red-500"
+          className={`w-20 ${commonClasses.input} rounded-md px-2 py-1 text-right focus:outline-none focus:ring-1 focus:ring-border-focus`}
         />
         <button
           type="button"
           onClick={toggleDiscountType}
-          className="ml-2 bg-zinc-700 hover:bg-zinc-600 text-white px-2 py-1 rounded transition-colors text-sm whitespace-nowrap min-w-14"
+          className="ml-2 bg-surface-interactive hover:bg-interactive-secondary-hover text-text-primary px-2 py-1 rounded transition-colors text-sm whitespace-nowrap min-w-14"
         >
           {discount.type === 'percentage' ? '%' : 'AED'}
         </button>

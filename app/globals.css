@@ -38,6 +38,61 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  
+  /* XMA Design System - Brand Colors */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-foreground: var(--brand-primary-foreground);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-foreground: var(--brand-secondary-foreground);
+  
+  /* XMA Design System - Surface Hierarchy */
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-interactive: var(--surface-interactive);
+  
+  /* XMA Design System - Text Hierarchy */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  
+  /* XMA Design System - Border Hierarchy */
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-interactive: var(--border-interactive);
+  --color-border-focus: var(--border-focus);
+  
+  /* XMA Design System - Status Colors */
+  --color-status-draft: var(--status-draft);
+  --color-status-draft-foreground: var(--status-draft-foreground);
+  --color-status-sent: var(--status-sent);
+  --color-status-sent-foreground: var(--status-sent-foreground);
+  --color-status-accepted: var(--status-accepted);
+  --color-status-accepted-foreground: var(--status-accepted-foreground);
+  --color-status-paid: var(--status-paid);
+  --color-status-paid-foreground: var(--status-paid-foreground);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-rejected-foreground: var(--status-rejected-foreground);
+  --color-status-expired: var(--status-expired);
+  --color-status-expired-foreground: var(--status-expired-foreground);
+  
+  /* XMA Design System - Interactive States */
+  --color-interactive-primary-hover: var(--interactive-primary-hover);
+  --color-interactive-primary-active: var(--interactive-primary-active);
+  --color-interactive-secondary-hover: var(--interactive-secondary-hover);
+  --color-interactive-secondary-active: var(--interactive-secondary-active);
+  
+  /* XMA Design System - Semantic Colors */
+  --color-semantic-success: var(--semantic-success);
+  --color-semantic-success-foreground: var(--semantic-success-foreground);
+  --color-semantic-error: var(--semantic-error);
+  --color-semantic-error-foreground: var(--semantic-error-foreground);
+  --color-semantic-warning: var(--semantic-warning);
+  --color-semantic-warning-foreground: var(--semantic-warning-foreground);
+  --color-semantic-info: var(--semantic-info);
+  --color-semantic-info-foreground: var(--semantic-info-foreground);
+  
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -104,13 +159,60 @@
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   
-  /* Status colors using 700 shades for better visibility */
-  --status-draft: #52525b; /* gray-600 */
-  --status-sent: #1d4ed8; /* blue-700 */
-  --status-accepted: #15803d; /* green-700 */
-  --status-paid: #7e22ce; /* purple-700 */
-  --status-rejected: #b91c1c; /* red-700 */
-  --status-expired: #c2410c; /* orange-700 */
+  /* XMA Design System - Brand Colors */
+  --brand-primary: oklch(0.577 0.245 27.325); /* #E53E3E - Red brand color */
+  --brand-primary-foreground: oklch(0.985 0 0);
+  --brand-secondary: oklch(0.274 0.006 286.033); /* zinc-800 equivalent */
+  --brand-secondary-foreground: oklch(0.985 0 0);
+  
+  /* XMA Design System - Surface Hierarchy (950→900→800) */
+  --surface-primary: oklch(0.094 0.006 285.885); /* zinc-950 - Page backgrounds */
+  --surface-secondary: oklch(0.141 0.005 285.823); /* zinc-900 - Cards, containers */
+  --surface-elevated: oklch(0.21 0.006 285.885); /* zinc-800 - Elevated elements */
+  --surface-interactive: oklch(0.274 0.006 286.033); /* zinc-700 - Hover states */
+  
+  /* XMA Design System - Text Hierarchy */
+  --text-primary: oklch(0.985 0 0); /* Pure white - Main text */
+  --text-secondary: oklch(0.85 0.002 286.32); /* zinc-300 - Secondary text */
+  --text-muted: oklch(0.705 0.015 286.067); /* zinc-400 - Muted text */
+  --text-subtle: oklch(0.552 0.016 285.938); /* zinc-500 - Very subtle text */
+  
+  /* XMA Design System - Border Hierarchy */
+  --border-primary: oklch(0.274 0.006 286.033); /* zinc-700 - Main borders */
+  --border-secondary: oklch(0.21 0.006 285.885); /* zinc-800 - Subtle borders */
+  --border-interactive: oklch(0.552 0.016 285.938); /* zinc-500 - Interactive borders */
+  --border-focus: var(--brand-primary); /* Focus state borders */
+  
+  /* XMA Design System - Status Colors */
+  --status-draft: oklch(0.552 0.016 285.938); /* zinc-500 - Draft state */
+  --status-draft-foreground: oklch(0.85 0.002 286.32);
+  --status-sent: oklch(0.488 0.243 264.376); /* blue-600 - Sent state */
+  --status-sent-foreground: oklch(0.792 0.119 264.376);
+  --status-accepted: oklch(0.569 0.191 161.275); /* green-600 - Success state */
+  --status-accepted-foreground: oklch(0.696 0.17 162.48);
+  --status-paid: oklch(0.627 0.265 303.9); /* purple-600 - Paid state */
+  --status-paid-foreground: oklch(0.769 0.188 303.9);
+  --status-rejected: oklch(0.577 0.245 27.325); /* red-600 - Error state */
+  --status-rejected-foreground: oklch(0.704 0.191 22.216);
+  --status-expired: oklch(0.645 0.246 16.439); /* orange-600 - Warning state */
+  --status-expired-foreground: oklch(0.769 0.188 70.08);
+  
+  /* XMA Design System - Interactive States */
+  --interactive-primary-hover: oklch(0.627 0.265 27.325); /* Darker red hover */
+  --interactive-primary-active: oklch(0.577 0.245 27.325); /* Active state */
+  --interactive-secondary-hover: oklch(0.344 0.006 286.033); /* zinc-600 hover */
+  --interactive-secondary-active: oklch(0.274 0.006 286.033); /* zinc-700 active */
+  
+  /* XMA Design System - Semantic Colors */
+  --semantic-success: oklch(0.569 0.191 161.275);
+  --semantic-success-foreground: oklch(0.985 0 0);
+  --semantic-error: oklch(0.577 0.245 27.325);
+  --semantic-error-foreground: oklch(0.985 0 0);
+  --semantic-warning: oklch(0.645 0.246 16.439);
+  --semantic-warning-foreground: oklch(0.985 0 0);
+  --semantic-info: oklch(0.488 0.243 264.376);
+  --semantic-info-foreground: oklch(0.985 0 0);
+  
   --sidebar: oklch(0.21 0.006 285.885);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);

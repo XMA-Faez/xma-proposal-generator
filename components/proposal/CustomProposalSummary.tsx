@@ -1,9 +1,9 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CustomProposalData } from "./CustomProposalClient";
+import { Card } from "../ui/design-card";
 
 interface CustomProposalSummaryProps {
   proposalData: CustomProposalData;
@@ -48,37 +48,37 @@ export default function CustomProposalSummary({
   const fixedTotal = fixedServices.reduce((sum, s) => sum + s.price, 0);
 
   return (
-    <Card className="p-6 bg-zinc-800 border-zinc-700">
-      <h2 className="text-xl font-semibold text-white mb-4">Proposal Summary</h2>
+    <Card variant="primary" size="lg">
+      <h2 className="text-xl font-semibold text-text-primary mb-4">Proposal Summary</h2>
 
       <div className="space-y-4">
         {/* Services Breakdown */}
         {proposalData.services.length > 0 && (
-          <div className="space-y-2 pb-4 border-b border-zinc-700">
+          <div className="space-y-2 pb-4 border-b border-border-primary">
             {monthlyServices.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-1">Monthly Services</h3>
+                <h3 className="text-sm font-medium text-text-muted mb-1">Monthly Services</h3>
                 {monthlyServices.map((service) => (
                   <div key={service.id} className="flex justify-between text-sm">
-                    <span className="text-gray-300">
+                    <span className="text-text-secondary">
                       {service.name}
                       {service.isMainService && " (Main)"}
                     </span>
-                    <span className="text-white">{service.price.toLocaleString()} AED/mo</span>
+                    <span className="text-text-primary">{service.price.toLocaleString()} AED/mo</span>
                   </div>
                 ))}
               </div>
             )}
             {fixedServices.length > 0 && (
               <div className="mt-3">
-                <h3 className="text-sm font-medium text-gray-400 mb-1">One-time Services</h3>
+                <h3 className="text-sm font-medium text-text-muted mb-1">One-time Services</h3>
                 {fixedServices.map((service) => (
                   <div key={service.id} className="flex justify-between text-sm">
-                    <span className="text-gray-300">
+                    <span className="text-text-secondary">
                       {service.name}
                       {service.isMainService && " (Main)"}
                     </span>
-                    <span className="text-white">{service.price.toLocaleString()} AED</span>
+                    <span className="text-text-primary">{service.price.toLocaleString()} AED</span>
                   </div>
                 ))}
               </div>
@@ -88,7 +88,7 @@ export default function CustomProposalSummary({
 
         {/* Discount Control */}
         <div>
-          <label className="text-sm font-medium text-gray-300 mb-2 block">Discount</label>
+          <label className="text-sm font-medium text-text-secondary mb-2 block">Discount</label>
           <div className="flex gap-2">
             <Input
               type="number"
@@ -96,7 +96,7 @@ export default function CustomProposalSummary({
               onChange={(e) =>
                 onDiscountChange(parseFloat(e.target.value) || 0, proposalData.discountType)
               }
-              className="bg-zinc-700 border-zinc-600 text-white"
+              className="bg-surface-elevated border-border-primary text-text-primary"
               placeholder="0"
             />
             <select
@@ -104,7 +104,7 @@ export default function CustomProposalSummary({
               onChange={(e) =>
                 onDiscountChange(proposalData.discount, e.target.value as "percentage" | "absolute")
               }
-              className="rounded-md bg-zinc-700 border-zinc-600 text-white px-3 py-2"
+              className="rounded-md bg-surface-elevated border-border-primary text-text-primary px-3 py-2"
             >
               <option value="percentage">%</option>
               <option value="absolute">AED</option>
@@ -119,35 +119,35 @@ export default function CustomProposalSummary({
             checked={proposalData.taxIncluded}
             onCheckedChange={(checked) => onTaxChange(checked as boolean)}
           />
-          <label htmlFor="tax" className="text-sm text-gray-300 cursor-pointer">
+          <label htmlFor="tax" className="text-sm text-text-secondary cursor-pointer">
             Include 5% VAT
           </label>
         </div>
 
         {/* Pricing Summary */}
-        <div className="pt-4 border-t border-zinc-700 space-y-2">
+        <div className="pt-4 border-t border-border-primary space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Subtotal</span>
-            <span className="text-white">{calculateSubtotal().toLocaleString()} AED</span>
+            <span className="text-text-muted">Subtotal</span>
+            <span className="text-text-primary">{calculateSubtotal().toLocaleString()} AED</span>
           </div>
           {proposalData.discount > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Discount</span>
-              <span className="text-red-400">-{calculateDiscount().toLocaleString()} AED</span>
+              <span className="text-text-muted">Discount</span>
+              <span className="text-semantic-error">-{calculateDiscount().toLocaleString()} AED</span>
             </div>
           )}
           {proposalData.taxIncluded && (
             <div className="flex justify-between text-sm">
-              <span className="text-gray-400">VAT (5%)</span>
-              <span className="text-white">{calculateTax().toLocaleString()} AED</span>
+              <span className="text-text-muted">VAT (5%)</span>
+              <span className="text-text-primary">{calculateTax().toLocaleString()} AED</span>
             </div>
           )}
-          <div className="flex justify-between font-semibold text-lg pt-2 border-t border-zinc-700">
-            <span className="text-white">Total</span>
-            <span className="text-white">{calculateTotal().toLocaleString()} AED</span>
+          <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border-primary">
+            <span className="text-text-primary">Total</span>
+            <span className="text-text-primary">{calculateTotal().toLocaleString()} AED</span>
           </div>
           {monthlyTotal > 0 && fixedTotal > 0 && (
-            <div className="text-xs text-gray-400 pt-2">
+            <div className="text-xs text-text-muted pt-2">
               <p>Monthly: {monthlyTotal.toLocaleString()} AED/mo</p>
               <p>One-time: {fixedTotal.toLocaleString()} AED</p>
             </div>

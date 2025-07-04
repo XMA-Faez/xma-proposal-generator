@@ -1,32 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { commonClasses } from "@/lib/design-system";
 import ProposalForm from "./ProposalForm";
 import CustomProposalClient from "./CustomProposalClient";
 
 // Create a client
 const queryClient = new QueryClient();
 
+interface Package {
+  id: string;
+  name: string;
+  price: number;
+  features: Array<{
+    id: string;
+    name: string;
+    description: string;
+  }>;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+}
+
 interface ProposalGeneratorTabsProps {
   initialData: {
-    packages: any[];
-    services: any[];
+    packages: Package[];
+    services: Service[];
   };
 }
 
 export default function ProposalGeneratorTabs({ initialData }: ProposalGeneratorTabsProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="bg-zinc-900 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-white mb-8">Proposal Generator</h1>
+      <div className={commonClasses.pageContainer}>
+        <div className={commonClasses.contentContainer}>
+          <h1 className="text-3xl font-bold text-text-primary mb-8">Proposal Generator</h1>
           
           <Tabs defaultValue="standard" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 bg-zinc-800 text-gray-400">
-              <TabsTrigger value="standard" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">Standard Proposal</TabsTrigger>
-              <TabsTrigger value="custom" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">Custom Proposal</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="standard">Standard Proposal</TabsTrigger>
+              <TabsTrigger value="custom">Custom Proposal</TabsTrigger>
             </TabsList>
             
             <TabsContent value="standard" className="space-y-6">

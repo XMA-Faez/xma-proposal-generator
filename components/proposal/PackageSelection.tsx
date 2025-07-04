@@ -2,6 +2,7 @@
 
 import React from "react";
 import PackageCard from "./PackageCard";
+import { Card } from "../ui/design-card";
 
 interface Package {
   id: string;
@@ -30,9 +31,9 @@ const PackageSelection: React.FC<PackageSelectionProps> = ({
   setIncludePackage,
 }) => {
   return (
-    <div className="bg-zinc-900 rounded-lg mb-8">
+    <Card className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">
+        <h2 className="text-xl font-bold text-text-primary">
           Select Package
         </h2>
         <div className="flex items-center">
@@ -44,13 +45,13 @@ const PackageSelection: React.FC<PackageSelectionProps> = ({
               className="sr-only"
             />
             <div
-              className={`relative w-10 h-5 rounded-full transition-colors ${includePackage ? "bg-red-500" : "bg-zinc-700"}`}
+              className={`relative w-10 h-5 rounded-full transition-colors ${includePackage ? "bg-brand-primary" : "bg-surface-interactive"}`}
             >
               <div
                 className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${includePackage ? "translate-x-5" : ""}`}
               />
             </div>
-            <span className="ml-2 text-sm text-zinc-300">
+            <span className="ml-2 text-sm text-text-secondary">
               Include Package
             </span>
           </label>
@@ -71,14 +72,14 @@ const PackageSelection: React.FC<PackageSelectionProps> = ({
       )}
 
       {!includePackage && (
-        <div className="bg-zinc-900 p-6 rounded-lg text-center">
-          <p className="text-zinc-400">
+        <div className="bg-surface-secondary p-6 rounded-lg text-center">
+          <p className="text-text-muted">
             Package selection is disabled. You can add additional
             services below.
           </p>
         </div>
       )}
-    </div>
+    </Card>
   );
 };
 
