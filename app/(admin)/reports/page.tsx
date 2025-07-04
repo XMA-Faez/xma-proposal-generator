@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
 import { requireAdminRole } from "@/lib/auth-helpers";
+import { commonClasses } from "@/lib/design-system";
 import ReportsClient from "./ReportsClient";
 
 export const metadata: Metadata = {
@@ -50,9 +51,9 @@ export default async function ReportsPage() {
   const proposals = await getProposalsData();
 
   return (
-    <div className="pt-8 px-4 pb-12">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent mb-6">
+    <div className={commonClasses.pageContainer}>
+      <div className={commonClasses.contentContainer}>
+        <h1 className="text-3xl font-bold mb-6">
           Reports & Analytics
         </h1>
         <ReportsClient initialProposals={proposals} />

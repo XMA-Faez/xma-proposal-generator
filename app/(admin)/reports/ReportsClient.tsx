@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/design-card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
 import { format, subDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -270,20 +268,20 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
           { name: "Rejected", value: rejected, fill: chartConfig.rejected.color },
         ].filter(item => item.value > 0),
         sendRate: [
-          { name: "Sent/Active", value: sendRate, fill: "#1d4ed8" }, // blue-700 matching sent status
-          { name: "Not Sent", value: 100 - sendRate, fill: "#3f3f46" }, // gray-700
+          { name: "Sent/Active", value: sendRate, fill: "var(--status-sent)" },
+          { name: "Not Sent", value: 100 - sendRate, fill: "var(--surface-interactive)" },
         ],
         closeRate: [
-          { name: "Closed", value: closeRate, fill: "#15803d" }, // green-700 matching accepted status
-          { name: "Open", value: 100 - closeRate, fill: "#3f3f46" }, // gray-700
+          { name: "Closed", value: closeRate, fill: "var(--status-accepted)" },
+          { name: "Open", value: 100 - closeRate, fill: "var(--surface-interactive)" },
         ],
         acceptedRate: [
-          { name: "Accepted", value: acceptedRate, fill: "#15803d" }, // green-700 matching accepted status
-          { name: "Other", value: 100 - acceptedRate, fill: "#3f3f46" }, // gray-700
+          { name: "Accepted", value: acceptedRate, fill: "var(--status-accepted)" },
+          { name: "Other", value: 100 - acceptedRate, fill: "var(--surface-interactive)" },
         ],
         paidRate: [
-          { name: "Paid", value: paidRate, fill: "#7e22ce" }, // purple-700 matching paid status
-          { name: "Unpaid", value: 100 - paidRate, fill: "#3f3f46" }, // gray-700
+          { name: "Paid", value: paidRate, fill: "var(--status-paid)" },
+          { name: "Unpaid", value: 100 - paidRate, fill: "var(--surface-interactive)" },
         ],
       },
     };
@@ -298,12 +296,12 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
   return (
     <div className="space-y-6">
       {/* Date Range Selector */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Select Time Period</CardTitle>
-          <CardDescription>Choose a date range to view analytics</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Card variant="primary" size="lg">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-text-primary">Select Time Period</h3>
+          <p className="text-sm text-text-muted">Choose a date range to view analytics</p>
+        </div>
+        <div>
           <Select
             value={selectedPreset}
             onValueChange={(value) => {
@@ -313,15 +311,15 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
               }
             }}
           >
-            <SelectTrigger className="w-full md:w-[280px] bg-zinc-800 border-zinc-700">
+            <SelectTrigger className="w-full md:w-[280px] bg-surface-elevated border-border-primary">
               <SelectValue placeholder="Select time period" />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700">
+            <SelectContent className="bg-surface-elevated border-border-primary">
               {presets.map((preset) => (
                 <SelectItem 
                   key={preset.label} 
                   value={preset.label}
-                  className="hover:bg-zinc-700 focus:bg-zinc-700"
+                  className="hover:bg-surface-interactive focus:bg-surface-interactive"
                 >
                   {preset.label}
                 </SelectItem>
@@ -330,102 +328,70 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
           </Select>
           
           {date?.from && date?.to && (
-            <div className="mt-4 text-sm text-zinc-400">
+            <div className="mt-4 text-sm text-text-muted">
               Showing data from {format(date.from, "MMM dd, yyyy")} to {format(date.to, "MMM dd, yyyy")}
             </div>
           )}
-        </CardContent>
+        </div>
       </Card>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Proposals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.total}</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Total Proposals</h4>
+          <div className="text-2xl font-bold text-text-primary">{metrics.total}</div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Send Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.rates.send.toFixed(1)}%</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Send Rate</h4>
+          <div className="text-2xl font-bold text-text-primary">{metrics.rates.send.toFixed(1)}%</div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Close Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.rates.close.toFixed(1)}%</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Close Rate</h4>
+          <div className="text-2xl font-bold text-text-primary">{metrics.rates.close.toFixed(1)}%</div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Paid Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.rates.paid.toFixed(1)}%</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Paid Rate</h4>
+          <div className="text-2xl font-bold text-text-primary">{metrics.rates.paid.toFixed(1)}%</div>
         </Card>
       </div>
 
       {/* Revenue Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.total))}</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Total Revenue</h4>
+          <div className="text-2xl font-bold text-text-primary">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.total))}</div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Discounts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.totalDiscount))}</div>
-            <div className="text-xs text-zinc-500 mt-1">{metrics.revenue.discountPercentage.toFixed(1)}% of original</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Total Discounts</h4>
+          <div className="text-2xl font-bold text-text-primary">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.totalDiscount))}</div>
+          <div className="text-xs text-text-subtle mt-1">{metrics.revenue.discountPercentage.toFixed(1)}% of original</div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Average Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.averagePerProposal))}</div>
-            <div className="text-xs text-zinc-500 mt-1">per paid proposal</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Average Revenue</h4>
+          <div className="text-2xl font-bold text-text-primary">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.averagePerProposal))}</div>
+          <div className="text-xs text-text-subtle mt-1">per paid proposal</div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Revenue Before Discount</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.totalBeforeDiscount))}</div>
-          </CardContent>
+        <Card variant="primary" size="md">
+          <h4 className="text-sm font-medium text-text-muted mb-2">Revenue Before Discount</h4>
+          <div className="text-2xl font-bold text-text-primary">AED {new Intl.NumberFormat('en-US').format(Math.round(metrics.revenue.totalBeforeDiscount))}</div>
         </Card>
       </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Status Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Proposal Status Distribution</CardTitle>
-            <CardDescription>Overall status breakdown</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card variant="primary" size="lg">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-text-primary">Proposal Status Distribution</h3>
+            <p className="text-sm text-text-muted">Overall status breakdown</p>
+          </div>
+          <div>
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -447,16 +413,16 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
-          </CardContent>
+          </div>
         </Card>
 
         {/* Send Rate */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Send Rate</CardTitle>
-            <CardDescription>Proposals sent vs drafts</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card variant="primary" size="lg">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-text-primary">Send Rate</h3>
+            <p className="text-sm text-text-muted">Proposals sent vs drafts</p>
+          </div>
+          <div>
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -478,16 +444,16 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
-          </CardContent>
+          </div>
         </Card>
 
         {/* Close Rate */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Close Rate</CardTitle>
-            <CardDescription>Accepted + Paid proposals</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card variant="primary" size="lg">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-text-primary">Close Rate</h3>
+            <p className="text-sm text-text-muted">Accepted + Paid proposals</p>
+          </div>
+          <div>
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -509,16 +475,16 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
-          </CardContent>
+          </div>
         </Card>
 
         {/* Paid Rate */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Rate</CardTitle>
-            <CardDescription>Paid vs unpaid proposals</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card variant="primary" size="lg">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-text-primary">Payment Rate</h3>
+            <p className="text-sm text-text-muted">Paid vs unpaid proposals</p>
+          </div>
+          <div>
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -540,7 +506,7 @@ export default function ReportsClient({ initialProposals }: ReportsClientProps) 
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </div>
